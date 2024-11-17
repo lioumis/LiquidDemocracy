@@ -22,11 +22,11 @@ public class AuthController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<String> generateToken(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<Object> generateToken(@RequestBody AuthRequest authRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
             String token = jwtUtil.generateToken(authRequest.getUsername());
-            return ResponseEntity.status(HttpStatus.OK).body(token);
+            return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse(token));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid username/password");
         } catch (Exception e) {
