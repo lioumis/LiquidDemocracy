@@ -1,5 +1,7 @@
 package gr.upatras.ceid.ld.entity;
 
+import gr.upatras.ceid.ld.converter.ActionConverter;
+import gr.upatras.ceid.ld.enums.Action;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
@@ -14,11 +16,12 @@ public class AuditLogEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    private String action; //TODO: Enum
+    @Convert(converter = ActionConverter.class)
+    private Action action;
 
     private String details;
 
-    public AuditLogEntity(UserEntity user, String action, String details) {
+    public AuditLogEntity(UserEntity user, Action action, String details) {
         this.user = user;
         this.action = action;
         this.details = details;

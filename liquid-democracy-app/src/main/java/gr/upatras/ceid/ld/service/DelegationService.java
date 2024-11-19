@@ -4,6 +4,7 @@ import gr.upatras.ceid.ld.entity.AuditLogEntity;
 import gr.upatras.ceid.ld.entity.DelegationEntity;
 import gr.upatras.ceid.ld.entity.TopicEntity;
 import gr.upatras.ceid.ld.entity.UserEntity;
+import gr.upatras.ceid.ld.enums.Action;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.repository.AuditLogRepository;
 import gr.upatras.ceid.ld.repository.DelegationRepository;
@@ -48,8 +49,8 @@ public class DelegationService {
         DelegationEntity delegation = new DelegationEntity(new TopicEntity(topicId), new UserEntity(delegatorId), new UserEntity(delegateId));
         delegationRepository.save(delegation);
 
-        AuditLogEntity auditLog = new AuditLogEntity(delegator, "Ανάθεση ψήφου",
-                "Ο χρήστης " + delegatorId + " ανέθεσε την ψήφο του στον χρήστη " + delegateId + " για το θέμα " + topicId);
+        AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION,
+                "Ο χρήστης " + delegatorId + " ανέθεσε την ψήφο του στον χρήστη " + delegateId + " για το θέμα " + topicId + ".");
         auditLogRepository.save(auditLog);
     }
 
@@ -64,8 +65,8 @@ public class DelegationService {
                 .orElseThrow(() -> new ValidationException("No delegation found for this user and topic"));
         delegationRepository.delete(delegation);
 
-        AuditLogEntity auditLog = new AuditLogEntity(delegator, "Αφαίρεση ανάθεσης ψήφου",
-                "Ο χρήστης " + delegatorId + " αφαίρεσε την ανάθεση της ψήφου του για το θέμα " + topicId);
+        AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION_REMOVAL,
+                "Ο χρήστης " + delegatorId + " αφαίρεσε την ανάθεση της ψήφου του για το θέμα " + topicId + ".");
         auditLogRepository.save(auditLog);
     }
 }

@@ -3,6 +3,7 @@ package gr.upatras.ceid.ld.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,11 +27,18 @@ public class UserEntity implements UserDetails {
     private String email;
 
 
+    @Setter
     @Column(nullable = false)
     private String passwordHash;
 
     @Column(nullable = false)
     private String role; //TODO: Enum
+
+    @Column(nullable = false)
+    private String securityQuestion;
+
+    @Column(nullable = false)
+    private String securityAnswerHash;
 
     @OneToMany(mappedBy = "voter")
     private List<VoteEntity> votes;
@@ -42,10 +50,12 @@ public class UserEntity implements UserDetails {
         this.id = id;
     }
 
-    public UserEntity(String username, String email, String passwordHash) {
+    public UserEntity(String username, String email, String passwordHash, String securityQuestion, String securityAnswerHash) {
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
+        this.securityQuestion = securityQuestion;
+        this.securityAnswerHash = securityAnswerHash;
         this.role = "USER";
     }
 

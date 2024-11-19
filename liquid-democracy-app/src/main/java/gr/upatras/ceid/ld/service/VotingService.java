@@ -1,6 +1,7 @@
 package gr.upatras.ceid.ld.service;
 
 import gr.upatras.ceid.ld.entity.*;
+import gr.upatras.ceid.ld.enums.Action;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.repository.*;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class VotingService {
 //        vote.setDelegated(false); //TODO: Find a way to distinguish the delegated votes.
         voteRepository.save(vote);
 
-        AuditLogEntity auditLog = new AuditLogEntity(voter, "Άμεση Ψήφος", "Ο χρήστης " + voter.getUsername() + " ψήφισε για το θέμα " + topicId);
+        AuditLogEntity auditLog = new AuditLogEntity(voter, Action.DIRECT_VOTE, "Ο χρήστης " + voter.getUsername() + " ψήφισε για το θέμα " + topicId + ".");
         auditLogRepository.save(auditLog);
 
         castDelegatedVote(voter, topic, voteChoice);
@@ -77,8 +78,8 @@ public class VotingService {
 //            vote.setDelegated(true); // Σημειώνεται ως εξουσιοδοτημένη ψήφος TODO
             voteRepository.save(vote);
 
-            AuditLogEntity auditLog = new AuditLogEntity(delegate, "Εξουσιοδοτημένη Ψήφος",
-                    "Ο χρήστης " + delegate.getUsername() + " ψήφισε για το θέμα " + topic.getId() + " εκ μέρους του " + delegation.getDelegator().getUsername());
+            AuditLogEntity auditLog = new AuditLogEntity(delegate, Action.DELEGATED_VOTE,
+                    "Ο χρήστης " + delegate.getUsername() + " ψήφισε για το θέμα " + topic.getId() + " εκ μέρους του " + delegation.getDelegator().getUsername() + ".");
             auditLogRepository.save(auditLog);
         }
     }
