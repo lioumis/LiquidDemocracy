@@ -1,5 +1,7 @@
 package gr.upatras.ceid.ld.entity;
 
+import gr.upatras.ceid.ld.converter.RoleConverter;
+import gr.upatras.ceid.ld.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,9 +9,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Entity(name = "user")
@@ -26,13 +26,17 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Setter
+    @Column(nullable = false)
+    private String name;
+
+    @Setter
+    @Column(nullable = false)
+    private String surname;
 
     @Setter
     @Column(nullable = false)
     private String passwordHash;
-
-    @Column(nullable = false)
-    private String role; //TODO: Enum
 
     @Column(nullable = false)
     private String securityQuestion;
@@ -46,17 +50,28 @@ public class UserEntity implements UserDetails {
     @OneToMany(mappedBy = "delegate")
     private List<DelegationEntity> delegations;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "role_id")
+    @Convert(converter = RoleConverter.class)
+    private Set<Role> roles = new HashSet<>();
+
     public UserEntity(Long id) {
         this.id = id;
     }
 
-    public UserEntity(String username, String email, String passwordHash, String securityQuestion, String securityAnswerHash) {
+    public UserEntity(String username, String email, String name, String surname, String passwordHash, String securityQuestion, String securityAnswerHash) {
         this.username = username;
         this.email = email;
+        this.name = name;
+        this.surname = surname;
         this.passwordHash = passwordHash;
         this.securityQuestion = securityQuestion;
         this.securityAnswerHash = securityAnswerHash;
-        this.role = "USER";
+        this.roles.add(Role.VOTER);
     }
 
     @Override

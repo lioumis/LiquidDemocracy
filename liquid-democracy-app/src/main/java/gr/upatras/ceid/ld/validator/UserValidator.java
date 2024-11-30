@@ -27,6 +27,18 @@ public class UserValidator { //TODO: Set & validate length of Strings
         }
     }
 
+    public void validateName(String name) throws ValidationException {
+        if (name == null || name.trim().isEmpty()) {
+            throw new ValidationException("The name is empty");
+        }
+    }
+
+    public void validateSurname(String name) throws ValidationException {
+        if (name == null || name.trim().isEmpty()) {
+            throw new ValidationException("The surname is empty");
+        }
+    }
+
     public void validatePassword(String password) throws ValidationException {
         if (password == null || password.trim().isEmpty()) {
             throw new ValidationException("The password is empty");
@@ -42,6 +54,12 @@ public class UserValidator { //TODO: Set & validate length of Strings
     public void validateSecurityAnswer(String answer) throws ValidationException {
         if (answer == null || answer.trim().isEmpty()) {
             throw new ValidationException("The answer of the security question is empty");
+        }
+    }
+
+    public void validateString(String string, String errorMessage) throws ValidationException {
+        if (string == null || string.trim().isEmpty()) {
+            throw new ValidationException(errorMessage);
         }
     }
 }

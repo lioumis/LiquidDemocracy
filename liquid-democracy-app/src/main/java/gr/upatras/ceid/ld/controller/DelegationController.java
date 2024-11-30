@@ -1,5 +1,6 @@
 package gr.upatras.ceid.ld.controller;
 
+import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.service.AuthorizationService;
@@ -19,11 +20,11 @@ import java.util.Set;
 @RestController
 @RequestMapping("/delegations")
 public class DelegationController {
-    private static final Set<String> ALLOWED_ROLES = new HashSet<>();
+    private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
 
     static {
-        ALLOWED_ROLES.add("ADMIN");
-        ALLOWED_ROLES.add("USER");
+        ALLOWED_ROLES.add(Role.VOTER);
+        ALLOWED_ROLES.add(Role.REPRESENTATIVE);
     }
 
     private final DelegationService delegationService;

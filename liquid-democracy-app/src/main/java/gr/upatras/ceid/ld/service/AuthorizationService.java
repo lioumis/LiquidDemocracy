@@ -1,6 +1,7 @@
 package gr.upatras.ceid.ld.service;
 
 import gr.upatras.ceid.ld.entity.UserEntity;
+import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,8 @@ public class AuthorizationService {
         this.userRepository = userRepository;
     }
 
-    public Long isUserAuthorized(String username, Set<String> allowedRoles) throws AuthorizationException {
+    @Deprecated
+    public Long isUserAuthorized(String username, Set<Role> allowedRoles) throws AuthorizationException {
         Optional<UserEntity> userEntity = userRepository.findByUsername(username);
 
         if (userEntity.isEmpty()) {
@@ -24,11 +26,26 @@ public class AuthorizationService {
         }
 
         UserEntity user = userEntity.get();
-        if (!allowedRoles.contains(user.getRole())) {
+        if (user.getRoles().stream().noneMatch(allowedRoles::contains)) {
             throw new AuthorizationException("The user does not have the correct role for this operation");
         }
 
         return user.getId();
+    }
+
+    public String getAuthorizedUser(String username, Set<Role> allowedRoles) throws AuthorizationException {
+        Optional<UserEntity> userEntity = userRepository.findByUsername(username);
+
+        if (userEntity.isEmpty()) {
+            throw new AuthorizationException("Unknown user");
+        }
+
+        UserEntity user = userEntity.get();
+        if (user.getRoles().stream().noneMatch(allowedRoles::contains)) {
+            throw new AuthorizationException("The user does not have the correct role for this operation");
+        }
+
+        return user.getUsername();
     }
 
 }

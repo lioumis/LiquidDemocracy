@@ -1,5 +1,6 @@
 package gr.upatras.ceid.ld.service;
 
+import gr.upatras.ceid.ld.dto.UserInformationDto;
 import gr.upatras.ceid.ld.entity.AuditLogEntity;
 import gr.upatras.ceid.ld.entity.UserEntity;
 import gr.upatras.ceid.ld.enums.Action;
@@ -43,11 +44,12 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void registerUser(String username, String email, String rawPassword, String securityQuestion, String securityAnswer) throws ValidationException {
-        //TODO: Τι άλλα στοιχεία κρατάμε για το χρήστη;
-        //TODO: Ονοματεπώνυμο;
+    public void registerUser(String username, String email, String name, String surname, String rawPassword,
+                             String securityQuestion, String securityAnswer) throws ValidationException {
         userValidator.validateUsername(username);
         userValidator.validateEmail(email);
+        userValidator.validateName(name);
+        userValidator.validateSurname(surname);
         userValidator.validatePassword(username);
         userValidator.validateSecurityQuestion(securityQuestion);
         userValidator.validateSecurityAnswer(securityAnswer);
@@ -64,7 +66,7 @@ public class UserService implements UserDetailsService {
 
         String encodedPassword = passwordEncoder.encode(rawPassword);
         String encodedAnswer = passwordEncoder.encode(securityAnswer);
-        UserEntity newUser = new UserEntity(username, email, encodedPassword, securityQuestion, encodedAnswer);
+        UserEntity newUser = new UserEntity(username, email, name, surname, encodedPassword, securityQuestion, encodedAnswer);
         userRepository.save(newUser);
 
         auditLogRepository.save(new AuditLogEntity(newUser, Action.USER_REGISTRATION,
@@ -78,6 +80,12 @@ public class UserService implements UserDetailsService {
         UserEntity user = findUser(username, email);
 
         return user.getSecurityQuestion();
+    }
+
+    public UserInformationDto getUserDetails(String username) throws ValidationException {
+        UserEntity user = findUser(username);
+        return new UserInformationDto(user.getUsername(), user.getName(), user.getSurname(), user.getEmail(), user.getRoles());
+
     }
 
     @Transactional
@@ -100,6 +108,24 @@ public class UserService implements UserDetailsService {
                 "Πραγματοποιήθηκε επαναφορά κωδικού πρόσβασης από το χρήστη " + username + "."));
     }
 
+    @Transactional
+    public void changePassword(String username, String oldPassword, String newRawPassword) throws ValidationException {
+        userValidator.validateString(oldPassword, "The old password is empty");
+        userValidator.validateString(newRawPassword, "The new password is empty");
+
+        UserEntity user = findUser(username);
+
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw new ValidationException("Incorrect old password");
+        }
+
+        String encodedPassword = passwordEncoder.encode(newRawPassword);
+        user.setPasswordHash(encodedPassword);
+        userRepository.save(user);
+        auditLogRepository.save(new AuditLogEntity(user, Action.PASSWORD_RESET,
+                "Πραγματοποιήθηκε αλλαγή κωδικού πρόσβασης από το χρήστη " + username + "."));
+    }
+
     private UserEntity findUser(String username, String email) throws ValidationException {
         Optional<UserEntity> byUsername = userRepository.findByUsername(username);
         if (byUsername.isEmpty()) {
@@ -112,5 +138,14 @@ public class UserService implements UserDetailsService {
         }
 
         return user;
+    }
+
+    private UserEntity findUser(String username) throws ValidationException {
+        Optional<UserEntity> byUsername = userRepository.findByUsername(username);
+        if (byUsername.isEmpty()) {
+            throw new ValidationException(USER_NOT_FOUND_MESSAGE);
+        }
+
+        return byUsername.get();
     }
 }

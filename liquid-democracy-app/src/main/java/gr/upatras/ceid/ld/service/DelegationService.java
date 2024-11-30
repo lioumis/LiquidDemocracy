@@ -55,6 +55,7 @@ public class DelegationService {
     }
 
     @Transactional
+    @Deprecated //TODO: Discuss if possible
     public void removeDelegation(Long delegatorId, Long topicId) throws ValidationException {
         UserEntity delegator = userRepository.findById(delegatorId)
                 .orElseThrow(() -> new ValidationException("Delegator not found"));
