@@ -16,10 +16,9 @@ public class FeedbackEntity {
     private UserEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "topic_id")
-    private TopicEntity topic;
+    @JoinColumn(name = "voting_id")
+    private VotingEntity voting;
 
+    @Column(nullable = false)
     private String content;
-
-    private int rating;
 }

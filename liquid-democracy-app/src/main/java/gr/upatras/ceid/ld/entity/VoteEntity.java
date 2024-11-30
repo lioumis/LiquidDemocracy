@@ -16,14 +16,18 @@ public class VoteEntity {
     private UserEntity voter;
 
     @ManyToOne
-    @JoinColumn(name = "topic_id")
-    private TopicEntity topic;
+    @JoinColumn(name = "voting_id")
+    private VotingEntity voting;
 
     private String choice; //TODO: Enum
 
-    public VoteEntity(UserEntity voter, TopicEntity topic, String choice) {
+    @Column(nullable = false)
+    private boolean delegated;
+
+    public VoteEntity(UserEntity voter, VotingEntity voting, String choice, boolean delegated) {
         this.voter = voter;
-        this.topic = topic;
+        this.voting = voting;
         this.choice = choice;
+        this.delegated = delegated;
     }
 }

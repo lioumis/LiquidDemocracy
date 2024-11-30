@@ -1,0 +1,46 @@
+package gr.upatras.ceid.ld.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Getter
+@NoArgsConstructor
+@Entity(name = "voting")
+public class VotingEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String information;
+
+    @Column(nullable = false)
+    private LocalDateTime startDate;
+
+    @Column(nullable = false)
+    private LocalDateTime endDate;
+
+    @OneToMany(mappedBy = "voting")
+    private List<VoteEntity> votes;
+
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    private TopicEntity topic;
+
+    @ManyToMany
+    @JoinTable(
+            name = "voting_committee",
+            joinColumns = @JoinColumn(name = "voting_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserEntity> electoralCommittee = new HashSet<>();
+}

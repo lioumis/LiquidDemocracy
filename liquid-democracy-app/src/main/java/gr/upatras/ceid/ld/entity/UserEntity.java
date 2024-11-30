@@ -26,11 +26,9 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Setter
     @Column(nullable = false)
     private String name;
 
-    @Setter
     @Column(nullable = false)
     private String surname;
 
@@ -58,6 +56,9 @@ public class UserEntity implements UserDetails {
     @Column(name = "role_id")
     @Convert(converter = RoleConverter.class)
     private Set<Role> roles = new HashSet<>();
+
+    @ManyToMany(mappedBy = "electoralCommittee")
+    private Set<VotingEntity> overseenVotings = new HashSet<>();
 
     public UserEntity(Long id) {
         this.id = id;

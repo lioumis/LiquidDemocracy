@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -18,15 +17,14 @@ public class TopicEntity {
 
     private String title;
 
+    //TODO: Is it needed?
     private String description;
-
-    @OneToMany(mappedBy = "topic")
-    private List<VoteEntity> votes;
 
     @OneToMany(mappedBy = "topic")
     private List<DelegationEntity> delegations;
 
-    private LocalDateTime deadline;
+    @OneToMany(mappedBy = "topic")
+    private List<VotingEntity> votings;
 
     public TopicEntity(Long id) {
         this.id = id;

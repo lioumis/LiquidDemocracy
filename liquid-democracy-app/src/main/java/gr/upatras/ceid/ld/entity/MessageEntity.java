@@ -17,5 +17,8 @@ public class MessageEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
+    @Column(nullable = false)
     private String content;
+
+    //TODO: Like & Dislike. Probably new table needed to track which user did the action so that they are not able to do it again..
 }
