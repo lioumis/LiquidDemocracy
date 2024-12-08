@@ -1,9 +1,12 @@
 package gr.upatras.ceid.ld.service;
 
+import gr.upatras.ceid.ld.dto.SuggestedVotingDto;
 import gr.upatras.ceid.ld.entity.*;
 import gr.upatras.ceid.ld.enums.Action;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.repository.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,5 +86,12 @@ public class VotingService {
                     "Ο χρήστης " + delegate.getUsername() + " ψήφισε για την ψηφοφορία " + voting.getId() + " εκ μέρους του " + delegation.getDelegator().getUsername() + ".");
             auditLogRepository.save(auditLog);
         }
+    }
+
+    public List<SuggestedVotingDto> getSuggestedVotings() throws ValidationException {
+        Pageable pageable = PageRequest.of(0, 6);
+        List<VotingEntity> topVotings = votingRepository.findTopVotingsWithMostVotesAndComments(pageable);
+        return topVotings.stream().map(v -> new SuggestedVotingDto(v.getName(), v.getTopic().getTitle(),
+                v.getVotes().size(), v.getMessages().size(), v.getId().intValue())).toList();
     }
 }

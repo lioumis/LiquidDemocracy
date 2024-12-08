@@ -10,8 +10,8 @@ public class MessageEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "discussion_id")
-    private DiscussionEntity discussion;
+    @JoinColumn(name = "voting_id")
+    private VotingEntity voting;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

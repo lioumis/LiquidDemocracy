@@ -36,6 +36,9 @@ public class VotingEntity {
     @JoinColumn(name = "topic_id")
     private TopicEntity topic;
 
+    @OneToMany(mappedBy = "voting", cascade = CascadeType.ALL)
+    private List<MessageEntity> messages;
+
     @ManyToMany
     @JoinTable(
             name = "voting_committee",

@@ -9,6 +9,5 @@ public record UserInformationDto(
         String name,
         String surname,
         String email,
-        Set<Role> roles
-) {
+        Set<Role> roles) {
 }

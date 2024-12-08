@@ -1,5 +1,6 @@
 package gr.upatras.ceid.ld.controller;
 
+import gr.upatras.ceid.ld.dto.SuggestedVotingDto;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -9,12 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -34,6 +33,28 @@ public class VotingController {
     public VotingController(VotingService votingService, AuthorizationService authorizationService) {
         this.votingService = votingService;
         this.authorizationService = authorizationService;
+    }
+
+    @GetMapping("/getSuggestedVotings")
+    public ResponseEntity<Object> getSuggestedVotings(@RequestParam("username") String username) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            List<SuggestedVotingDto> suggestedVotings = votingService.getSuggestedVotings();
+            return ResponseEntity.status(HttpStatus.OK).body(suggestedVotings);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/vote")
