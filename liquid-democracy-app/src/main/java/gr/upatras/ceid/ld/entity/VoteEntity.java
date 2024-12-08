@@ -1,8 +1,12 @@
 package gr.upatras.ceid.ld.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+@Getter
 @NoArgsConstructor
 @Entity(name = "vote")
 public class VoteEntity {
@@ -19,15 +23,16 @@ public class VoteEntity {
     @JoinColumn(name = "voting_id")
     private VotingEntity voting;
 
-    private String choice; //TODO: Enum
-
     @Column(nullable = false)
     private boolean delegated;
 
-    public VoteEntity(UserEntity voter, VotingEntity voting, String choice, boolean delegated) {
+    @OneToMany(mappedBy = "vote")
+    private List<VoteDetailsEntity> voteDetails;
+
+    public VoteEntity(UserEntity voter, VotingEntity voting, boolean delegated, List<VoteDetailsEntity> voteDetails) {
         this.voter = voter;
         this.voting = voting;
-        this.choice = choice;
         this.delegated = delegated;
+        this.voteDetails = voteDetails;
     }
 }

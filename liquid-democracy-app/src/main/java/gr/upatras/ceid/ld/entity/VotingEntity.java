@@ -1,5 +1,7 @@
 package gr.upatras.ceid.ld.entity;
 
+import gr.upatras.ceid.ld.converter.VotingTypeConverter;
+import gr.upatras.ceid.ld.enums.VotingType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +33,12 @@ public class VotingEntity {
 
     @OneToMany(mappedBy = "voting")
     private List<VoteEntity> votes;
+
+    @Convert(converter = VotingTypeConverter.class)
+    private VotingType votingType;
+
+    @OneToMany(mappedBy = "voting")
+    private List<VotingOptionsEntity> votingOptions;
 
     @ManyToOne
     @JoinColumn(name = "topic_id")

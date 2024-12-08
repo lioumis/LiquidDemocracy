@@ -1,6 +1,8 @@
 package gr.upatras.ceid.ld.controller;
 
 import gr.upatras.ceid.ld.dto.SuggestedVotingDto;
+import gr.upatras.ceid.ld.dto.VotingDetailsDto;
+import gr.upatras.ceid.ld.dto.VotingDto;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -48,6 +50,48 @@ public class VotingController {
 
             List<SuggestedVotingDto> suggestedVotings = votingService.getSuggestedVotings();
             return ResponseEntity.status(HttpStatus.OK).body(suggestedVotings);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getVotings")
+    public ResponseEntity<Object> getVotings(@RequestParam("username") String username) { //TODO: SearchParams & validation
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            List<VotingDto> votings = votingService.getVotings(username);
+            return ResponseEntity.status(HttpStatus.OK).body(votings);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getVotingDetails")
+    public ResponseEntity<Object> getVotingDetails(@RequestParam("username") String username, @RequestParam("voting") Long votingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            VotingDetailsDto votingDetails = votingService.getVotingDetails(username, votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(votingDetails);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (ValidationException e) {
