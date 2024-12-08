@@ -11,7 +11,8 @@ public enum Action {
     VOTE_DELEGATION(3, "Ανάθεση ψήφου"),
     VOTE_DELEGATION_REMOVAL(4, "Αφαίρεση ανάθεσης ψήφου"),
     DIRECT_VOTE(5, "Άμεση Ψήφος"),
-    DELEGATED_VOTE(6, "Εξουσιοδοτημένη Ψήφος");
+    DELEGATED_VOTE(6, "Εξουσιοδοτημένη Ψήφος"),
+    VOTING_CREATION(7, "Δημιουργία Ψηφοφορίας");
 
     private final int id;
     private final String name;

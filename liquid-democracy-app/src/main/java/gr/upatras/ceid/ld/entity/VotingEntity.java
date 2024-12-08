@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class VotingEntity {
     @Convert(converter = VotingTypeConverter.class)
     private VotingType votingType;
 
-    @OneToMany(mappedBy = "voting")
+    @OneToMany(mappedBy = "voting", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<VotingOptionsEntity> votingOptions;
 
     @ManyToOne
@@ -54,4 +55,29 @@ public class VotingEntity {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<UserEntity> electoralCommittee = new HashSet<>();
+
+    public VotingEntity(String name, String information, LocalDateTime startDate, LocalDateTime endDate,
+                        VotingType votingType, TopicEntity topic, Set<UserEntity> electoralCommittee) {
+        this.name = name;
+        this.information = information;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.votingType = votingType;
+        this.topic = topic;
+        this.electoralCommittee = electoralCommittee;
+    }
+
+    public void addVotingOption(String name, String description) {
+        if (this.votingOptions == null) {
+            this.votingOptions = new ArrayList<>();
+        }
+        this.votingOptions.add(new VotingOptionsEntity(name, description, this));
+    }
+
+    public void addMessage(String message, UserEntity user) {
+        if (this.messages == null) {
+            this.messages = new ArrayList<>();
+        }
+        this.messages.add(new MessageEntity(user, message, this));
+    }
 }

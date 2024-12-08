@@ -3,6 +3,7 @@ package gr.upatras.ceid.ld.service;
 import gr.upatras.ceid.ld.dto.*;
 import gr.upatras.ceid.ld.entity.*;
 import gr.upatras.ceid.ld.enums.Action;
+import gr.upatras.ceid.ld.enums.VotingType;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.repository.*;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -30,12 +32,15 @@ public class VotingService {
 
     private final AuditLogRepository auditLogRepository;
 
-    public VotingService(UserRepository userRepository, VotingRepository votingRepository, VoteRepository voteRepository, DelegationRepository delegationRepository, AuditLogRepository auditLogRepository) {
+    private final TopicRepository topicRepository;
+
+    public VotingService(UserRepository userRepository, VotingRepository votingRepository, VoteRepository voteRepository, DelegationRepository delegationRepository, AuditLogRepository auditLogRepository, TopicRepository topicRepository) {
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
         this.voteRepository = voteRepository;
         this.delegationRepository = delegationRepository;
         this.auditLogRepository = auditLogRepository;
+        this.topicRepository = topicRepository;
     }
 
     @Transactional
@@ -111,6 +116,33 @@ public class VotingService {
         }
     }
 
+    @Transactional
+    public void createVoting(String username, VotingCreationDto votingCreationDto) throws ValidationException {
+        //TODO: Validation
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("Voter not found"));
+
+        TopicEntity topic = topicRepository.findById(Long.valueOf(votingCreationDto.topic())) //TODO: Find by title
+                .orElseThrow(() -> new ValidationException("Topic not found"));
+
+        VotingEntity votingEntity = new VotingEntity(votingCreationDto.name(), votingCreationDto.description(), //TODO: Check if already exists
+                toLocalDateTime(votingCreationDto.startDate()), toLocalDateTime(votingCreationDto.endDate()),
+                VotingType.valueOf(votingCreationDto.mechanism()), topic, Set.of(user)); //TODO: What about the committee?
+
+        votingCreationDto.options().forEach(option ->
+                votingEntity.addVotingOption(option.title(), option.details()));
+
+        votingEntity.addMessage(votingCreationDto.comment(), user); //TODO: Message is optional
+
+        votingRepository.save(votingEntity);
+
+        AuditLogEntity auditLog = new AuditLogEntity(user, Action.VOTING_CREATION,
+                "Ο χρήστης " + user.getUsername() + " δημιούργησε την ψηφοφορία " + votingEntity.getId() +
+                        " με τίτλο " + votingCreationDto.name() + " στη θεματική περιοχή " + topic.getTitle() + ".");
+        auditLogRepository.save(auditLog);
+    }
+
     public List<VotingDto> getVotings(String username) throws ValidationException {
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Voter not found"));
@@ -140,13 +172,13 @@ public class VotingService {
 
 
         if (voting.getEndDate().isBefore(LocalDateTime.now())) {
-            return getInactiveVotingDetails(voting, voter);
+            return getInactiveVotingStatistics(voting, voter);
         }
 
-        return getActiveVotingStatistics(voting, voter);
+        return getActiveVotingDetails(voting, voter);
     }
 
-    private VotingDetailsDto getInactiveVotingDetails(VotingEntity voting, UserEntity voter) {
+    private VotingDetailsDto getInactiveVotingStatistics(VotingEntity voting, UserEntity voter) {
         Map<VotingOptionDto, Integer> resultMap = new HashMap<>();
         AtomicInteger directVotes = new AtomicInteger();
         AtomicInteger delegatedVotes = new AtomicInteger();
@@ -186,12 +218,36 @@ public class VotingService {
                 delegated, results, userOption, directVotes.get(), delegatedVotes.get());
     }
 
-    private VotingDetailsDto getActiveVotingStatistics(VotingEntity voting, UserEntity voter) {
-        return null; //TODO: Complete
+    private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {
+        Optional<VoteEntity> voteEntityOptional = voteRepository.findByVoterAndVoting(voter, voting);
+        List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
+        List<VotingResultDto> votingResults = votingOptions.stream().map(option ->
+                new VotingResultDto(new VotingOptionDto(option.getName(), option.getDescription()), null)).toList();
+
+        if (voteEntityOptional.isPresent()) {
+            VoteEntity vote = voteEntityOptional.get();
+            VoteDetailsEntity voteDetailsEntity = vote.getVoteDetails().get(0);
+            VotingOptionDto votingOptionDto = new VotingOptionDto(voteDetailsEntity.getVotingOption().getName(),
+                    voteDetailsEntity.getVotingOption().getDescription());
+
+            return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Maybe use a different DTO to differentiate active & inactive
+                    toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
+                    vote.isDelegated(), votingResults, votingOptionDto, null, null);
+        }
+
+        return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Support multiple choices
+                toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
+                null, votingResults, null, null, null);
     }
 
     private String toString(LocalDateTime localDateTime) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
         return localDateTime.format(formatter);
+    }
+
+    private LocalDateTime toLocalDateTime(String string) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
+        LocalDate localDate = LocalDate.parse(string, formatter);
+        return localDate.atStartOfDay();
     }
 }

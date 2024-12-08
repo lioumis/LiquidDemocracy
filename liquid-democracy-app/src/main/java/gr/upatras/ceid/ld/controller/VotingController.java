@@ -1,6 +1,7 @@
 package gr.upatras.ceid.ld.controller;
 
 import gr.upatras.ceid.ld.dto.SuggestedVotingDto;
+import gr.upatras.ceid.ld.dto.VotingCreationDto;
 import gr.upatras.ceid.ld.dto.VotingDetailsDto;
 import gr.upatras.ceid.ld.dto.VotingDto;
 import gr.upatras.ceid.ld.enums.Role;
@@ -22,10 +23,13 @@ import java.util.Set;
 @RequestMapping("/votings")
 public class VotingController {
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
+    private static final Set<Role> ALLOWED_ROLES_FOR_CREATION = new HashSet<>();
 
     static {
         ALLOWED_ROLES.add(Role.VOTER);
         ALLOWED_ROLES.add(Role.REPRESENTATIVE);
+
+        ALLOWED_ROLES_FOR_CREATION.add(Role.ELECTORAL_COMMITTEE);
     }
 
     private final VotingService votingService;
@@ -122,6 +126,26 @@ public class VotingController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body("Vote cast successfully!");
+    }
+
+    @PostMapping("/createVoting")
+    public ResponseEntity<String> createVoting(@RequestBody VotingCreationDto votingCreationDto) {
+        try {
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();  //TODO: Check if the specific user is allowed to create this voting.
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
+
+            votingService.createVoting(authorizedUsername, votingCreationDto);
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body("Voting created successfully!");
     }
 
 }

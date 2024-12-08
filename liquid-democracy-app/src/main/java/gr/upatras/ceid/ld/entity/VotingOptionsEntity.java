@@ -3,6 +3,7 @@ package gr.upatras.ceid.ld.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -17,7 +18,14 @@ public class VotingOptionsEntity {
 
     private String description;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "voting_id")
     private VotingEntity voting;
+
+    public VotingOptionsEntity(String name, String description, VotingEntity voting) {
+        this.name = name;
+        this.description = description;
+        this.voting = voting;
+    }
 }
