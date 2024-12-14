@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DelegationService {
@@ -65,6 +67,19 @@ public class DelegationService {
             UserEntity delegate = delegation.getDelegate();
             return new DelegationDto(delegate.getName(), delegate.getSurname(), delegate.getUsername(), delegation.getTopic().getTitle());
         }).toList();
+    }
+
+    public Map<String, Integer> getReceivedDelegations(String username) throws ValidationException {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("User not found"));
+
+        List<DelegationEntity> delegations = delegationRepository.findByDelegate(user);
+
+        return delegations.stream()
+                .collect(Collectors.groupingBy(
+                        delegation -> delegation.getTopic().getTitle(),
+                        Collectors.summingInt(delegation -> 1)
+                ));
     }
 
     @Transactional

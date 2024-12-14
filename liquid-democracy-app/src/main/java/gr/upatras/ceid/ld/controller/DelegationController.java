@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -94,6 +95,26 @@ public class DelegationController {
             }
 
             List<DelegationDto> delegations = delegationService.getDelegations(username);
+            return ResponseEntity.status(HttpStatus.OK).body(delegations);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getReceivedDelegations")
+    public ResponseEntity<Object> getReceivedDelegations(@RequestParam("username") String username) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            Map<String, Integer> delegations = delegationService.getReceivedDelegations(username);
             return ResponseEntity.status(HttpStatus.OK).body(delegations);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
