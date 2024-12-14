@@ -1,5 +1,6 @@
 package gr.upatras.ceid.ld.controller;
 
+import gr.upatras.ceid.ld.dto.DelegationDto;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -9,12 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -37,18 +36,19 @@ public class DelegationController {
     }
 
     @PostMapping("/delegate")
-    public ResponseEntity<String> delegateVote(@RequestParam("delegatorId") Long delegatorId, @RequestParam("delegateId") Long delegateId,
-                                               @RequestParam("topicId") Long topicId) {
+    public ResponseEntity<String> delegateVote(@RequestParam("delegator") String delegator, @RequestParam("delegateName") String delegateName,
+                                               @RequestParam("delegateSurname") String delegateSurname, @RequestParam("topicId") Long topicId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            Long userId = authorizationService.isUserAuthorized(username, ALLOWED_ROLES);
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!delegatorId.equals(userId)) {
-                throw new AuthorizationException("You do not have permission to delegate this topic");
+            if (!delegator.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            delegationService.delegateVote(delegatorId, delegateId, topicId);
+
+            delegationService.delegateVote(delegator, delegateName, delegateSurname, topicId);
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (AuthorizationException e) {
@@ -60,7 +60,7 @@ public class DelegationController {
         return ResponseEntity.status(HttpStatus.OK).body("Vote delegated successfully!");
     }
 
-    @PostMapping("/removeDelegation")
+    @PostMapping("/removeDelegation") //TODO: Should not be possible. Clarify and remove
     public ResponseEntity<String> removeDelegation(@RequestParam("delegatorId") Long delegatorId, @RequestParam("topicId") Long topicId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -80,5 +80,25 @@ public class DelegationController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body("Vote delegation removed successfully!");
+    }
+
+    @GetMapping("/getDelegations")
+    public ResponseEntity<Object> getDelegations(@RequestParam("username") String username) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            List<DelegationDto> delegations = delegationService.getDelegations(username);
+            return ResponseEntity.status(HttpStatus.OK).body(delegations);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 }

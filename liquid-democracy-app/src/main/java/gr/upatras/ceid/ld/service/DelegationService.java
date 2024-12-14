@@ -1,5 +1,6 @@
 package gr.upatras.ceid.ld.service;
 
+import gr.upatras.ceid.ld.dto.DelegationDto;
 import gr.upatras.ceid.ld.entity.AuditLogEntity;
 import gr.upatras.ceid.ld.entity.DelegationEntity;
 import gr.upatras.ceid.ld.entity.TopicEntity;
@@ -12,6 +13,8 @@ import gr.upatras.ceid.ld.repository.TopicRepository;
 import gr.upatras.ceid.ld.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class DelegationService {
@@ -31,13 +34,12 @@ public class DelegationService {
     }
 
     @Transactional
-    public void delegateVote(Long delegatorId, Long delegateId, Long topicId) throws ValidationException {
-        UserEntity delegator = userRepository.findById(delegatorId)
+    public void delegateVote(String delegatorUsername, String delegateName, String delegateSurname, Long topicId) throws ValidationException {
+        UserEntity delegator = userRepository.findByUsername(delegatorUsername)
                 .orElseThrow(() -> new ValidationException("Delegator not found"));
 
-        if (userRepository.findById(delegateId).isEmpty()) {
-            throw new ValidationException("Delegate not found");
-        }
+        UserEntity delegate = userRepository.findByNameAndSurnameIgnoreCase(delegateName, delegateSurname)
+                .orElseThrow(() -> new ValidationException("Delegate not found"));
 
         TopicEntity topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ValidationException("Topic not found"));
@@ -46,12 +48,23 @@ public class DelegationService {
             throw new ValidationException("Υπάρχει ήδη ανάθεση ψήφου για το συγκεκριμένο θέμα.");
         }
 
-        DelegationEntity delegation = new DelegationEntity(new TopicEntity(topicId), new UserEntity(delegatorId), new UserEntity(delegateId));
+        DelegationEntity delegation = new DelegationEntity(new TopicEntity(topicId), delegator, delegate);
         delegationRepository.save(delegation);
 
         AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION,
-                "Ο χρήστης " + delegatorId + " ανέθεσε την ψήφο του στον χρήστη " + delegateId + " για το θέμα " + topicId + ".");
+                "Ο χρήστης " + delegator.getId() + " ανέθεσε την ψήφο του στον χρήστη " + delegate.getId() + " για το θέμα " + topicId + ".");
         auditLogRepository.save(auditLog);
+    }
+
+    public List<DelegationDto> getDelegations(String username) throws ValidationException {
+        UserEntity delegator = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("Delegator not found"));
+
+        List<DelegationEntity> delegations = delegationRepository.findByDelegator(delegator);
+        return delegations.stream().map(delegation -> {
+            UserEntity delegate = delegation.getDelegate();
+            return new DelegationDto(delegate.getName(), delegate.getSurname(), delegate.getUsername(), delegation.getTopic().getTitle());
+        }).toList();
     }
 
     @Transactional

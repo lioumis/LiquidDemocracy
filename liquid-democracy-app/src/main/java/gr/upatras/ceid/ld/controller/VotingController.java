@@ -173,7 +173,7 @@ public class VotingController {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (!username.equals(authorizedUsername)) {
                 throw new AuthorizationException("You do not have permission to perform this action");
@@ -197,7 +197,7 @@ public class VotingController {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (!username.equals(authorizedUsername)) {
                 throw new AuthorizationException("You do not have permission to perform this action");
@@ -222,7 +222,7 @@ public class VotingController {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (!username.equals(authorizedUsername)) {
                 throw new AuthorizationException("You do not have permission to perform this action");

@@ -15,4 +15,6 @@ public interface DelegationRepository extends JpaRepository<DelegationEntity, Lo
 
     List<DelegationEntity> findByDelegateAndTopic(UserEntity delegate, TopicEntity topic);
 
+    List<DelegationEntity> findByDelegator(UserEntity delegator);
+
 }
