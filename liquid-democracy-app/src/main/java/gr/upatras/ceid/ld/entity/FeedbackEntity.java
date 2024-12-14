@@ -21,4 +21,10 @@ public class FeedbackEntity {
 
     @Column(nullable = false)
     private String content;
+
+    public FeedbackEntity(UserEntity user, String content, VotingEntity voting) {
+        this.user = user;
+        this.content = content;
+        this.voting = voting;
+    }
 }

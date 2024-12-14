@@ -38,10 +38,13 @@ public class VotingService {
 
     private final MessageDetailsRepository messageDetailsRepository;
 
+    private final FeedbackRepository feedbackRepository;
+
     public VotingService(UserRepository userRepository, VotingRepository votingRepository,
                          VoteRepository voteRepository, DelegationRepository delegationRepository,
                          AuditLogRepository auditLogRepository, TopicRepository topicRepository,
-                         MessageRepository messageRepository, MessageDetailsRepository messageDetailsRepository) {
+                         MessageRepository messageRepository, MessageDetailsRepository messageDetailsRepository,
+                         FeedbackRepository feedbackRepository) {
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
         this.voteRepository = voteRepository;
@@ -50,6 +53,7 @@ public class VotingService {
         this.topicRepository = topicRepository;
         this.messageRepository = messageRepository;
         this.messageDetailsRepository = messageDetailsRepository;
+        this.feedbackRepository = feedbackRepository;
     }
 
     @Transactional
@@ -248,6 +252,21 @@ public class VotingService {
 
         voting.addMessage(message, user);
         votingRepository.save(voting);
+    }
+
+    public void addFeedback(String username, Long votingId, String message) throws ValidationException {
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Voting not found"));
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("User not found"));
+
+        if (feedbackRepository.existsByVotingAndUser(voting, user)) {
+            throw new ValidationException("Feedback already exists");
+        }
+
+        FeedbackEntity feedback = new FeedbackEntity(user, message, voting);
+        feedbackRepository.save(feedback);
     }
 
     private VotingDetailsDto getInactiveVotingStatistics(VotingEntity voting, UserEntity voter) {
