@@ -1,9 +1,6 @@
 package gr.upatras.ceid.ld.controller;
 
-import gr.upatras.ceid.ld.dto.SuggestedVotingDto;
-import gr.upatras.ceid.ld.dto.VotingCreationDto;
-import gr.upatras.ceid.ld.dto.VotingDetailsDto;
-import gr.upatras.ceid.ld.dto.VotingDto;
+import gr.upatras.ceid.ld.dto.*;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -146,6 +143,77 @@ public class VotingController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body("Voting created successfully!");
+    }
+
+    @GetMapping("/getDiscussion")
+    public ResponseEntity<Object> getDiscussion(@RequestParam("username") String username, @RequestParam("voting") Long votingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            List<DiscussionDto> votings = votingService.getDiscussions(username, votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(votings);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/react")
+    public ResponseEntity<String> react(@RequestParam("username") String username, @RequestParam("message") Long messageId, @RequestParam(name = "action", required = false) Boolean action) {
+        try {
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            votingService.reactToMessage(messageId, username, action);
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body("Reaction saved successfully!");
+    }
+
+    @PostMapping("/comment")
+    public ResponseEntity<String> comment(@RequestParam("username") String username, @RequestParam("voting") Long votingId, @RequestParam("message") String message) {
+        try {
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
+
+            if (!username.equals(authorizedUsername)) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            //TODO: Length & special chars? validation
+            votingService.addComment(username, votingId, message);
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body("Comment saved successfully!");
     }
 
 }

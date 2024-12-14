@@ -34,13 +34,22 @@ public class VotingService {
 
     private final TopicRepository topicRepository;
 
-    public VotingService(UserRepository userRepository, VotingRepository votingRepository, VoteRepository voteRepository, DelegationRepository delegationRepository, AuditLogRepository auditLogRepository, TopicRepository topicRepository) {
+    private final MessageRepository messageRepository;
+
+    private final MessageDetailsRepository messageDetailsRepository;
+
+    public VotingService(UserRepository userRepository, VotingRepository votingRepository,
+                         VoteRepository voteRepository, DelegationRepository delegationRepository,
+                         AuditLogRepository auditLogRepository, TopicRepository topicRepository,
+                         MessageRepository messageRepository, MessageDetailsRepository messageDetailsRepository) {
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
         this.voteRepository = voteRepository;
         this.delegationRepository = delegationRepository;
         this.auditLogRepository = auditLogRepository;
         this.topicRepository = topicRepository;
+        this.messageRepository = messageRepository;
+        this.messageDetailsRepository = messageDetailsRepository;
     }
 
     @Transactional
@@ -176,6 +185,69 @@ public class VotingService {
         }
 
         return getActiveVotingDetails(voting, voter);
+    }
+
+    public List<DiscussionDto> getDiscussions(String username, Long votingId) throws ValidationException {
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Voting not found"));
+
+        UserEntity voter = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("User not found"));
+
+        List<MessageEntity> messages = messageRepository.findByVoting(voting);
+        return messages.stream().map(message -> {
+            List<MessageDetailsEntity> messageDetails = message.getMessageDetails();
+
+            long likes = message.getMessageDetails().stream().filter(MessageDetailsEntity::isLiked).count();
+            long dislikes = message.getMessageDetails().size() - likes;
+
+            Optional<MessageDetailsEntity> userDetails = messageDetails.stream().filter(details ->
+                    details.getUser().getId().equals(voter.getId())).findFirst();
+
+            Boolean userAction = null;
+            if (userDetails.isPresent()) {
+                MessageDetailsEntity messageDetailsEntity = userDetails.get();
+                userAction = messageDetailsEntity.isLiked();
+            }
+
+            return new DiscussionDto(message.getId().intValue(), message.getUser().getName(), message.getUser().getSurname(),
+                    message.getContent(), (int) likes, (int) dislikes, userAction);
+        }).toList();
+    }
+
+    public void reactToMessage(Long messageId, String username, Boolean action) throws ValidationException {
+        MessageEntity message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ValidationException("Message not found"));
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("User not found"));
+
+        //TODO: Validate if voting is active?
+        Optional<MessageDetailsEntity> messageDetails = messageDetailsRepository.findByMessageAndUser(message, user);
+
+        if (messageDetails.isPresent()) {
+            if (action == null) {
+                messageDetailsRepository.delete(messageDetails.get());
+            } else {
+                MessageDetailsEntity details = messageDetails.get();
+                details.setLiked(action);
+                messageDetailsRepository.save(details);
+            }
+        } else {
+            MessageDetailsEntity newReaction = new MessageDetailsEntity(message, user, action);
+            messageDetailsRepository.save(newReaction);
+        }
+    }
+
+    public void addComment(String username, Long votingId, String message) throws ValidationException {
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Voting not found"));
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("User not found"));
+
+        voting.addMessage(message, user);
+        votingRepository.save(voting);
     }
 
     private VotingDetailsDto getInactiveVotingStatistics(VotingEntity voting, UserEntity voter) {

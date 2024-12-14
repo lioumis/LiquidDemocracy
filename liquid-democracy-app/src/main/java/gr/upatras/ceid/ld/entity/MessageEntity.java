@@ -1,8 +1,12 @@
 package gr.upatras.ceid.ld.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+@Getter
 @NoArgsConstructor
 @Entity(name = "message")
 public class MessageEntity {
@@ -22,11 +26,22 @@ public class MessageEntity {
     @Column(nullable = false)
     private String content;
 
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MessageDetailsEntity> messageDetails;
+
     public MessageEntity(UserEntity user, String content, VotingEntity voting) {
         this.user = user;
         this.content = content;
         this.voting = voting;
     }
 
-    //TODO: Like & Dislike. Probably new table needed to track which user did the action so that they are not able to do it again..
+    public void addMessageDetail(MessageDetailsEntity detail) {
+        this.messageDetails.add(detail);
+        detail.setMessage(this);
+    }
+
+    public void removeMessageDetail(MessageDetailsEntity detail) {
+        this.messageDetails.remove(detail);
+        detail.setMessage(null);
+    }
 }
