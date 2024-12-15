@@ -1,5 +1,7 @@
 package gr.upatras.ceid.ld.authentication;
 
+import gr.upatras.ceid.ld.entity.UserEntity;
+import gr.upatras.ceid.ld.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 public class AuthController {
 
@@ -16,15 +20,20 @@ public class AuthController {
 
     private final JwtUtil jwtUtil;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    private final UserRepository userRepository;
+
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<Object> generateToken(@RequestBody AuthRequest authRequest) {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+            Optional<UserEntity> byEmail = userRepository.findByEmail(authRequest.getUsername());
+            String username = byEmail.isPresent() ? byEmail.get().getUsername() : authRequest.getUsername();
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authRequest.getPassword()));
             String token = jwtUtil.generateToken(authRequest.getUsername());
             return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse(token));
         } catch (AuthenticationException e) {
