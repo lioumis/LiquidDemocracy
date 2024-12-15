@@ -44,19 +44,24 @@ export class RegistrationComponent {
 
   onSubmit(): void {
     this.registrationForm.setErrors(null);
-    // this.messageService.clear(); //TODO: Does not work
+    this.messageService.clear();
     if (this.registrationForm.valid) {
       const {username, email, name, surname, password, securityQuestion, securityAnswer} = this.registrationForm.value;
       this.authService.register(username, email, name, surname, password, securityQuestion, securityAnswer).subscribe(
         (response) => {
           this.router.navigate(['/login']);
+          this.messageService.add({ //TODO: Somehow add on the app layer so that it is visible
+            severity: 'success',
+            summary: 'Επιτυχία Εγγραφής',
+            detail: ''
+          });
         },
         (error) => {
-          console.error('Login failed', error);
-          this.messageService.add({ //TODO: Does not work
+          console.error('Login failed', error.error.error);
+          this.messageService.add({
             severity: 'error',
-            summary: 'Login Failed',
-            detail: 'Invalid username or password.'
+            summary: 'Αποτυχία Εγγραφής',
+            detail: error.error.error
           });
 
           this.registrationForm.setErrors({registrationError: true});
