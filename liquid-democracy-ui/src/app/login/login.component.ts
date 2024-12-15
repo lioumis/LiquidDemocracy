@@ -3,6 +3,9 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {AuthService} from "./auth.service";
 import {HttpClientModule} from "@angular/common/http";
 import {Router, RouterLink} from "@angular/router";
+import {MessageService} from "primeng/api";
+import {Button} from "primeng/button";
+import {ToastModule} from "primeng/toast";
 
 @Component({
   selector: 'app-login',
@@ -10,18 +13,22 @@ import {Router, RouterLink} from "@angular/router";
   imports: [
     ReactiveFormsModule,
     HttpClientModule,
-    RouterLink
+    RouterLink,
+    Button,
+    ToastModule
   ],
+  providers: [AuthService, MessageService],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export class LoginComponent implements OnInit{
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly messageService: MessageService
   ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -29,22 +36,30 @@ export class LoginComponent implements OnInit{
     });
   }
 
-  ngOnInit(): void { /* TODO document why this method 'ngOnInit' is empty */ }
+  ngOnInit(): void { /* TODO document why this method 'ngOnInit' is empty */
+  }
 
   onSubmit(): void {
+    // this.messageService.clear(); //TODO: Does not work
     if (this.loginForm.valid) {
-      const { username, password } = this.loginForm.value;
+      const {username, password} = this.loginForm.value;
       this.authService.login(username, password).subscribe(
         (response) => {
           // Handle successful login, navigate to dashboard
           localStorage.setItem('token', response.token);
           console.log('Token response', response.token);
-          // this.router.navigate(['/dashboard']);
-          this.router.navigate(['/']);
+          this.router.navigate(['/dashboard']);
         },
         (error) => {
           // Handle login error
           console.error('Login failed', error);
+          this.messageService.add({ //TODO: Does not work
+            severity: 'error',
+            summary: 'Login Failed',
+            detail: 'Invalid username or password.'
+          });
+
+          this.loginForm.setErrors({invalidCredentials: true});
         }
       );
     }

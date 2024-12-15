@@ -1,5 +1,7 @@
 package gr.upatras.ceid.ld.controller;
 
+import gr.upatras.ceid.ld.dto.RegistrationDto;
+import gr.upatras.ceid.ld.dto.ResetDto;
 import gr.upatras.ceid.ld.dto.UserInformationDto;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
@@ -10,14 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 public class UserController {
@@ -37,29 +34,40 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestParam("username") String username, @RequestParam("password") String password,
-                                           @RequestParam("name") String name, @RequestParam("surname") String surname,
-                                           @RequestParam("email") String email, @RequestParam("securityQuestion") String securityQuestion,
-                                           @RequestParam("securityAnswer") String securityAnswer) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody RegistrationDto registrationDto) {
         try {
-            userService.registerUser(username, email, name, surname, password, securityQuestion, securityAnswer);
-            return ResponseEntity.status(HttpStatus.OK).body("User registered successfully");
+            userService.registerUser(registrationDto.username(), registrationDto.email(), registrationDto.name(),
+                    registrationDto.surname(), registrationDto.password(), registrationDto.securityQuestion(),
+                    registrationDto.securityAnswer());
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "User registered successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
     @GetMapping("/getSecurityQuestion")
-    public ResponseEntity<String> getSecurityQuestion(@RequestParam("username") String username, @RequestParam("email") String email) {
+    public ResponseEntity<Map<String, String>> getSecurityQuestion(@RequestParam("username") String username, @RequestParam("email") String email) {
         try {
-            String securityQuestion = userService.getSecurityQuestion(username, email); //TODO: Maybe wrap in object to provide as JSON
-            return ResponseEntity.status(HttpStatus.OK).body(securityQuestion);
+            String securityQuestion = userService.getSecurityQuestion(username, email);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", securityQuestion);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
@@ -86,15 +94,20 @@ public class UserController {
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<String> resetPassword(@RequestParam("username") String username, @RequestParam("email") String email,
-                                                @RequestParam("securityAnswer") String securityAnswer, @RequestParam("newPassword") String newPassword) {
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetDto resetDto) {
         try {
-            userService.resetPassword(username, email, securityAnswer, newPassword);
-            return ResponseEntity.status(HttpStatus.OK).body("Password was reset successfully");
+            userService.resetPassword(resetDto.username(), resetDto.email(), resetDto.securityAnswer(), resetDto.newPassword());
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Password was reset successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 

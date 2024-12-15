@@ -1,0 +1,136 @@
+<p-toast></p-toast>
+
+<div class="login-container">
+  <h2>Εγγραφή Χρήστη</h2>
+  <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="username">Όνομα χρήστη *</label>
+      <input
+        type="text"
+        id="username"
+        formControlName="username"
+      />
+      @if (registrationForm.get('username')?.invalid && registrationForm.get('username')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="email">Διεύθυνση Email *</label>
+      <input
+        type="text"
+        id="email"
+        formControlName="email"
+      />
+      @if (registrationForm.get('email')?.invalid && registrationForm.get('email')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="name">Όνομα *</label>
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+      />
+      @if (registrationForm.get('name')?.invalid && registrationForm.get('name')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="surname">Επώνυμο *</label>
+      <input
+        type="text"
+        id="surname"
+        formControlName="surname"
+      />
+      @if (registrationForm.get('surname')?.invalid && registrationForm.get('surname')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="password">Κωδικός Πρόσβασης</label>
+      <input
+        type="password"
+        id="password"
+        formControlName="password"
+      />
+      @if (registrationForm.get('password')?.invalid && registrationForm.get('password')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="passwordRepeat">Επανάληψη Κωδικού Πρόσβασης *</label>
+      <input
+        type="password"
+        id="passwordRepeat"
+        formControlName="passwordRepeat"
+      />
+      @if (registrationForm.get('passwordRepeat')?.invalid && registrationForm.get('passwordRepeat')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="securityQuestion">Ερώτηση Ασφαλείας *</label>
+      <input
+        type="text"
+        id="securityQuestion"
+        formControlName="securityQuestion"
+      />
+      @if (registrationForm.get('securityQuestion')?.invalid && registrationForm.get('securityQuestion')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="securityAnswer">Απάντηση *</label>
+      <input
+        type="text"
+        id="securityAnswer"
+        formControlName="securityAnswer"
+      />
+      @if (registrationForm.get('securityAnswer')?.invalid && registrationForm.get('securityAnswer')?.touched) {
+        <div>
+          <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+    </div>
+
+    <p></p>
+
+    @if (registrationForm.errors?.['registrationError']) {
+      <div>
+        <small class="error">Η εγγραφή απέτυχε</small>
+      </div>
+      <!--      TODO: Print the exact error coming from the BE -->
+    }
+
+    <p></p>
+
+    <div class="button-container">
+      <p-button routerLink="/login" severity="secondary" label="Ακύρωση"></p-button>
+      <p-button type="submit" [disabled]="registrationForm.invalid" label="Εγγραφή"></p-button>
+    </div>
+
+  </form>
+
+</div>
