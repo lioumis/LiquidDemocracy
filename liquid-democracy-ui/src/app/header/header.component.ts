@@ -19,7 +19,8 @@ export class HeaderComponent {
   constructor(protected readonly authService: AuthService, private readonly router: Router) {
   }
 
-  visibleSidebar: boolean = false;
+  protected readonly localStorage = localStorage;
+  protected visibleSidebar: boolean = false;
 
   navigateTo(route: string) {
     this.closeSidebar();

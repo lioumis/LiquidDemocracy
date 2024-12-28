@@ -12,7 +12,7 @@
 
     <div class="navbar-right">
       @if (this.authService.isAuthenticated()) {
-        <div>Όνομα Χρήστη</div>
+        <div>{{localStorage.getItem('name') + ' ' + localStorage.getItem('surname')}}</div>
       }
     </div>
   </div>
@@ -21,10 +21,10 @@
 @if (canShowSidebar()) {
   <p-sidebar [(visible)]="visibleSidebar" [dismissible]="true" (onHide)="closeSidebar()" [baseZIndex]="10000">
     <ul>
-      <li><i class="pi pi-home"></i> <a (click)="navigateTo('#')"> Κύρια Οθόνη</a></li>
+      <li><i class="pi pi-home"></i> <a (click)="navigateTo('/dashboard')"> Κύρια Οθόνη</a></li>
       <li><i class="pi pi-check-square"></i> <a (click)="navigateTo('#')"> Ψηφοφορίες</a></li>
-      <li><i class="pi pi-users"></i> <a (click)="navigateTo('#')"> Αναθέσεις</a></li>
-      <li><i class="pi pi-cog"></i> <a (click)="navigateTo('#')"> Ρυθμίσεις</a></li>
+      <li><i class="pi pi-users"></i> <a (click)="navigateTo('/delegations')"> Αναθέσεις</a></li>
+      <li><i class="pi pi-cog"></i> <a (click)="navigateTo('/settings')"> Ρυθμίσεις</a></li>
       <li><i class="pi pi-sign-out"></i> <a (click)="logout()"> Αποσύνδεση</a></li>
       <!--      TODO: Routes -->
     </ul>

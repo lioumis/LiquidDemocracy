@@ -1,4 +1,4 @@
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
@@ -46,8 +46,10 @@ export class AuthService {
   }
 
   getUserDetails(username: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const params = new HttpParams().set('username', username)
-    return this.http.get(this.API_REL_PATH + this.USER_DETAILS, {params});
+    return this.http.get(this.API_REL_PATH + this.USER_DETAILS, {headers, params});
   }
 
   isAuthenticated(): boolean {
