@@ -1,8 +1,10 @@
-import {Component} from '@angular/core';
+import {Component, HostListener, ViewChild} from '@angular/core';
 import {Router, RouterLink} from "@angular/router";
-import {SidebarModule} from "primeng/sidebar";
-import {Button} from "primeng/button";
+import {Sidebar, SidebarModule} from "primeng/sidebar";
+import {ButtonModule} from "primeng/button";
 import {AuthService} from "../login/auth.service";
+import {Dropdown, DropdownModule} from "primeng/dropdown";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-header',
@@ -11,16 +13,23 @@ import {AuthService} from "../login/auth.service";
   imports: [
     RouterLink,
     SidebarModule,
-    Button
+    ButtonModule,
+    DropdownModule,
+    FormsModule
   ],
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
+  @ViewChild('dropdown') dropdown: Dropdown | undefined;
+  @ViewChild('sidebar') sidebar: Sidebar | undefined;
+
   constructor(protected readonly authService: AuthService, private readonly router: Router) {
   }
 
   protected readonly localStorage = localStorage;
   protected visibleSidebar: boolean = false;
+  protected sidebarButtonClicked: boolean = false;
+  protected selectedRole: string = '';
 
   navigateTo(route: string) {
     this.closeSidebar();
@@ -32,8 +41,12 @@ export class HeaderComponent {
     this.authService.logout();
   }
 
+  openSidebar() {
+    this.sidebarButtonClicked = true;
+    this.visibleSidebar = true
+  }
+
   closeSidebar() {
-    console.log("Closed Sidebar");
     this.visibleSidebar = false;
   }
 
@@ -43,5 +56,34 @@ export class HeaderComponent {
 
   protected canShowSidebarButton() {
     return !this.visibleSidebar && this.authService.isAuthenticated();
+  }
+
+  onRoleChange(event: any) {
+    this.selectedRole = event.value;
+    if (this.dropdown) {
+      this.dropdown.overlayVisible = false;
+    }
+  }
+
+  protected getRoles() {
+    let roleString = this.localStorage.getItem('roles');
+    if (roleString) {
+      return roleString.split(',');
+    }
+    return [];
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (this.dropdown && !this.dropdown.el.nativeElement.contains(target)) {
+      this.dropdown.overlayVisible = false;
+    }
+
+    if (this.visibleSidebar && this.sidebar && !this.sidebar.el.nativeElement.contains(target) && !this.sidebarButtonClicked) {
+      this.closeSidebar();
+    }
+
+    this.sidebarButtonClicked = false;
   }
 }

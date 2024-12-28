@@ -4,7 +4,7 @@ import {AuthService} from "./auth.service";
 import {HttpClientModule} from "@angular/common/http";
 import {Router, RouterLink} from "@angular/router";
 import {MessageService} from "primeng/api";
-import {Button} from "primeng/button";
+import {ButtonModule} from "primeng/button";
 import {ToastModule} from "primeng/toast";
 
 @Component({
@@ -14,7 +14,7 @@ import {ToastModule} from "primeng/toast";
     ReactiveFormsModule,
     HttpClientModule,
     RouterLink,
-    Button,
+    ButtonModule,
     ToastModule
   ],
   providers: [AuthService, MessageService],

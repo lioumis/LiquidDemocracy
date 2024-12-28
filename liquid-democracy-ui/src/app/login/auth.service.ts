@@ -45,7 +45,7 @@ export class AuthService {
     return this.http.get(this.API_REL_PATH + this.SECURITY_QUESTION, {params});
   }
 
-  getUserDetails(username: string): Observable<any> {
+  getUserDetails(username: string): Observable<any> { //TODO: Also allow email.
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const params = new HttpParams().set('username', username)
@@ -53,7 +53,6 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    console.log('Local storage token: ', localStorage.getItem('token'))
     return !!localStorage.getItem('token');
   }
 

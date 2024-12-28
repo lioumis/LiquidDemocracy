@@ -3,7 +3,7 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {AuthService} from '../auth.service';
 import {Router, RouterLink} from '@angular/router';
 import {MessageService} from 'primeng/api';
-import {Button} from "primeng/button";
+import {ButtonModule} from "primeng/button";
 import {PaginatorModule} from "primeng/paginator";
 import {ToastModule} from "primeng/toast";
 
@@ -11,7 +11,7 @@ import {ToastModule} from "primeng/toast";
   selector: 'app-password-reset',
   standalone: true,
   imports: [
-    Button,
+    ButtonModule,
     PaginatorModule,
     ReactiveFormsModule,
     RouterLink,

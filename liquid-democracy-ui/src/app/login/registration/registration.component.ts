@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Button} from "primeng/button";
+import {ButtonModule} from "primeng/button";
 import {PaginatorModule} from "primeng/paginator";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Router, RouterLink} from "@angular/router";
@@ -11,7 +11,7 @@ import {MessageService} from "primeng/api";
   selector: 'app-registration',
   standalone: true,
   imports: [
-    Button,
+    ButtonModule,
     PaginatorModule,
     ReactiveFormsModule,
     RouterLink,

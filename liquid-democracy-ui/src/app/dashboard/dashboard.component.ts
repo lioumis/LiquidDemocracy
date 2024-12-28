@@ -23,7 +23,8 @@ export class DashboardComponent implements OnInit {
           localStorage.setItem('username', response.username);
           localStorage.setItem('name', response.name);
           localStorage.setItem('surname', response.surname);
-          localStorage.setItem('email', response.email); //TODO: Roles
+          localStorage.setItem('email', response.email);
+          localStorage.setItem('roles', response.roles);
         },
         (error) => {
           console.error('Σφάλμα:', error);
