@@ -6,6 +6,14 @@
   background-color: #2980b9;
   margin: 0;
   padding: 0;
+  position: relative;
+}
+
+.navbar-left {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .navbar-brand {
@@ -16,6 +24,33 @@
   text-decoration: none;
 }
 
+.navbar-right {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .navbar-brand:hover {
   color: #0056b3;
+}
+
+p-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+p-sidebar li {
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+p-sidebar li a {
+  text-decoration: none;
+  color: #333;
+}
+
+p-sidebar li a:hover {
+  color: #007ad9;
 }

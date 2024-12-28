@@ -1,9 +1,32 @@
 <nav class="navbar">
-  <div class="container">
-    <div class="row">
-        <a class="navbar-brand" routerLink="/app">
-          Ρευστή Δημοκρατία
-        </a>
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="navbar-left">
+      @if (canShowSidebarButton()) {
+        <p-button type="button" icon="pi pi-bars" (onClick)="visibleSidebar = true"></p-button>
+      }
+    </div>
+
+    <a class="navbar-brand" routerLink="/app">
+      Ρευστή Δημοκρατία
+    </a>
+
+    <div class="navbar-right">
+      @if (this.authService.isAuthenticated()) {
+        <div>Όνομα Χρήστη</div>
+      }
     </div>
   </div>
 </nav>
+
+@if (canShowSidebar()) {
+  <p-sidebar [(visible)]="visibleSidebar" [dismissible]="true" (onHide)="closeSidebar()" [baseZIndex]="10000">
+    <ul>
+      <li><i class="pi pi-home"></i> <a (click)="navigateTo('#')"> Κύρια Οθόνη</a></li>
+      <li><i class="pi pi-check-square"></i> <a (click)="navigateTo('#')"> Ψηφοφορίες</a></li>
+      <li><i class="pi pi-users"></i> <a (click)="navigateTo('#')"> Αναθέσεις</a></li>
+      <li><i class="pi pi-cog"></i> <a (click)="navigateTo('#')"> Ρυθμίσεις</a></li>
+      <li><i class="pi pi-sign-out"></i> <a (click)="logout()"> Αποσύνδεση</a></li>
+      <!--      TODO: Routes -->
+    </ul>
+  </p-sidebar>
+}

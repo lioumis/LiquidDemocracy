@@ -1,6 +1,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Injectable} from "@angular/core";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +14,9 @@ export class AuthService {
   private readonly REGISTRATION = '/register';
   private readonly RESET = '/resetPassword';
   private readonly SECURITY_QUESTION = '/getSecurityQuestion';
+  private readonly USER_DETAILS = '/getUserDetails';
 
-  constructor(private readonly http: HttpClient) {
+  constructor(private readonly http: HttpClient, private readonly router: Router) {
   }
 
   login(username: string, password: string): Observable<any> {
@@ -43,8 +45,18 @@ export class AuthService {
     return this.http.get(this.API_REL_PATH + this.SECURITY_QUESTION, {params});
   }
 
+  getUserDetails(username: string): Observable<any> {
+    const params = new HttpParams().set('username', username)
+    return this.http.get(this.API_REL_PATH + this.USER_DETAILS, {params});
+  }
+
   isAuthenticated(): boolean {
     console.log('Local storage token: ', localStorage.getItem('token'))
     return !!localStorage.getItem('token');
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
   }
 }

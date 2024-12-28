@@ -18,7 +18,7 @@ export class AppComponent implements OnInit{
   title = 'app';
 
   ngOnInit(): void {
-    console.log('Is authenticated: ', this.authService.isAuthenticated())
+    console.log('Is authenticated: ', this.authService.isAuthenticated()) //TODO: Remove all console.log() for delivery
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
     } else {

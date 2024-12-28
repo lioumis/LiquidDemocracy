@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
-    // this.messageService.clear(); //TODO: Does not work
+    this.messageService.clear();
     if (this.loginForm.valid) {
       const {username, password} = this.loginForm.value;
       this.authService.login(username, password).subscribe(
@@ -51,12 +51,11 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/dashboard']);
         },
         (error) => {
-          // Handle login error
           console.error('Login failed', error);
-          this.messageService.add({ //TODO: Does not work
+          this.messageService.add({
             severity: 'error',
-            summary: 'Login Failed',
-            detail: 'Invalid username or password.'
+            summary: 'Αποτυχία Σύνδεσης',
+            detail: error.error
           });
 
           this.loginForm.setErrors({invalidCredentials: true});
