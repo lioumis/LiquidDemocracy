@@ -17,8 +17,8 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     let identifier = localStorage.getItem('identifier');
-    if(identifier) {
-      this.authService.getUserDetails(identifier).subscribe(
+    if(identifier) { //TODO: Check if needed
+      this.authService.getUserDetails().subscribe(
         (response) => {
           localStorage.setItem('username', response.username);
           localStorage.setItem('name', response.name);

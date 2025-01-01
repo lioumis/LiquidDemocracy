@@ -45,11 +45,10 @@ export class AuthService {
     return this.http.get(this.API_REL_PATH + this.SECURITY_QUESTION, {params});
   }
 
-  getUserDetails(username: string): Observable<any> { //TODO: Also allow email.
+  getUserDetails(): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const params = new HttpParams().set('username', username)
-    return this.http.get(this.API_REL_PATH + this.USER_DETAILS, {headers, params});
+    return this.http.get(this.API_REL_PATH + this.USER_DETAILS, {headers});
   }
 
   isAuthenticated(): boolean {
@@ -58,6 +57,12 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('token');
+    localStorage.removeItem('identifier');
+    localStorage.removeItem('email');
+    localStorage.removeItem('name');
+    localStorage.removeItem('roles');
+    localStorage.removeItem('surname');
+    localStorage.removeItem('username');
     this.router.navigate(['/login']);
   }
 }

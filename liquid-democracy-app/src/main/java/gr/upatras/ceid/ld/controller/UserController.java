@@ -72,17 +72,13 @@ public class UserController {
     }
 
     @GetMapping("/getUserDetails")
-    public ResponseEntity<Object> getUserDetails(@RequestParam("username") String username) {
+    public ResponseEntity<Object> getUserDetails() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
-                throw new AuthorizationException("You do not have permission to perform this action");
-            }
-
-            UserInformationDto userDetails = userService.getUserDetails(username);
+            UserInformationDto userDetails = userService.getUserDetails(authorizedUsername);
             return ResponseEntity.status(HttpStatus.OK).body(userDetails);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());

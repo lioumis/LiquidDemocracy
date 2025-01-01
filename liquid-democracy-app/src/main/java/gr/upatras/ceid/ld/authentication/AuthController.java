@@ -34,7 +34,7 @@ public class AuthController {
             Optional<UserEntity> byEmail = userRepository.findByEmail(authRequest.getUsername());
             String username = byEmail.isPresent() ? byEmail.get().getUsername() : authRequest.getUsername();
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authRequest.getPassword()));
-            String token = jwtUtil.generateToken(authRequest.getUsername());
+            String token = jwtUtil.generateToken(username);
             return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse(token));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Το όνομα χρήστη ή ο κωδικός πρόσβασης είναι λάθος");
