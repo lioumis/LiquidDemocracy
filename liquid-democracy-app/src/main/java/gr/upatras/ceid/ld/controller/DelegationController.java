@@ -24,7 +24,7 @@ public class DelegationController {
 
     static {
         ALLOWED_ROLES.add(Role.VOTER);
-        ALLOWED_ROLES.add(Role.REPRESENTATIVE);
+        ALLOWED_ROLES.add(Role.REPRESENTATIVE); //TODO: Secure the services. Only for delegators?
     }
 
     private final DelegationService delegationService;
@@ -84,17 +84,17 @@ public class DelegationController {
     }
 
     @GetMapping("/getDelegations")
-    public ResponseEntity<Object> getDelegations(@RequestParam("username") String username) {
+    public ResponseEntity<Object> getDelegations() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
+            if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            List<DelegationDto> delegations = delegationService.getDelegations(username);
+            List<DelegationDto> delegations = delegationService.getDelegations(authorizedUsername);
             return ResponseEntity.status(HttpStatus.OK).body(delegations);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());

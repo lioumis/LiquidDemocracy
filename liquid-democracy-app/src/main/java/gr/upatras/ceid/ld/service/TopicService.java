@@ -1,12 +1,11 @@
 package gr.upatras.ceid.ld.service;
 
+import gr.upatras.ceid.ld.dto.TopicDto;
 import gr.upatras.ceid.ld.entity.TopicEntity;
 import gr.upatras.ceid.ld.repository.TopicRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class TopicService {
@@ -16,13 +15,11 @@ public class TopicService {
         this.topicRepository = topicRepository;
     }
 
-    public Map<Long, String> getTopics() {
+    public List<TopicDto> getTopics() {
         List<TopicEntity> topics = topicRepository.findAll();
 
-        Map<Long, String> topicMap = new HashMap<>();
-        topics.forEach(topic -> topicMap.put(topic.getId(), topic.getTitle()));
-
-        return topicMap;
+        return topics.stream().map(topic ->
+                new TopicDto(topic.getId().intValue(), topic.getTitle())).toList();
     }
 
 }

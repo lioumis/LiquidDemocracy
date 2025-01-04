@@ -19,6 +19,12 @@ export class AuthService {
   private readonly VOTINGS = '/votings';
   private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
 
+  private readonly TOPICS = '/topics';
+  private readonly ALL_TOPICS = '/getTopics';
+
+  private readonly DELEGATIONS = '/delegations';
+  private readonly MY_DELEGATIONS = '/getDelegations';
+
   constructor(private readonly http: HttpClient, private readonly router: Router) {
   }
 
@@ -58,6 +64,18 @@ export class AuthService {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.SUGGESTED_VOTINGS, {headers});
+  }
+
+  getTopics(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.get(this.API_REL_PATH + this.TOPICS + this.ALL_TOPICS, {headers});
+  }
+
+  getDelegations(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.get(this.API_REL_PATH + this.DELEGATIONS + this.MY_DELEGATIONS, {headers});
   }
 
   isAuthenticated(): boolean {

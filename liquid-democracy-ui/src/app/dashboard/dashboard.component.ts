@@ -5,6 +5,9 @@ import {PanelModule} from 'primeng/panel';
 import {CarouselModule} from "primeng/carousel";
 import {Button} from "primeng/button";
 import {CardModule} from "primeng/card";
+import {Table, TableModule} from "primeng/table";
+import {MultiSelectModule} from "primeng/multiselect";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-dashboard',
@@ -13,7 +16,10 @@ import {CardModule} from "primeng/card";
     PanelModule,
     CarouselModule,
     Button,
-    CardModule
+    CardModule,
+    TableModule,
+    MultiSelectModule,
+    FormsModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './dashboard.component.html',
@@ -21,50 +27,13 @@ import {CardModule} from "primeng/card";
 })
 export class DashboardComponent implements OnInit {
 
-  votings: Voting[] = [ //TODO: Remove hardcoded values
-    {
-      id: 1,
-      name: "Όνομα Ψηφοφορίας 1",
-      topic: "Θεματική Περιοχή 1",
-      votes: 12,
-      comments: 14
-    },
-    {
-      id: 2,
-      name: "Όνομα Ψηφοφορίας 2",
-      topic: "Θεματική Περιοχή 2",
-      votes: 22,
-      comments: 24
-    },
-    {
-      id: 3,
-      name: "Όνομα Ψηφοφορίας 3",
-      topic: "Θεματική Περιοχή 3",
-      votes: 32,
-      comments: 34
-    },
-    {
-      id: 4,
-      name: "Όνομα Ψηφοφορίας 4",
-      topic: "Θεματική Περιοχή 4",
-      votes: 42,
-      comments: 44
-    },
-    {
-      id: 5,
-      name: "Όνομα Ψηφοφορίας 5",
-      topic: "Θεματική Περιοχή 5",
-      votes: 52,
-      comments: 54
-    },
-    {
-      id: 6,
-      name: "Όνομα Ψηφοφορίας 6",
-      topic: "Θεματική Περιοχή 6",
-      votes: 62,
-      comments: 64
-    }
-  ];
+  delegations: Delegation[] = [];
+
+  topics: string[] = [];
+
+  loading: boolean = true;
+
+  votings: Voting[] = [];
 
   responsiveOptions: any[] | undefined;
 
@@ -107,6 +76,34 @@ export class DashboardComponent implements OnInit {
       }
     )
 
+    this.authService.getTopics().subscribe(
+      (response: Topic[]) => {
+        this.topics = response.map((topic) => topic.name);
+      },
+      (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    )
+
+    this.authService.getDelegations().subscribe(
+      (response) => {
+        this.delegations = response;
+      },
+      (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    )
+
     this.responsiveOptions = [
       {
         breakpoint: '1199px',
@@ -124,6 +121,12 @@ export class DashboardComponent implements OnInit {
         numScroll: 1
       }
     ];
+
+    this.loading = false;
+  }
+
+  clear(table: Table) {
+    table.clear();
   }
 
 }
@@ -134,4 +137,15 @@ export interface Voting {
   topic: string;
   votes: number;
   comments: number;
+}
+
+export interface Delegation {
+  name: string;
+  surname: string;
+  topic: string;
+}
+
+export interface Topic {
+  id: number;
+  name: string;
 }
