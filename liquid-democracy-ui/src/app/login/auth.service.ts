@@ -25,6 +25,7 @@ export class AuthService {
   private readonly DELEGATIONS = '/delegations';
   private readonly MY_DELEGATIONS = '/getDelegations';
   private readonly RECEIVED_DELEGATIONS = '/getReceivedDelegations';
+  private readonly NEW_DELEGATION = '/delegate';
 
   constructor(private readonly http: HttpClient, private readonly router: Router) {
   }
@@ -44,6 +45,19 @@ export class AuthService {
       securityQuestion,
       securityAnswer
     });
+  }
+
+  createDelegation(delegateName: string, delegateSurname: string, topicId: number): Observable<any> {
+    const delegator = localStorage.getItem('username');
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.DELEGATIONS + this.NEW_DELEGATION, {
+      delegator,
+      delegateName,
+      delegateSurname,
+      topicId
+    }, httpOptions);
   }
 
   reset(username: string, email: string, newPassword: string, securityAnswer: string): Observable<any> {

@@ -5,9 +5,10 @@ import {PanelModule} from 'primeng/panel';
 import {CarouselModule} from "primeng/carousel";
 import {Button} from "primeng/button";
 import {CardModule} from "primeng/card";
-import {Table, TableModule} from "primeng/table";
+import {TableModule} from "primeng/table";
 import {MultiSelectModule} from "primeng/multiselect";
 import {FormsModule} from "@angular/forms";
+import {ToastModule} from "primeng/toast";
 
 @Component({
   selector: 'app-dashboard',
@@ -19,7 +20,8 @@ import {FormsModule} from "@angular/forms";
     CardModule,
     TableModule,
     MultiSelectModule,
-    FormsModule
+    FormsModule,
+    ToastModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './dashboard.component.html',
@@ -139,10 +141,6 @@ export class DashboardComponent implements OnInit {
     ];
 
     this.loading = false;
-  }
-
-  clear(table: Table) {
-    table.clear();
   }
 
 }

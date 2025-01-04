@@ -1,6 +1,7 @@
 package gr.upatras.ceid.ld.controller;
 
 import gr.upatras.ceid.ld.dto.DelegationDto;
+import gr.upatras.ceid.ld.dto.DelegationRequestDto;
 import gr.upatras.ceid.ld.dto.ReceivedDelegationDto;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
@@ -13,9 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/delegations")
@@ -37,28 +36,36 @@ public class DelegationController {
     }
 
     @PostMapping("/delegate")
-    public ResponseEntity<String> delegateVote(@RequestParam("delegator") String delegator, @RequestParam("delegateName") String delegateName,
-                                               @RequestParam("delegateSurname") String delegateSurname, @RequestParam("topicId") Long topicId) {
+    public ResponseEntity<Map<String, String>> delegateVote(@RequestBody DelegationRequestDto delegationRequestDto) {
+        //TODO: Parameter validation
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!delegator.equals(authorizedUsername)) {
+            if (!delegationRequestDto.delegator().equals(authorizedUsername)) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-
-            delegationService.delegateVote(delegator, delegateName, delegateSurname, topicId);
+            delegationService.delegateVote(delegationRequestDto.delegator(), delegationRequestDto.delegateName(),
+                    delegationRequestDto.delegateSurname(), delegationRequestDto.topicId());
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Vote delegated successfully!");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Vote delegated successfully!");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/removeDelegation") //TODO: Should not be possible. Clarify and remove

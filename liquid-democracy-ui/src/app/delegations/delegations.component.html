@@ -1,1 +1,171 @@
-<p>delegations works!</p>
+<p-toast></p-toast>
+
+<div class="dashboard">
+
+  <p-panel header="Αναθέσεις Ψήφου">
+    <p-table
+      #dt
+      [value]="delegations"
+      dataKey="id"
+      [rows]="5"
+      [loading]="loading"
+      [paginator]="true"
+      [globalFilterFields]="['name', 'surname', 'username', 'topic']"
+      [tableStyle]="{ 'min-width': '100rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name" style="width:25%">
+            Όνομα
+            <p-sortIcon field="name"/>
+          </th>
+          <th pSortableColumn="surname" style="width:25%">
+            Επώνυμο
+            <p-sortIcon field="surname"/>
+          </th>
+          <th pSortableColumn="username" style="width:25%">
+            Επώνυμο
+            <p-sortIcon field="username"/>
+          </th>
+          <th pSortableColumn="topic" style="width:25%">
+            Θέμα
+            <p-sortIcon field="topic"/>
+          </th>
+        </tr>
+        <tr>
+          <th>
+            <p-columnFilter
+              [showMenu]="false"
+              type="text"
+              field="name"
+              placeholder="Όνομα"
+              ariaLabel="Filter Name"/>
+          </th>
+          <th>
+            <p-columnFilter
+              [showMenu]="false"
+              type="text"
+              field="surname"
+              placeholder="Επώνυμο"
+              ariaLabel="Filter Surname"/>
+          </th>
+          <th>
+            <p-columnFilter
+              [showMenu]="false"
+              type="text"
+              field="username"
+              placeholder="Όνομα χρήστη"
+              ariaLabel="Filter username"/>
+          </th>
+          <th>
+            <p-columnFilter field="topic" matchMode="in" [showMenu]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <p-multiSelect
+                  [ngModel]="value"
+                  [options]="topics"
+                  placeholder="Θέμα"
+                  (onChange)="filter($event.value)"
+                  [maxSelectedLabels]=1
+                  selectedItemsLabel="{0} θέματα επιλέχθηκαν"
+                  optionLabel="">
+                  <ng-template let-option pTemplate="item">
+                    <div class="inline-block vertical-align-middle">
+                      {{ option }}
+                    </div>
+                  </ng-template>
+                </p-multiSelect>
+              </ng-template>
+            </p-columnFilter>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-delegation>
+        <tr>
+          <td>
+            {{ delegation.name }}
+          </td>
+          <td>
+            {{ delegation.surname }}
+          </td>
+          <td>
+            {{ delegation.username }}
+          </td>
+          <td>
+            {{ delegation.topic }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4">Δεν βρέθηκαν αναθέσεις ψήφου</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+
+  <div class="new-delegation">
+    <p-panel header="Νέα Ανάθεση">
+      <p>Για τη διαδικασία ανάθεσης, θα χρειαστεί να εισάγετε το όνομα και το επώνυμο του αντιπροσώπου, καθώς και να
+        επιλέξετε το θέμα για το οποίο θέλετε να αναθέσετε την ψήφο σας.</p>
+      <form [formGroup]="delegationForm" (ngSubmit)="onSubmit()" class="form">
+        <div class="form-group">
+          <label for="name">Όνομα Αντιπροσώπου</label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+          />
+          @if (delegationForm.get('name')?.invalid && delegationForm.get('name')?.touched) {
+            <div>
+              <small class="error">Υποχρεωτικό πεδίο</small>
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="surname">Επώνυμο Αντιπροσώπου</label>
+          <input
+            type="text"
+            id="surname"
+            formControlName="surname"
+          />
+          @if (delegationForm.get('surname')?.invalid && delegationForm.get('surname')?.touched) {
+            <div>
+              <small class="error">Υποχρεωτικό πεδίο</small>
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="topic">Θέμα Ανάθεσης</label>
+          <p-dropdown
+            #dropdown
+            id="topic"
+            [options]="topics"
+            [panelStyleClass]="'upwards-panel'"
+            [style]="{'width':'100%'}"
+            [(ngModel)]="selectedTopic"
+            placeholder="Θέμα"
+            formControlName="topic"
+            (onChange)="onTopicChange($event)"/>
+          <!--          TODO: Find a way to make the dropdown open upwards with 'upwards-panel' or remove and move the Νέα ανάθεση panel to the top-->
+          <!--          TODO: Close dropdown after a value is selected or user clicks outside.-->
+
+          @if (delegationForm.get('topic')?.invalid && delegationForm.get('topic')?.touched) {
+            <div>
+              <small class="error">Υποχρεωτικό πεδίο</small>
+            </div>
+          }
+        </div>
+
+        <p></p>
+
+        <div class="button-container">
+          <p-button class="left-button" (onClick)="resetForm()" severity="secondary" label="Επαναφορά"></p-button>
+          <p-button type="submit" [disabled]="delegationForm.invalid" label="Ανάθεση"></p-button>
+        </div>
+
+      </form>
+    </p-panel>
+  </div>
+
+</div>
