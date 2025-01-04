@@ -1,6 +1,7 @@
 package gr.upatras.ceid.ld.controller;
 
 import gr.upatras.ceid.ld.dto.DelegationDto;
+import gr.upatras.ceid.ld.dto.ReceivedDelegationDto;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -104,17 +104,17 @@ public class DelegationController {
     }
 
     @GetMapping("/getReceivedDelegations")
-    public ResponseEntity<Object> getReceivedDelegations(@RequestParam("username") String username) {
+    public ResponseEntity<Object> getReceivedDelegations() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action"); //TODO: Change to Greek
             }
 
-            Map<String, Integer> delegations = delegationService.getReceivedDelegations(username);
+            List<ReceivedDelegationDto> delegations = delegationService.getReceivedDelegations(authorizedUsername);
             return ResponseEntity.status(HttpStatus.OK).body(delegations);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());

@@ -1,6 +1,7 @@
 package gr.upatras.ceid.ld.service;
 
 import gr.upatras.ceid.ld.dto.DelegationDto;
+import gr.upatras.ceid.ld.dto.ReceivedDelegationDto;
 import gr.upatras.ceid.ld.entity.AuditLogEntity;
 import gr.upatras.ceid.ld.entity.DelegationEntity;
 import gr.upatras.ceid.ld.entity.TopicEntity;
@@ -69,17 +70,21 @@ public class DelegationService {
         }).toList();
     }
 
-    public Map<String, Integer> getReceivedDelegations(String username) throws ValidationException {
+    public List<ReceivedDelegationDto> getReceivedDelegations(String username) throws ValidationException {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("User not found"));
 
         List<DelegationEntity> delegations = delegationRepository.findByDelegate(user);
 
-        return delegations.stream()
+        Map<String, Integer> groupedDelegations = delegations.stream()
                 .collect(Collectors.groupingBy(
                         delegation -> delegation.getTopic().getTitle(),
                         Collectors.summingInt(delegation -> 1)
                 ));
+
+        return groupedDelegations.entrySet().stream()
+                .map(entry -> new ReceivedDelegationDto(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     @Transactional

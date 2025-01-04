@@ -24,6 +24,7 @@ export class AuthService {
 
   private readonly DELEGATIONS = '/delegations';
   private readonly MY_DELEGATIONS = '/getDelegations';
+  private readonly RECEIVED_DELEGATIONS = '/getReceivedDelegations';
 
   constructor(private readonly http: HttpClient, private readonly router: Router) {
   }
@@ -76,6 +77,12 @@ export class AuthService {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.DELEGATIONS + this.MY_DELEGATIONS, {headers});
+  }
+
+  getReceivedDelegations(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.get(this.API_REL_PATH + this.DELEGATIONS + this.RECEIVED_DELEGATIONS, {headers});
   }
 
   isAuthenticated(): boolean {

@@ -55,7 +55,15 @@
 
 .delegations {
   display: flex;
-  align-items: center;
-  padding-top: 50px;
+  padding-top: 25px;
+  padding-bottom: 25px;
   justify-content: space-between;
+}
+
+p-multiselect-panel {
+  z-index: 1050 !important;
+}
+
+:host ::ng-deep .p-datatable > .p-datatable-wrapper {
+  overflow: visible !important;
 }

@@ -29,6 +29,8 @@ export class DashboardComponent implements OnInit {
 
   delegations: Delegation[] = [];
 
+  receivedDelegations: ReceivedDelegation[] = [];
+
   topics: string[] = [];
 
   loading: boolean = true;
@@ -104,6 +106,20 @@ export class DashboardComponent implements OnInit {
       }
     )
 
+    this.authService.getReceivedDelegations().subscribe(
+      (response) => {
+        this.receivedDelegations = response;
+      },
+      (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    )
+
     this.responsiveOptions = [
       {
         breakpoint: '1199px',
@@ -148,4 +164,9 @@ export interface Delegation {
 export interface Topic {
   id: number;
   name: string;
+}
+
+export interface ReceivedDelegation {
+  topic: string;
+  votes: number;
 }
