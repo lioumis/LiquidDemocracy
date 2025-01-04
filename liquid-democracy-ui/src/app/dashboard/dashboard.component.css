@@ -1,0 +1,54 @@
+.dashboard {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.voting-card {
+  padding: 15px;
+  margin: 10px;
+  border-radius: 8px;
+}
+
+.voting-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.voting-info {
+  text-align: left;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.voting-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.voting-topic {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.voting-stats {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.voting-icon {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.voting-icon i {
+  margin-right: 5px;
+}
+
+.voting-button {
+  align-self: flex-end;
+}

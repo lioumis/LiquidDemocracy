@@ -27,7 +27,7 @@
 </nav>
 
 @if (canShowSidebar()) {
-  <p-sidebar #sidebar [(visible)]="visibleSidebar" [dismissible]="true" (onHide)="closeSidebar()" [baseZIndex]="10000">
+  <p-sidebar #sidebar [(visible)]="visibleSidebar" [dismissible]="true" (onHide)="closeSidebar()" [style]="{'z-index':'1'}">
     <ul>
       <li><i class="pi pi-home"></i> <a (click)="navigateTo('/dashboard')"> Κύρια Οθόνη</a></li>
       <li><i class="pi pi-check-square"></i> <a (click)="navigateTo('#')"> Ψηφοφορίες</a></li>

@@ -1,1 +1,34 @@
-<p>dashboard works!</p>
+<div class="dashboard">
+  <h2>Καλώς ορίσατε!</h2>
+
+  <p-panel header="Ψηφοφορίες που μπορεί να σας ενδιαφέρουν">
+    <p-carousel
+      [value]="votings"
+      [numVisible]="6"
+      [numScroll]="6"
+      [circular]="false"
+      [responsiveOptions]="responsiveOptions"
+      [showIndicators]="false"
+      [showNavigators]="false">
+      <ng-template let-voting pTemplate="item">
+        <p-card class="voting-card">
+          <div class="voting-content">
+            <div class="voting-info">
+              <h4 class="voting-title">{{ voting.name }}</h4>
+              <p class="voting-topic">{{ voting.topic }}</p>
+            </div>
+            <div class="voting-stats">
+              <div class="voting-icon">
+                <i class="pi pi-check-square"></i> {{ voting.votes }}
+              </div>
+              <div class="voting-icon">
+                <i class="pi pi-comments"></i> {{ voting.comments }}
+              </div>
+            </div>
+            <p-button icon="pi pi-arrow-right" severity="secondary" class="voting-button" [outlined]="true"></p-button>
+          </div>
+        </p-card>
+      </ng-template>
+    </p-carousel>
+  </p-panel>
+</div>
