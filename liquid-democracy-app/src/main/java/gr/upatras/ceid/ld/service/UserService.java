@@ -110,13 +110,13 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void changePassword(String username, String oldPassword, String newRawPassword) throws ValidationException {
-        userValidator.validateString(oldPassword, "The old password is empty");
-        userValidator.validateString(newRawPassword, "The new password is empty");
+        userValidator.validateString(oldPassword, "Ο παλιός κωδικός πρόσβασης είναι κενός");
+        userValidator.validateString(newRawPassword, "Ο νέος κωδικός πρόσβασης είναι κενός");
 
         UserEntity user = findUser(username);
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
-            throw new ValidationException("Incorrect old password");
+            throw new ValidationException("Ο παλιός κωδικός πρόσβασης είναι λάθος");
         }
 
         String encodedPassword = passwordEncoder.encode(newRawPassword);

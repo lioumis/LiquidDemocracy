@@ -1,1 +1,55 @@
-<p>settings works!</p>
+<p-toast></p-toast>
+<div class="dashboard">
+
+  <h2>Ρυθμίσεις</h2>
+
+  <div class="settings">
+    <p-panel header="Προσωπικά στοιχεία" class="panel">
+      <div class="profile-details">
+        <p><strong>Όνομα Χρήστη: </strong>{{ username }}</p>
+        <p><strong>Όνομα: </strong>{{ name }}</p>
+        <p><strong>Επώνυμο: </strong>{{ surname }}</p>
+        <p><strong>Διεύθυνση Email: </strong>{{ email }}</p>
+      </div>
+    </p-panel>
+
+    <p-panel header="Αλλαγή κωδικού πρόσβασης">
+      <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="oldPassword">Παλιός Κωδικός:</label>
+          <input type="password" id="oldPassword" formControlName="oldPassword"/>
+          @if (passwordForm.get('oldPassword')?.invalid && passwordForm.get('oldPassword')?.touched) {
+            <div>
+              <small class="error">Υποχρεωτικό πεδίο</small>
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="newPassword">Νέος Κωδικός:</label>
+          <input type="password" id="newPassword" formControlName="newPassword"/>
+          @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+            <div>
+              <small class="error">Υποχρεωτικό πεδίο</small>
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Επανάληψη Νέου Κωδικού:</label>
+          <input type="password" id="confirmPassword" formControlName="confirmPassword"/>
+          @if (passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched) {
+            <div>
+              <small class="error">Υποχρεωτικό πεδίο</small>
+            </div>
+          }
+          @if (passwordForm.errors?.['mismatch']) {
+            <div>
+              <small class="error">Οι κωδικοί πρόσβασης δεν ταιριάζουν</small>
+            </div>
+          }
+        </div>
+        <p-button type="submit" [disabled]="passwordForm.invalid" class="button" label="Αλλαγή"></p-button>
+      </form>
+    </p-panel>
+  </div>
+
+</div>

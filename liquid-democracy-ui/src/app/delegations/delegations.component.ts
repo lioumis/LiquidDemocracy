@@ -45,7 +45,7 @@ export class DelegationsComponent implements OnInit {
 
   constructor(private readonly authService: AuthService,
               private readonly messageService: MessageService,
-              private readonly fb: FormBuilder,) {
+              private readonly fb: FormBuilder) {
     this.delegationForm = this.fb.group({
       name: ['', Validators.required],
       surname: ['', Validators.required],

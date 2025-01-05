@@ -15,6 +15,7 @@ export class AuthService {
   private readonly RESET = '/resetPassword';
   private readonly SECURITY_QUESTION = '/getSecurityQuestion';
   private readonly USER_DETAILS = '/getUserDetails';
+  private readonly CHANGE_PASSWORD = '/changePassword';
 
   private readonly VOTINGS = '/votings';
   private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
@@ -45,6 +46,13 @@ export class AuthService {
       securityQuestion,
       securityAnswer
     });
+  }
+
+  changePassword(oldPassword: string, newPassword: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.CHANGE_PASSWORD, {oldPassword, newPassword}, httpOptions);
   }
 
   createDelegation(delegateName: string, delegateSurname: string, topicId: number): Observable<any> {

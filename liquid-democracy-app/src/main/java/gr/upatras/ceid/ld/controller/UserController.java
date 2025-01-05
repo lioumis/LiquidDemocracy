@@ -1,5 +1,6 @@
 package gr.upatras.ceid.ld.controller;
 
+import gr.upatras.ceid.ld.dto.ChangePasswordDto;
 import gr.upatras.ceid.ld.dto.RegistrationDto;
 import gr.upatras.ceid.ld.dto.ResetDto;
 import gr.upatras.ceid.ld.dto.UserInformationDto;
@@ -108,25 +109,32 @@ public class UserController {
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@RequestParam("username") String username, @RequestParam("oldPassword") String oldPassword,
-                                                 @RequestParam("newPassword") String newPassword) {
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
+            if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            userService.changePassword(username, oldPassword, newPassword);
-            return ResponseEntity.status(HttpStatus.OK).body("Password was changed successfully");
+            userService.changePassword(authorizedUsername, changePasswordDto.oldPassword(), changePasswordDto.newPassword());
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Ο κωδικός πρόσβασης άλλαξε με επιτυχία");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 }
