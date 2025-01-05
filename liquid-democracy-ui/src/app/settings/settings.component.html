@@ -6,10 +6,22 @@
   <div class="settings">
     <p-panel header="Προσωπικά στοιχεία" class="panel">
       <div class="profile-details">
-        <p><strong>Όνομα Χρήστη: </strong>{{ username }}</p>
-        <p><strong>Όνομα: </strong>{{ name }}</p>
-        <p><strong>Επώνυμο: </strong>{{ surname }}</p>
-        <p><strong>Διεύθυνση Email: </strong>{{ email }}</p>
+        <div class="row">
+          <p><strong>Όνομα Χρήστη:</strong></p>
+          <p>{{ username }}</p>
+        </div>
+        <div class="row">
+          <p><strong>Όνομα:</strong></p>
+          <p>{{ name }}</p>
+        </div>
+        <div class="row">
+          <p><strong>Επώνυμο:</strong></p>
+          <p>{{ surname }}</p>
+        </div>
+        <div class="row">
+          <p><strong>Διεύθυνση Email:</strong></p>
+          <p>{{ email }}</p>
+        </div>
       </div>
     </p-panel>
 
