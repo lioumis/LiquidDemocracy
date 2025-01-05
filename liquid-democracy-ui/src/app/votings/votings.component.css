@@ -1,0 +1,19 @@
+.dashboard {
+  padding: 25px 10px;
+}
+
+.panel {
+  padding-bottom: 25px;
+}
+
+p-multiselect-panel {
+  z-index: 1050 !important;
+}
+
+:host ::ng-deep .p-datatable > .p-datatable-wrapper {
+  overflow: visible !important;
+}
+
+:host ::ng-deep .p-calendar .p-datepicker {
+  z-index: 1 !important;
+}

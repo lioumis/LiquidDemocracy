@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {MultiSelectModule} from "primeng/multiselect";
 import {PanelModule} from "primeng/panel";
 import {MessageService, PrimeTemplate} from "primeng/api";
@@ -130,5 +130,14 @@ export class DelegationsComponent implements OnInit {
         });
       }
     )
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (this.dropdown && !this.dropdown.el.nativeElement.contains(target)) {
+      this.dropdown.overlayVisible = true;
+      this.dropdown.overlayVisible = false;
+    }
   }
 }

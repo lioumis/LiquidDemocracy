@@ -59,17 +59,17 @@ public class VotingController {
     }
 
     @GetMapping("/getVotings")
-    public ResponseEntity<Object> getVotings(@RequestParam("username") String username) { //TODO: SearchParams & validation
+    public ResponseEntity<Object> getVotings() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
+            if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            List<VotingDto> votings = votingService.getVotings(username);
+            List<VotingDto> votings = votingService.getVotings(authorizedUsername);
             return ResponseEntity.status(HttpStatus.OK).body(votings);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
