@@ -20,6 +20,7 @@ export class AuthService {
   private readonly VOTINGS = '/votings';
   private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
   private readonly ALL_VOTINGS = '/getVotings';
+  private readonly VOTING_DETAILS = '/getVotingDetails';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -94,6 +95,13 @@ export class AuthService {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_VOTINGS, {headers});
+  }
+
+  getVotingDetails(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const params = new HttpParams().set('voting', id);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.VOTING_DETAILS, {params, headers});
   }
 
   getTopics(): Observable<any> {

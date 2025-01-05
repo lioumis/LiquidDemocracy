@@ -26,7 +26,8 @@
                 <i class="pi pi-comments"></i> {{ voting.comments }}
               </div>
             </div>
-            <p-button icon="pi pi-arrow-right" severity="secondary" class="voting-button" [outlined]="true"></p-button>
+            <p-button icon="pi pi-arrow-right" (onClick)="selectVoting(voting.id)" severity="secondary"
+                      class="voting-button" [outlined]="true"></p-button>
           </div>
         </p-card>
       </ng-template>

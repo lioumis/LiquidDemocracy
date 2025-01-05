@@ -9,6 +9,7 @@ import {TableModule} from "primeng/table";
 import {MultiSelectModule} from "primeng/multiselect";
 import {FormsModule} from "@angular/forms";
 import {ToastModule} from "primeng/toast";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-dashboard',
@@ -41,7 +42,9 @@ export class DashboardComponent implements OnInit {
 
   responsiveOptions: any[] | undefined;
 
-  constructor(private readonly authService: AuthService, private readonly messageService: MessageService) {
+  constructor(private readonly authService: AuthService,
+              private readonly router: Router,
+              private readonly messageService: MessageService) {
   }
 
   ngOnInit(): void {
@@ -141,6 +144,10 @@ export class DashboardComponent implements OnInit {
     ];
 
     this.loading = false;
+  }
+
+  selectVoting(id: number) {
+    this.router.navigate(['/voting', id]);
   }
 
 }

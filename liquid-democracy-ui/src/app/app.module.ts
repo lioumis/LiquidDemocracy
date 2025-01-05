@@ -13,6 +13,7 @@ import {MessageService} from "primeng/api";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RouterModule} from "@angular/router";
 import {VotingsComponent} from "./votings/votings.component";
+import {VotingComponent} from "./votings/voting/voting.component";
 
 @NgModule({
   declarations: [],
@@ -30,6 +31,7 @@ import {VotingsComponent} from "./votings/votings.component";
     RegistrationComponent,
     PasswordResetComponent,
     VotingsComponent,
+    VotingComponent,
     BrowserAnimationsModule
   ],
   providers: [MessageService]

@@ -7,6 +7,7 @@ import {DashboardComponent} from "./dashboard/dashboard.component";
 import {SettingsComponent} from "./settings/settings.component";
 import {DelegationsComponent} from "./delegations/delegations.component";
 import {VotingsComponent} from "./votings/votings.component";
+import {VotingComponent} from "./votings/voting/voting.component";
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -17,6 +18,7 @@ export const routes: Routes = [
   { path: 'delegations', component: DelegationsComponent },
   { path: 'register', component: RegistrationComponent },
   { path: 'votings', component: VotingsComponent },
+  { path: 'voting/:id', component: VotingComponent },
   { path: '', redirectTo: '/', pathMatch: 'full' }, // Redirect to root
   { path: '**', redirectTo: '/login' } // Fallback route
 ];

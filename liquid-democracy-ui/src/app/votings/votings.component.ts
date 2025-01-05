@@ -11,6 +11,7 @@ import {Dropdown} from "primeng/dropdown";
 import {ButtonDirective} from "primeng/button";
 import {Ripple} from "primeng/ripple";
 import {DatePipe} from "@angular/common";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-votings',
@@ -44,6 +45,7 @@ export class VotingsComponent implements OnInit {
   loading: boolean = true;
 
   constructor(private readonly authService: AuthService,
+              private readonly router: Router,
               private readonly messageService: MessageService) {
   }
 
@@ -85,11 +87,7 @@ export class VotingsComponent implements OnInit {
   }
 
   selectVoting(id: number) {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Επιλογή Ψηφοφορίας',
-      detail: 'Η ψηφοφορία ' + id + ' επιλέχθηκε!'
-    });
+    this.router.navigate(['/voting', id]);
   }
 
 }
