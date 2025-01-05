@@ -12,6 +12,7 @@ import {PasswordResetComponent} from "./login/password-reset/password-reset.comp
 import {MessageService} from "primeng/api";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RouterModule} from "@angular/router";
+import {VotingsComponent} from "./votings/votings.component";
 
 @NgModule({
   declarations: [],
@@ -28,6 +29,7 @@ import {RouterModule} from "@angular/router";
     HeaderComponent,
     RegistrationComponent,
     PasswordResetComponent,
+    VotingsComponent,
     BrowserAnimationsModule
   ],
   providers: [MessageService]

@@ -30,11 +30,10 @@
   <p-sidebar #sidebar [(visible)]="visibleSidebar" [dismissible]="true" (onHide)="closeSidebar()" [style]="{'z-index':'1'}">
     <ul>
       <li><i class="pi pi-home"></i> <a (click)="navigateTo('/dashboard')"> Κύρια Οθόνη</a></li>
-      <li><i class="pi pi-check-square"></i> <a (click)="navigateTo('#')"> Ψηφοφορίες</a></li>
+      <li><i class="pi pi-check-square"></i> <a (click)="navigateTo('/votings')"> Ψηφοφορίες</a></li>
       <li><i class="pi pi-users"></i> <a (click)="navigateTo('/delegations')"> Αναθέσεις</a></li>
       <li><i class="pi pi-cog"></i> <a (click)="navigateTo('/settings')"> Ρυθμίσεις</a></li>
       <li><i class="pi pi-sign-out"></i> <a (click)="logout()"> Αποσύνδεση</a></li>
-      <!--      TODO: Routes -->
     </ul>
   </p-sidebar>
 }
