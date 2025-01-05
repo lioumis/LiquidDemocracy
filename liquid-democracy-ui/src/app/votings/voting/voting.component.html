@@ -1,5 +1,57 @@
 <p-toast></p-toast>
 
 <div class="dashboard">
-  Voting: {{ votingId }}
+  <div class="voting-details-container">
+    <div class="voting-details-header">
+      <h2>{{ votingDetails?.name }}</h2>
+      <p>{{ votingDetails?.topic }}</p>
+      <div class="voting-dates">
+        <p><strong>Ημερομηνία Έναρξης: </strong>{{ votingDetails?.startDate }}</p>
+        <p><strong>Ημερομηνία Λήξης: </strong>{{ votingDetails?.endDate }}</p>
+      </div>
+    </div>
+    <div class="voting-information">
+      <h3>Πληροφορίες</h3>
+      <p>{{ votingDetails?.information }}</p>
+    </div>
+  </div>
+
+  <div class="details">
+    <p-panel header="Ψήφος" class="vote-panel">
+    </p-panel>
+
+    <p-panel header="Συζήτηση" class="comments-panel">
+      <div class="comments">
+        <div class="comment" *ngFor="let comment of comments;">
+          <h4>{{ comment.name + " " + comment.surname }}</h4>
+          <p>{{ comment.message }}</p>
+          <div class="comment-actions">
+            @if (comment.userAction === null) {
+              <span>{{ comment.likes }}
+                <p-button icon="pi pi-thumbs-up" (onClick)="like(comment.id)" [outlined]="false"/></span>
+              <span>{{ comment.dislikes }}
+                <p-button icon="pi pi-thumbs-down" (onClick)="dislike(comment.id)" [outlined]="false"/></span>
+            }
+            @if (comment.userAction === true) {
+              <span>{{ comment.likes }}
+                <p-button icon="pi pi-thumbs-up-fill" (onClick)="like(comment.id)" [outlined]="false"/></span>
+              <span>{{ comment.dislikes }}
+                <p-button icon="pi pi-thumbs-down" (onClick)="dislike(comment.id)" [outlined]="false"/></span>
+            }
+            @if (comment.userAction === false) {
+              <span>{{ comment.likes }}
+                <p-button icon="pi pi-thumbs-up" (onClick)="like(comment.id)" [outlined]="false"/></span>
+              <span>{{ comment.dislikes }}
+                <p-button icon="pi pi-thumbs-down-fill" (onClick)="dislike(comment.id)" [outlined]="false"/></span>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="new-comment">
+        <input type="text" class="comment-input" placeholder="Προσθέστε ένα σχόλιο..." [(ngModel)]="newComment">
+        <p-button type="button" [disabled]="checkComment()" label="Αποστολή" (onClick)="submitComment()"></p-button>
+      </div>
+    </p-panel>
+  </div>
+
 </div>

@@ -21,6 +21,9 @@ export class AuthService {
   private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
   private readonly ALL_VOTINGS = '/getVotings';
   private readonly VOTING_DETAILS = '/getVotingDetails';
+  private readonly DISCUSSION = '/getDiscussion';
+  private readonly COMMENT = '/comment';
+  private readonly REACT = '/react';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -102,6 +105,27 @@ export class AuthService {
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const params = new HttpParams().set('voting', id);
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.VOTING_DETAILS, {params, headers});
+  }
+
+  getDiscussion(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const params = new HttpParams().set('voting', id);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.DISCUSSION, {params, headers});
+  }
+
+  addComment(votingId: number, message: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.COMMENT, {votingId, message}, httpOptions);
+  }
+
+  react(messageId: number, action: boolean): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.REACT, {messageId, action}, httpOptions);
   }
 
   getTopics(): Observable<any> {

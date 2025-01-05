@@ -12,9 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/votings")
@@ -146,17 +144,17 @@ public class VotingController {
     }
 
     @GetMapping("/getDiscussion")
-    public ResponseEntity<Object> getDiscussion(@RequestParam("username") String username, @RequestParam("voting") Long votingId) {
+    public ResponseEntity<Object> getDiscussion(@RequestParam("voting") Long votingId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
+            if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            List<DiscussionDto> votings = votingService.getDiscussions(username, votingId);
+            List<DiscussionDto> votings = votingService.getDiscussions(authorizedUsername, votingId);
             return ResponseEntity.status(HttpStatus.OK).body(votings);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -168,52 +166,68 @@ public class VotingController {
     }
 
     @PostMapping("/react")
-    public ResponseEntity<String> react(@RequestParam("username") String username, @RequestParam("message") Long messageId, @RequestParam(name = "action", required = false) Boolean action) {
+    public ResponseEntity<Map<String, String>> react(@RequestBody ReactionDto reactionDto) {
         try {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
+            if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            votingService.reactToMessage(messageId, username, action);
+            votingService.reactToMessage(reactionDto.messageId(), authorizedUsername, reactionDto.action());
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Reaction saved successfully!");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Reaction saved successfully!");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/comment")
-    public ResponseEntity<String> comment(@RequestParam("username") String username, @RequestParam("voting") Long votingId, @RequestParam("message") String message) {
+    public ResponseEntity<Map<String, String>> comment(@RequestBody CommentDto commentDto) {
         try {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
+            if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
             //TODO: Length & special chars? validation
-            votingService.addComment(username, votingId, message);
+            votingService.addComment(authorizedUsername, commentDto.votingId(), commentDto.message());
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Comment saved successfully!");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Comment saved successfully!");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/feedback")

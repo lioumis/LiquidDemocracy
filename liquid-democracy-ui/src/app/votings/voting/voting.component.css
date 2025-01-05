@@ -1,3 +1,142 @@
 .dashboard {
-  padding: 10px 10px;
+  padding: 25px 30px;
+}
+
+.voting-details-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.voting-details-header {
+  flex: 0.3;
+  margin-right: 20px;
+}
+
+.voting-details-header h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.voting-details-header p {
+  font-size: 1rem;
+  color: #555;
+  margin: 5px 0;
+}
+
+.voting-dates {
+  margin-top: 10px;
+}
+
+.voting-dates p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.voting-dates strong {
+  color: #000;
+}
+
+.voting-information {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.voting-information h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+.voting-information p {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.vote-panel {
+  flex: 0.35;
+}
+
+.comments-panel {
+  flex: 0.6;
+}
+
+.details {
+  display: flex;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  justify-content: space-between;
+  gap: 25px;
+}
+
+.discussion-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.comments {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.comment {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.comment h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.comment p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: #888;
+  justify-content: flex-end;
+}
+
+.comment-actions i {
+  cursor: pointer;
+}
+
+.new-comment {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.new-comment textarea {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 0.9rem;
+}
+
+.comment-input {
+  width: 100%;
+}
+
+.new-comment .submit-button {
+  background-color: #444;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
 }

@@ -219,7 +219,7 @@ public class VotingService {
         }).toList();
     }
 
-    public void reactToMessage(Long messageId, String username, Boolean action) throws ValidationException {
+    public void reactToMessage(Long messageId, String username, boolean action) throws ValidationException {
         MessageEntity message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new ValidationException("Message not found"));
 
@@ -230,7 +230,7 @@ public class VotingService {
         Optional<MessageDetailsEntity> messageDetails = messageDetailsRepository.findByMessageAndUser(message, user);
 
         if (messageDetails.isPresent()) {
-            if (action == null) {
+            if ((action && messageDetails.get().isLiked()) || (!action && !messageDetails.get().isLiked())) {
                 messageDetailsRepository.delete(messageDetails.get());
             } else {
                 MessageDetailsEntity details = messageDetails.get();
