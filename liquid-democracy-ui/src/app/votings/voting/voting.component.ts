@@ -10,6 +10,7 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {NgForOf} from "@angular/common";
 import {RadioButtonModule} from "primeng/radiobutton";
 import {InputTextareaModule} from "primeng/inputtextarea";
+import {ChartModule} from "primeng/chart";
 
 @Component({
   selector: 'app-voting',
@@ -23,7 +24,8 @@ import {InputTextareaModule} from "primeng/inputtextarea";
     NgForOf,
     RadioButtonModule,
     ReactiveFormsModule,
-    InputTextareaModule
+    InputTextareaModule,
+    ChartModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
@@ -44,6 +46,14 @@ export class VotingComponent implements OnInit {
   newComment: string = '';
 
   feedback: string = '';
+
+  resultData: any;
+
+  resultOptions: any;
+
+  distributionData: any;
+
+  distributionOptions: any;
 
   constructor(private readonly route: ActivatedRoute,
               private readonly authService: AuthService,
@@ -74,6 +84,12 @@ export class VotingComponent implements OnInit {
             this.formGroup.get('vote')?.setValue(this.votingDetails?.userVote.title);
           }
 
+          if (this.isExpired()) {
+            this.formGroup.get('vote')?.disable();
+            this.resultData = this.transformToBarChartData(this.votingDetails);
+            this.distributionData = this.transformToPieChartData(this.votingDetails);
+          }
+
           if (this.votingDetails?.feedback) {
             this.feedback = this.votingDetails?.feedback;
           }
@@ -88,6 +104,94 @@ export class VotingComponent implements OnInit {
         }
       );
     }
+  }
+
+  transformToBarChartData(votingData: any): any {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
+    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
+    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+
+    this.resultOptions = {
+      indexAxis: 'y',
+      maintainAspectRatio: false,
+      aspectRatio: 0.8,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: textColorSecondary,
+            font: {
+              weight: 500
+            }
+          },
+          grid: {
+            color: surfaceBorder,
+            drawBorder: false
+          }
+        },
+        y: {
+          ticks: {
+            color: textColorSecondary
+          },
+          grid: {
+            color: surfaceBorder,
+            drawBorder: false
+          }
+        }
+      }
+    };
+
+    return {
+      labels: votingData.results.map((result: any) => result.option.title),
+      datasets: [
+        {
+          label: 'Ψήφοι',
+          backgroundColor: documentStyle.getPropertyValue('--blue-500'),
+          borderColor: documentStyle.getPropertyValue('--blue-500'),
+          data: votingData.results.map((result: any) => result.count),
+        },
+      ],
+    };
+  }
+
+  transformToPieChartData(votingData: any): any {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
+
+    this.distributionOptions = {
+      plugins: {
+        legend: {
+          labels: {
+            usePointStyle: true,
+            color: textColor
+          }
+        }
+      }
+    };
+
+    return {
+      labels: ['Άμεσες ψήφοι', 'Εξουσιοδοτημένες ψήφοι'],
+      datasets: [
+        {
+          data: [votingData.directVotes, votingData.delegatedVotes],
+          backgroundColor: [
+            documentStyle.getPropertyValue('--blue-500'),
+            documentStyle.getPropertyValue('--yellow-500')
+          ],
+          hoverBackgroundColor: [
+            documentStyle.getPropertyValue('--blue-400'),
+            documentStyle.getPropertyValue('--yellow-400')
+          ],
+        },
+      ],
+    };
   }
 
   loadComments(): void {

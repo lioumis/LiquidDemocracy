@@ -284,6 +284,11 @@ public class VotingService {
             delegated = vote.isDelegated();
         }
 
+        voting.getVotingOptions().forEach(option -> {
+            VotingOptionDto votingOptionDto = new VotingOptionDto(option.getName(), option.getDescription());
+            resultMap.put(votingOptionDto, 0);
+        });
+
         List<VoteEntity> votes = voting.getVotes();
         votes.forEach(v -> {
             VoteDetailsEntity voteDetailsEntity = v.getVoteDetails().get(0); //TODO: Support multiple choices
@@ -305,7 +310,7 @@ public class VotingService {
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                delegated, null, results, userOption, directVotes.get(), delegatedVotes.get(), feedback);
+                delegated, voting.getVotingType().getId(), results, userOption, directVotes.get(), delegatedVotes.get(), feedback);
     }
 
     private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {

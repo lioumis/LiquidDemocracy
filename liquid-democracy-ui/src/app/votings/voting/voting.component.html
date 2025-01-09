@@ -103,7 +103,42 @@
   } @else {
     <div class="details">
       <p-panel header="Αποτελέσματα & Στατιστικά" class="results-panel">
-        <div class="comments">
+        <div class="results-content">
+          <div class="vote-section">
+            @if (votingDetails?.votingType === 1) {
+              <form class="flex flex-column gap-3" [formGroup]="formGroup">
+                @if (votingDetails?.delegated === false) {
+                  <p>Η ψήφος σας (Άμεση)</p>
+                } @else if (votingDetails?.delegated === true) {
+                  <p>Η ψήφος σας (Έμμεση)</p>
+                }
+                <div class="voting-option" *ngFor="let option of votingDetails?.results">
+                  <p-radioButton
+                    [inputId]="option.option.title"
+                    [value]="option.option.title"
+                    formControlName="vote"/>
+                  <div class="option-labels">
+                    <label [for]="option.option.title" class="option-title">
+                      {{ option.option.title }}
+                    </label>
+                    <span class="option-details">
+                  {{ option.option.details }}
+                </span>
+                  </div>
+                </div>
+              </form>
+            }
+          </div>
+
+          <div class="results-section">
+            <p>Αποτελέσματα</p>
+            <p-chart type="bar" [data]="resultData" [options]="resultOptions"/>
+          </div>
+
+          <div class="distribution-section">
+            <p>Κατανομή ψήφων</p>
+            <p-chart type="pie" [data]="distributionData" [options]="distributionOptions"/>
+          </div>
         </div>
       </p-panel>
 
