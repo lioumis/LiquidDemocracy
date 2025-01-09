@@ -25,6 +25,7 @@ export class AuthService {
   private readonly COMMENT = '/comment';
   private readonly REACT = '/react';
   private readonly VOTE = '/vote';
+  private readonly FEEDBACK = '/feedback';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -120,6 +121,13 @@ export class AuthService {
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const httpOptions = {headers}
     return this.http.post(this.API_REL_PATH + this.VOTINGS + this.COMMENT, {votingId, message}, httpOptions);
+  }
+
+  submitFeedback(votingId: number, message: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.FEEDBACK, {votingId, message}, httpOptions);
   }
 
   react(messageId: number, action: boolean): Observable<any> {

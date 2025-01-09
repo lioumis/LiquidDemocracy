@@ -9,6 +9,7 @@ import {Button} from "primeng/button";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgForOf} from "@angular/common";
 import {RadioButtonModule} from "primeng/radiobutton";
+import {InputTextareaModule} from "primeng/inputtextarea";
 
 @Component({
   selector: 'app-voting',
@@ -21,7 +22,8 @@ import {RadioButtonModule} from "primeng/radiobutton";
     FormsModule,
     NgForOf,
     RadioButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    InputTextareaModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
@@ -31,6 +33,8 @@ export class VotingComponent implements OnInit {
 
   formGroup: FormGroup;
 
+  feedbackForm: FormGroup;
+
   votingId: number | null = null;
 
   votingDetails: VotingDetails | null = null;
@@ -39,6 +43,8 @@ export class VotingComponent implements OnInit {
 
   newComment: string = '';
 
+  feedback: string = '';
+
   constructor(private readonly route: ActivatedRoute,
               private readonly authService: AuthService,
               private readonly messageService: MessageService,
@@ -46,6 +52,9 @@ export class VotingComponent implements OnInit {
     this.formGroup = this.fb.group({
       vote: [{value: '', disabled: false}, Validators.required]
     });
+    this.feedbackForm = this.fb.group({
+      feedback: ['', Validators.required]
+    })
   }
 
   ngOnInit(): void {
@@ -63,6 +72,10 @@ export class VotingComponent implements OnInit {
           if (this.votingDetails?.userVote) {
             this.formGroup.get('vote')?.disable();
             this.formGroup.get('vote')?.setValue(this.votingDetails?.userVote.title);
+          }
+
+          if (this.votingDetails?.feedback) {
+            this.feedback = this.votingDetails?.feedback;
           }
         },
         (error) => {
@@ -120,7 +133,7 @@ export class VotingComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
-          detail: error.error
+          detail: error.error.error
         });
       }
     );
@@ -151,7 +164,7 @@ export class VotingComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
-          detail: error.error
+          detail: error.error.error
         });
       }
     );
@@ -173,7 +186,31 @@ export class VotingComponent implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
-            detail: error.error
+            detail: error.error.error
+          });
+        }
+      );
+      this.newComment = '';
+    }
+  }
+
+  submitFeedback() {
+    if (this.feedback.trim() && this.votingId) { //TODO: & If the voting is inactive
+      this.authService.submitFeedback(this.votingId, this.feedback).subscribe(
+        () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: 'H ανατροφοδότηση υποβλήθηκε επιτυχώς'
+          });
+          this.loadVotingDetails()
+        },
+        (error) => {
+          console.error('Σφάλμα:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error.error
           });
         }
       );
@@ -183,6 +220,14 @@ export class VotingComponent implements OnInit {
 
   checkComment() {
     return !this.newComment?.trim();
+  }
+
+  checkFeedback() {
+    return !this.feedback?.trim() || !!this.votingDetails?.feedback;
+  }
+
+  feedbackExists() {
+    return !!this.votingDetails?.feedback;
   }
 
   isExpired() {
@@ -199,7 +244,6 @@ export class VotingComponent implements OnInit {
     this.messageService.clear();
     if (this.formGroup.valid && this.votingId) {
       const option = this.formGroup.value;
-      console.log(option);
 
       this.authService.castVote(option.vote, this.votingId).subscribe({
         next: () => {
@@ -235,6 +279,7 @@ export interface VotingDetails {
   userVote: VotingOption;
   directVotes: number;
   delegatedVotes: number;
+  feedback: string;
 }
 
 export interface VotingResult {

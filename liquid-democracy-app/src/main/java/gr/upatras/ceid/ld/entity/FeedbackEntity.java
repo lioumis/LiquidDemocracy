@@ -1,8 +1,10 @@
 package gr.upatras.ceid.ld.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @NoArgsConstructor
 @Entity(name = "feedback")
 public class FeedbackEntity {

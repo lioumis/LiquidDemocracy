@@ -239,28 +239,36 @@ public class VotingController {
     }
 
     @PostMapping("/feedback")
-    public ResponseEntity<String> feedback(@RequestParam("username") String username, @RequestParam("voting") Long votingId, @RequestParam("message") String message) {
+    public ResponseEntity<Map<String, String>> feedback(@RequestBody CommentDto commentDto) {
         try {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!username.equals(authorizedUsername)) {
+            if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
             //TODO: Length & special chars? validation
-            votingService.addFeedback(username, votingId, message);
+            votingService.addFeedback(authorizedUsername, commentDto.votingId(), commentDto.message());
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Feedback saved successfully!");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Feedback saved successfully!");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

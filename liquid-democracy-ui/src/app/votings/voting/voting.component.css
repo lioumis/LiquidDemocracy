@@ -65,6 +65,29 @@
   flex: 0.6;
 }
 
+.results-panel {
+  flex: 0.7;
+}
+
+.feedback-panel {
+  flex: 0.3;
+}
+
+.feedback-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  resize: none;
+}
+
 .details {
   display: flex;
   padding-top: 25px;
@@ -80,7 +103,7 @@
 }
 
 .comments {
-  max-height: 300px;
+  max-height: 500px;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -163,6 +186,10 @@
   border-radius: 5px;
   padding: 10px 15px;
   cursor: pointer;
+}
+
+.submit-feedback-button {
+  align-self: flex-end;
 }
 
 .button {

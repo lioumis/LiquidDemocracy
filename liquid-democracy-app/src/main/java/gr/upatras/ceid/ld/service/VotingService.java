@@ -300,9 +300,12 @@ public class VotingService {
         List<VotingResultDto> results = resultMap.entrySet().stream().map(entry ->
                 new VotingResultDto(entry.getKey(), entry.getValue())).toList();
 
+        Optional<FeedbackEntity> byVotingAndUser = feedbackRepository.findByVotingAndUser(voting, voter);
+        String feedback = byVotingAndUser.map(FeedbackEntity::getContent).orElse(null);
+
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                delegated, null, results, userOption, directVotes.get(), delegatedVotes.get());
+                delegated, null, results, userOption, directVotes.get(), delegatedVotes.get(), feedback);
     }
 
     private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {
@@ -319,12 +322,14 @@ public class VotingService {
 
             return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Maybe use a different DTO to differentiate active & inactive
                     toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                    vote.isDelegated(), voting.getVotingType().getId(), votingResults, votingOptionDto, null, null);
+                    vote.isDelegated(), voting.getVotingType().getId(), votingResults, votingOptionDto, null,
+                    null, null);
         }
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Support multiple choices
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                null, voting.getVotingType().getId(), votingResults, null, null, null);
+                null, voting.getVotingType().getId(), votingResults, null, null,
+                null, null);
     }
 
     private String toString(LocalDateTime localDateTime) {
