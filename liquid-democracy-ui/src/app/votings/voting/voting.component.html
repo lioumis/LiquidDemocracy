@@ -18,6 +18,55 @@
 
   <div class="details">
     <p-panel header="Ψήφος" class="vote-panel">
+      <div class="comments">
+
+      </div>
+      @if (isExpired() || votingDetails?.userVote) {
+        @if (votingDetails?.votingType === 1) {
+          <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+            @if (votingDetails?.delegated === false) {
+              <p>Η ψήφος σας (Άμεση)</p>
+            } @else if (votingDetails?.delegated === true) {
+              <p>Η ψήφος σας (Έμμεση)</p>
+            }
+            <div class="voting-option" *ngFor="let option of votingDetails?.results">
+              <p-radioButton
+                [inputId]="option.option.title"
+                [value]="option.option.title"
+                formControlName="vote"/>
+              <div class="option-labels">
+                <label [for]="option.option.title" class="option-title">
+                  {{ option.option.title }}
+                </label>
+                <span class="option-details">
+                  {{ option.option.details }}
+                </span>
+              </div>
+            </div>
+            <p-button type="submit" [disabled]="true" class="button" label="Υποβολή"></p-button>
+          </form>
+        }
+      } @else {
+        @if (votingDetails?.votingType === 1) {
+          <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+            <div class="voting-option" *ngFor="let option of votingDetails?.results">
+              <p-radioButton
+                [inputId]="option.option.title"
+                [value]="option.option.title"
+                formControlName="vote"/>
+              <div class="option-labels">
+                <label [for]="option.option.title" class="option-title">
+                  {{ option.option.title }}
+                </label>
+                <span class="option-details">
+                  {{ option.option.details }}
+                </span>
+              </div>
+            </div>
+            <p-button type="submit" [disabled]="formGroup.invalid" class="button" label="Υποβολή"></p-button>
+          </form>
+        }
+      }
     </p-panel>
 
     <p-panel header="Συζήτηση" class="comments-panel">

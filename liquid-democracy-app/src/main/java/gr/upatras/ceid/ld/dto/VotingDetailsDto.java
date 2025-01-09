@@ -9,6 +9,7 @@ public record VotingDetailsDto(
         String endDate,
         String information,
         Boolean delegated,
+        Integer votingType,
         List<VotingResultDto> results,
         VotingOptionDto userVote,
         Integer directVotes,

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -26,13 +27,20 @@ public class VoteEntity {
     @Column(nullable = false)
     private boolean delegated;
 
-    @OneToMany(mappedBy = "vote")
+    @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VoteDetailsEntity> voteDetails;
 
-    public VoteEntity(UserEntity voter, VotingEntity voting, boolean delegated, List<VoteDetailsEntity> voteDetails) {
+    public VoteEntity(UserEntity voter, VotingEntity voting, boolean delegated) {
         this.voter = voter;
         this.voting = voting;
         this.delegated = delegated;
-        this.voteDetails = voteDetails;
+    }
+
+    public void addVoteDetails(VoteDetailsEntity detail) {
+        if (voteDetails == null) {
+            voteDetails = new ArrayList<>();
+        }
+        this.voteDetails.add(detail);
+        detail.setVote(this);
     }
 }

@@ -70,7 +70,7 @@ export class VotingsComponent implements OnInit {
           ...voting,
           startDate: new Date(voting.startDate),
           endDate: new Date(voting.endDate),
-          hasVoted: voting.hasVoted === 'true' ? 'Ναι' : 'Όχι',
+          hasVoted: voting.hasVoted ? 'Ναι' : 'Όχι',
         }));
       },
       (error) => {

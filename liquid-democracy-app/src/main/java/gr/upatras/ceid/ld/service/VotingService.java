@@ -57,15 +57,14 @@ public class VotingService {
     }
 
     @Transactional
-    public void castVote(Long voterId, Long votingId, String voteChoice) throws ValidationException {
-        UserEntity voter = userRepository.findById(voterId)
+    public void castVote(String username, Long votingId, String voteChoice) throws ValidationException {
+        UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Voter not found"));
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Voting not found"));
 
         if (voteRepository.existsByVoterAndVoting(voter, voting)) {
-//            throw new ValidationException("Ο χρήστης έχει ήδη ψηφίσει για αυτό το θέμα.");
-            return;
+            throw new ValidationException("Έχετε ήδη ψηφίσει για αυτό το θέμα.");
         }
 
         if (voting.getEndDate().isBefore(LocalDateTime.now())) {
@@ -83,9 +82,8 @@ public class VotingService {
 
         VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, optionEntity);
 
-        List<VoteDetailsEntity> voteDetailsEntities = new ArrayList<>();
-        voteDetailsEntities.add(voteDetailsEntity);
-        VoteEntity vote = new VoteEntity(voter, voting, false, voteDetailsEntities);
+        VoteEntity vote = new VoteEntity(voter, voting, false);
+        vote.addVoteDetails(voteDetailsEntity);
         voteRepository.save(vote);
 
         AuditLogEntity auditLog = new AuditLogEntity(voter, Action.DIRECT_VOTE, "Ο χρήστης " + voter.getUsername() + " ψήφισε για την ψηφοφορία " + votingId + ".");
@@ -98,7 +96,6 @@ public class VotingService {
         List<DelegationEntity> delegations = delegationRepository.findByDelegateAndTopic(delegate, voting.getTopic());
 
         if (delegations.isEmpty()) {
-//            throw new ValidationException("Δεν βρέθηκε ανάθεση ψήφου για το συγκεκριμένο θέμα.");
             return;
         }
 
@@ -118,9 +115,8 @@ public class VotingService {
 
             VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, optionEntity);
 
-            List<VoteDetailsEntity> voteDetailsEntities = new ArrayList<>();
-            voteDetailsEntities.add(voteDetailsEntity);
-            VoteEntity vote = new VoteEntity(delegate, voting, true, voteDetailsEntities);
+            VoteEntity vote = new VoteEntity(delegate, voting, true);
+            vote.addVoteDetails(voteDetailsEntity);
             voteRepository.save(vote);
 
             AuditLogEntity auditLog = new AuditLogEntity(delegate, Action.DELEGATED_VOTE,
@@ -306,7 +302,7 @@ public class VotingService {
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                delegated, results, userOption, directVotes.get(), delegatedVotes.get());
+                delegated, null, results, userOption, directVotes.get(), delegatedVotes.get());
     }
 
     private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {
@@ -323,12 +319,12 @@ public class VotingService {
 
             return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Maybe use a different DTO to differentiate active & inactive
                     toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                    vote.isDelegated(), votingResults, votingOptionDto, null, null);
+                    vote.isDelegated(), voting.getVotingType().getId(), votingResults, votingOptionDto, null, null);
         }
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Support multiple choices
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                null, votingResults, null, null, null);
+                null, voting.getVotingType().getId(), votingResults, null, null, null);
     }
 
     private String toString(LocalDateTime localDateTime) {

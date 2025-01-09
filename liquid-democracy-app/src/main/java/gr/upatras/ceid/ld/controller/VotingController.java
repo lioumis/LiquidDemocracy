@@ -101,26 +101,34 @@ public class VotingController {
     }
 
     @PostMapping("/vote")
-    public ResponseEntity<String> castVote(@RequestParam("voterId") Long voterId, @RequestParam("topicId") Long topicId, @RequestParam("voteChoice") String voteChoice) {
+    public ResponseEntity<Map<String, String>> castVote(@RequestBody VoteDto voteDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            Long userId = authorizationService.isUserAuthorized(username, ALLOWED_ROLES);
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!voterId.equals(userId)) {
-                throw new AuthorizationException("You do not have permission to vote");
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            votingService.castVote(voterId, topicId, voteChoice);
+            votingService.castVote(authorizedUsername, voteDto.votingId().longValue(), voteDto.vote());
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Vote cast successfully!");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Vote cast successfully!");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/createVoting")

@@ -58,7 +58,7 @@
 }
 
 .vote-panel {
-  flex: 0.35;
+  flex: 0.4;
 }
 
 .comments-panel {
@@ -83,6 +83,30 @@
   max-height: 300px;
   overflow-y: auto;
   padding-right: 10px;
+}
+
+.voting-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.option-labels {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
+}
+
+.option-title {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.option-details {
+  font-size: 0.9rem;
+  color: #777;
 }
 
 .comment {
@@ -139,4 +163,10 @@
   border-radius: 5px;
   padding: 10px 15px;
   cursor: pointer;
+}
+
+.button {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
 }

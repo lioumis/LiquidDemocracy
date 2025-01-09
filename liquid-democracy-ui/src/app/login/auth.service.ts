@@ -24,6 +24,7 @@ export class AuthService {
   private readonly DISCUSSION = '/getDiscussion';
   private readonly COMMENT = '/comment';
   private readonly REACT = '/react';
+  private readonly VOTE = '/vote';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -128,6 +129,13 @@ export class AuthService {
     return this.http.post(this.API_REL_PATH + this.VOTINGS + this.REACT, {messageId, action}, httpOptions);
   }
 
+  castVote(vote: string, votingId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.VOTE, {vote, votingId}, httpOptions);
+  }
+
   getTopics(): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
@@ -147,7 +155,20 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    let token = localStorage.getItem('token');
+    return !token || !this.isTokenExpired(token);
+
+  }
+
+  isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp < currentTime;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return true;
+    }
   }
 
   logout(): void {

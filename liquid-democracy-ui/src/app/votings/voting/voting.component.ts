@@ -6,8 +6,9 @@ import {MessageService} from "primeng/api";
 import {PanelModule} from "primeng/panel";
 import {DataViewModule} from "primeng/dataview";
 import {Button} from "primeng/button";
-import {FormsModule} from "@angular/forms";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgForOf} from "@angular/common";
+import {RadioButtonModule} from "primeng/radiobutton";
 
 @Component({
   selector: 'app-voting',
@@ -18,13 +19,17 @@ import {NgForOf} from "@angular/common";
     DataViewModule,
     Button,
     FormsModule,
-    NgForOf
+    NgForOf,
+    RadioButtonModule,
+    ReactiveFormsModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
   styleUrl: './voting.component.css'
 })
 export class VotingComponent implements OnInit {
+
+  formGroup: FormGroup;
 
   votingId: number | null = null;
 
@@ -36,7 +41,11 @@ export class VotingComponent implements OnInit {
 
   constructor(private readonly route: ActivatedRoute,
               private readonly authService: AuthService,
-              private readonly messageService: MessageService) {
+              private readonly messageService: MessageService,
+              private readonly fb: FormBuilder) {
+    this.formGroup = this.fb.group({
+      vote: [{value: '', disabled: false}, Validators.required]
+    });
   }
 
   ngOnInit(): void {
@@ -50,6 +59,11 @@ export class VotingComponent implements OnInit {
       this.authService.getVotingDetails(this.votingId).subscribe(
         (response) => {
           this.votingDetails = response;
+
+          if (this.votingDetails?.userVote) {
+            this.formGroup.get('vote')?.disable();
+            this.formGroup.get('vote')?.setValue(this.votingDetails?.userVote.title);
+          }
         },
         (error) => {
           console.error('Σφάλμα:', error);
@@ -171,6 +185,42 @@ export class VotingComponent implements OnInit {
     return !this.newComment?.trim();
   }
 
+  isExpired() {
+    let endDateString = this.votingDetails?.endDate;
+    if (endDateString) {
+      const currentDate = new Date();
+      const votingEndDate = new Date(`${endDateString}T23:59:59`); //TODO: Check if expires at EOD
+      return currentDate > votingEndDate
+    }
+    return false;
+  }
+
+  onSubmit(): void {
+    this.messageService.clear();
+    if (this.formGroup.valid && this.votingId) {
+      const option = this.formGroup.value;
+      console.log(option);
+
+      this.authService.castVote(option.vote, this.votingId).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: 'Η ψήφος καταχωρήθηκε επιτυχώς'
+          });
+          this.loadVotingDetails();
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error.error || 'Προέκυψε σφάλμα κατά την καταχώρηση της ψήφου'
+          });
+        }
+      });
+    }
+  }
+
 }
 
 export interface VotingDetails {
@@ -179,7 +229,8 @@ export interface VotingDetails {
   startDate: string;
   endDate: string;
   information: string;
-  delegated: boolean;
+  delegated: boolean | null;
+  votingType: number;
   results: VotingResult[];
   userVote: VotingOption;
   directVotes: number;
