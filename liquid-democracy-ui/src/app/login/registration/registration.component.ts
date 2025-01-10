@@ -50,7 +50,7 @@ export class RegistrationComponent {
       this.authService.register(username, email, name, surname, password, securityQuestion, securityAnswer).subscribe(
         (response) => {
           this.router.navigate(['/login']);
-          this.messageService.add({ //TODO: Somehow add on the app layer so that it is visible
+          this.messageService.add({ //TODO: Somehow add on the app layer so that it is visible or login automatically & redirect to dashboard
             severity: 'success',
             summary: 'Επιτυχία Εγγραφής',
             detail: ''

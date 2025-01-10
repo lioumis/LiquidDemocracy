@@ -13,31 +13,31 @@
       [tableStyle]="{ 'min-width': '100rem' }">
       <ng-template pTemplate="header">
         <tr>
-          <th pSortableColumn="name" style="width:20%">
+          <th pSortableColumn="name" class="center" style="width:20%">
             Όνομα
             <p-sortIcon field="name"/>
           </th>
-          <th pSortableColumn="topic" style="width:20%">
+          <th pSortableColumn="topic" class="center" style="width:20%">
             Θέμα
             <p-sortIcon field="topic"/>
           </th>
-          <th pSortableColumn="startDate" style="width:15%">
+          <th pSortableColumn="startDate" class="center" style="width:15%">
             Ημερομηνία Έναρξης
             <p-sortIcon field="startDate"/>
           </th>
-          <th pSortableColumn="endDate" style="width:15%">
+          <th pSortableColumn="endDate" class="center" style="width:15%">
             Ημερομηνία Λήξης
             <p-sortIcon field="endDate"/>
           </th>
-          <th pSortableColumn="hasVoted" style="width:10%">
+          <th pSortableColumn="hasVoted" class="center" style="width:10%">
             Έχω ψηφίσει
             <p-sortIcon field="hasVoted"/>
           </th>
-          <th pSortableColumn="votes" style="width:10%">
+          <th pSortableColumn="votes" class="center" style="width:10%">
             Αριθμός Ψήφων
             <p-sortIcon field="votes"/>
           </th>
-          <th pSortableColumn="details" style="width:10%">
+          <th pSortableColumn="details" class="center" style="width:10%">
             Λεπτομέρειες
           </th>
         </tr>
@@ -131,13 +131,13 @@
           <td>
             {{ voting.endDate | date: 'dd/MM/yyyy' }}
           </td>
-          <td>
+          <td class="center">
             {{ voting.hasVoted }}
           </td>
-          <td>
+          <td class="center">
             {{ voting.votes }}
           </td>
-          <td>
+          <td class="center">
             <button
               type="button"
               pButton

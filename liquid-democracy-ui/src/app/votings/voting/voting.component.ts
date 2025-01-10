@@ -275,7 +275,7 @@ export class VotingComponent implements OnInit {
   }
 
   submitComment() {
-    if (this.newComment.trim() && this.votingId) { //TODO: & If the voting is still active
+    if (this.newComment.trim() && this.votingId) { //TODO: If the voting is still active
       this.authService.addComment(this.votingId, this.newComment).subscribe(
         () => {
           this.messageService.add({

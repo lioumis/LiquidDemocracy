@@ -73,3 +73,7 @@ button:disabled {
   position: absolute;
   bottom: 100% !important;
 }
+
+.center {
+  text-align: center;
+}

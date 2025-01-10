@@ -47,15 +47,15 @@
         [tableStyle]="{ 'min-width': '60rem' }">
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="name" style="width:33%">
+            <th pSortableColumn="name" class="center" style="width:33%">
               Όνομα
               <p-sortIcon field="name"/>
             </th>
-            <th pSortableColumn="surname" style="width:33%">
+            <th pSortableColumn="surname" class="center" style="width:33%">
               Επώνυμο
               <p-sortIcon field="surname"/>
             </th>
-            <th pSortableColumn="topic" style="width:33%">
+            <th pSortableColumn="topic" class="center" style="width:33%">
               Θέμα
               <p-sortIcon field="topic"/>
             </th>
@@ -134,11 +134,11 @@
         [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="topic" style="width:33%">
+            <th pSortableColumn="topic" class="center" style="width:33%">
               Θέμα
               <p-sortIcon field="topic"/>
             </th>
-            <th pSortableColumn="votes" style="width:33%">
+            <th pSortableColumn="votes" class="center" style="width:33%">
               Αριθμός Ψήφων
               <p-sortIcon field="votes"/>
             </th>
@@ -179,7 +179,7 @@
             <td>
               {{ receivedDelegation.topic }}
             </td>
-            <td>
+            <td class="center">
               {{ receivedDelegation.votes }}
             </td>
           </tr>

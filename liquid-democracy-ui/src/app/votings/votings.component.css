@@ -17,3 +17,7 @@ p-multiselect-panel {
 :host ::ng-deep .p-calendar .p-datepicker {
   z-index: 1 !important;
 }
+
+.center {
+  text-align: center;
+}
