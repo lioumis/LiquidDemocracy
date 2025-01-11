@@ -21,19 +21,25 @@ public class VoteEntity {
     private UserEntity voter;
 
     @ManyToOne
+    @JoinColumn(name = "original_voter_id")
+    private UserEntity originalVoter;
+
+    @ManyToOne
     @JoinColumn(name = "voting_id")
     private VotingEntity voting;
-
-    @Column(nullable = false)
-    private boolean delegated;
 
     @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VoteDetailsEntity> voteDetails;
 
-    public VoteEntity(UserEntity voter, VotingEntity voting, boolean delegated) {
-        this.voter = voter;
+    public VoteEntity(UserEntity originalVoter, VotingEntity voting) {
+        this.originalVoter = originalVoter;
         this.voting = voting;
-        this.delegated = delegated;
+    }
+
+    public VoteEntity(UserEntity voter, UserEntity originalVoter, VotingEntity voting) {
+        this.voter = voter;
+        this.originalVoter = originalVoter;
+        this.voting = voting;
     }
 
     public void addVoteDetails(VoteDetailsEntity detail) {

@@ -15,9 +15,7 @@ import gr.upatras.ceid.ld.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class DelegationService {
@@ -72,30 +70,45 @@ public class DelegationService {
 
     public List<ReceivedDelegationDto> getReceivedDelegations(String username) throws ValidationException {
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("User not found"));
+                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
 
-        List<DelegationEntity> delegations = delegationRepository.findByDelegate(user);
+        List<DelegationEntity> directDelegations = delegationRepository.findByDelegate(user);
 
-        Map<String, Integer> groupedDelegations = delegations.stream()
-                .collect(Collectors.groupingBy(
-                        delegation -> delegation.getTopic().getTitle(),
-                        Collectors.summingInt(delegation -> 1)
-                ));
+        Map<String, Integer> groupedDelegations = new HashMap<>();
+        Set<Long> visitedDelegations = new HashSet<>();
+        Queue<DelegationEntity> delegationQueue = new LinkedList<>(directDelegations);
+
+        while (!delegationQueue.isEmpty()) {
+            DelegationEntity currentDelegation = delegationQueue.poll();
+            if (visitedDelegations.contains(currentDelegation.getId())) {
+                continue;
+            }
+            visitedDelegations.add(currentDelegation.getId());
+
+            String topicTitle = currentDelegation.getTopic().getTitle();
+            groupedDelegations.merge(topicTitle, 1, Integer::sum);
+
+            List<DelegationEntity> nextDelegations = delegationRepository.findByDelegateAndTopic(
+                    currentDelegation.getDelegator(),
+                    currentDelegation.getTopic()
+            );
+            delegationQueue.addAll(nextDelegations);
+        }
 
         return groupedDelegations.entrySet().stream()
                 .map(entry -> new ReceivedDelegationDto(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
     public void removeDelegation(Long delegatorId, Long topicId) throws ValidationException {
         UserEntity delegator = userRepository.findById(delegatorId)
-                .orElseThrow(() -> new ValidationException("Delegator not found"));
+                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
         TopicEntity topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new ValidationException("Topic not found"));
+                .orElseThrow(() -> new ValidationException("Το θέμα δεν βρέθηκε"));
 
         DelegationEntity delegation = delegationRepository.findByDelegatorAndTopic(delegator, topic)
-                .orElseThrow(() -> new ValidationException("No delegation found for this user and topic"));
+                .orElseThrow(() -> new ValidationException("Δεν βρέθηκε ανάθεση για το θέμα από εσάς"));
         delegationRepository.delete(delegation);
 
         AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION_REMOVAL,

@@ -45,6 +45,9 @@ public class UserEntity implements UserDetails {
     @OneToMany(mappedBy = "voter")
     private List<VoteEntity> votes;
 
+    @OneToMany(mappedBy = "originalVoter")
+    private List<VoteEntity> originalVotes;
+
     @OneToMany(mappedBy = "delegate")
     private List<DelegationEntity> delegations;
 

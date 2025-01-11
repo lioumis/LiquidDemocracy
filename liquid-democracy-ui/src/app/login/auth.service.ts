@@ -164,8 +164,11 @@ export class AuthService { //TODO: Split to business specific services
 
   isAuthenticated(): boolean {
     let token = localStorage.getItem('token');
-    return !token || !this.isTokenExpired(token);
 
+    if (!token) {
+      return false;
+    }
+    return !this.isTokenExpired(token);
   }
 
   isTokenExpired(token: string): boolean {

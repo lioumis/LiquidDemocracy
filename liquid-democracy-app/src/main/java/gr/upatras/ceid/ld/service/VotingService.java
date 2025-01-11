@@ -59,40 +59,40 @@ public class VotingService {
     @Transactional
     public void castVote(String username, Long votingId, String voteChoice) throws ValidationException {
         UserEntity voter = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Voter not found"));
+                .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Voting not found"));
-
-        if (voteRepository.existsByVoterAndVoting(voter, voting)) {
-            throw new ValidationException("Έχετε ήδη ψηφίσει για αυτό το θέμα.");
-        }
+                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
         if (voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
 
+        if (voteRepository.existsByOriginalVoterAndVoting(voter, voting)) {
+            throw new ValidationException("Έχετε ήδη ψηφίσει για αυτή την ψηφοφορία.");
+        }
+
         Optional<DelegationEntity> delegationOpt = delegationRepository.findByDelegatorAndTopic(voter, voting.getTopic());
         if (delegationOpt.isPresent()) {
-            throw new ValidationException("Ο χρήστης έχει ήδη αναθέσει την ψήφο του σε άλλο χρήστη και δεν μπορεί να ψηφίσει άμεσα.");
+            throw new ValidationException("Έχετε ήδη αναθέσει την ψήφο σας σε άλλο χρήστη και δεν μπορείτε να ψηφίσετε άμεσα.");
         }
 
         List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
         VotingOptionsEntity optionEntity = votingOptions.stream().filter(option -> voteChoice.equals(option.getName())).findFirst()
-                .orElseThrow(() -> new ValidationException("Option not found"));
+                .orElseThrow(() -> new ValidationException("Η επιλογή δεν βρέθηκε"));
 
         VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, optionEntity);
 
-        VoteEntity vote = new VoteEntity(voter, voting, false);
+        VoteEntity vote = new VoteEntity(voter, voting);
         vote.addVoteDetails(voteDetailsEntity);
         voteRepository.save(vote);
 
         AuditLogEntity auditLog = new AuditLogEntity(voter, Action.DIRECT_VOTE, "Ο χρήστης " + voter.getUsername() + " ψήφισε για την ψηφοφορία " + votingId + ".");
         auditLogRepository.save(auditLog);
 
-        castDelegatedVote(voter, voting, voteChoice);
+        castDelegatedVote(voter, voting, optionEntity, voter);
     }
 
-    public void castDelegatedVote(UserEntity delegate, VotingEntity voting, String voteChoice) throws ValidationException {
+    public void castDelegatedVote(UserEntity delegate, VotingEntity voting, VotingOptionsEntity votingOptions, UserEntity finalDelegate) {
         List<DelegationEntity> delegations = delegationRepository.findByDelegateAndTopic(delegate, voting.getTopic());
 
         if (delegations.isEmpty()) {
@@ -100,28 +100,19 @@ public class VotingService {
         }
 
         for (DelegationEntity delegation : delegations) {
-            if (voteRepository.existsByVoterAndVoting(delegation.getDelegator(), voting)) {
-                throw new ValidationException("Η ψήφος έχει ήδη καταχωρηθεί για τον χρήστη " + delegation.getDelegator().getUsername());
-            } //TODO: This checks if A -> B and A has already voted. It doesn't check if A -> B -> C and A has already voted!
+            if (!voteRepository.existsByOriginalVoterAndVoting(delegation.getDelegator(), voting)) {
+                VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, votingOptions);
 
-            //TODO: Add check in the delegation process that a vote has not already been cast by the delegating user.
-            //TODO: What if a user delegates a vote to someone that has already voted? An automatic vote should happen for every vote delegated.
-            //TODO: If a user removes the delegation and votes directly, the whole delegation chain has to be removed as well as the last vote if exists.
-            //TODO: Clarify what a topic is. Is it something general that can contain many votings? And a vote can be delegated for
+                VoteEntity vote = new VoteEntity(finalDelegate, delegation.getDelegator(), voting);
+                vote.addVoteDetails(voteDetailsEntity);
+                voteRepository.save(vote);
 
-            List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
-            VotingOptionsEntity optionEntity = votingOptions.stream().filter(option -> voteChoice.equals(option.getName())).findFirst()
-                    .orElseThrow(() -> new ValidationException("Option not found"));
+                AuditLogEntity auditLog = new AuditLogEntity(finalDelegate, Action.DELEGATED_VOTE,
+                        "Ο χρήστης " + delegate.getUsername() + " ψήφισε για την ψηφοφορία " + voting.getId() + " εκ μέρους του " + delegation.getDelegator().getUsername() + ".");
+                auditLogRepository.save(auditLog);
+            }
 
-            VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, optionEntity);
-
-            VoteEntity vote = new VoteEntity(delegate, voting, true);
-            vote.addVoteDetails(voteDetailsEntity);
-            voteRepository.save(vote);
-
-            AuditLogEntity auditLog = new AuditLogEntity(delegate, Action.DELEGATED_VOTE,
-                    "Ο χρήστης " + delegate.getUsername() + " ψήφισε για την ψηφοφορία " + voting.getId() + " εκ μέρους του " + delegation.getDelegator().getUsername() + ".");
-            auditLogRepository.save(auditLog);
+            castDelegatedVote(delegation.getDelegator(), voting, votingOptions, finalDelegate);
         }
     }
 
@@ -157,8 +148,8 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException("Voter not found"));
 
         List<VotingEntity> votingEntities = votingRepository.findAll();
-        return votingEntities.stream().map(v -> { //TODO: Check if the user has voted indirectly
-            boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getVoter().getId().equals(voter.getId()));
+        return votingEntities.stream().map(v -> {
+            boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
             return new VotingDto(v.getName(), v.getTopic().getTitle(),
                     toString(v.getStartDate()), toString(v.getEndDate()), hasVoted, v.getVotes().size(),
                     v.getId().intValue());
@@ -271,7 +262,7 @@ public class VotingService {
         AtomicInteger delegatedVotes = new AtomicInteger();
         VotingOptionDto userOption = null;
         Boolean delegated = null;
-        Optional<VoteEntity> voteEntityOptional = voteRepository.findByVoterAndVoting(voter, voting);
+        Optional<VoteEntity> voteEntityOptional = voteRepository.findByOriginalVoterAndVoting(voter, voting);
 
         if (voteEntityOptional.isPresent()) {
             VoteEntity vote = voteEntityOptional.get();
@@ -281,7 +272,7 @@ public class VotingService {
                 VotingOptionsEntity votingOption = voteDetailsEntity.getVotingOption();
                 userOption = new VotingOptionDto(votingOption.getName(), votingOption.getDescription());
             }
-            delegated = vote.isDelegated();
+            delegated = vote.getVoter() != null;
         }
 
         voting.getVotingOptions().forEach(option -> {
@@ -295,7 +286,7 @@ public class VotingService {
             VotingOptionDto votingOptionDto = new VotingOptionDto(voteDetailsEntity.getVotingOption().getName(), voteDetailsEntity.getVotingOption().getDescription());
             resultMap.merge(votingOptionDto, 1, Integer::sum);
 
-            if (v.isDelegated()) {
+            if (v.getVoter() != null) {
                 delegatedVotes.incrementAndGet();
             } else {
                 directVotes.incrementAndGet();
@@ -314,7 +305,7 @@ public class VotingService {
     }
 
     private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {
-        Optional<VoteEntity> voteEntityOptional = voteRepository.findByVoterAndVoting(voter, voting);
+        Optional<VoteEntity> voteEntityOptional = voteRepository.findByOriginalVoterAndVoting(voter, voting);
         List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
         List<VotingResultDto> votingResults = votingOptions.stream().map(option ->
                 new VotingResultDto(new VotingOptionDto(option.getName(), option.getDescription()), null)).toList();
@@ -325,9 +316,9 @@ public class VotingService {
             VotingOptionDto votingOptionDto = new VotingOptionDto(voteDetailsEntity.getVotingOption().getName(),
                     voteDetailsEntity.getVotingOption().getDescription());
 
-            return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Maybe use a different DTO to differentiate active & inactive
+            return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                     toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                    vote.isDelegated(), voting.getVotingType().getId(), votingResults, votingOptionDto, null,
+                    vote.getVoter() != null, voting.getVotingType().getId(), votingResults, votingOptionDto, null,
                     null, null);
         }
 
