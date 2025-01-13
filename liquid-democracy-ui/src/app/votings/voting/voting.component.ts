@@ -129,11 +129,11 @@ export class VotingComponent implements OnInit {
             color: textColorSecondary,
             font: {
               weight: 500
-            }
+            },
+            stepSize: 1
           },
           grid: {
-            color: surfaceBorder,
-            drawBorder: false
+            display: false
           }
         },
         y: {
@@ -141,8 +141,7 @@ export class VotingComponent implements OnInit {
             color: textColorSecondary
           },
           grid: {
-            color: surfaceBorder,
-            drawBorder: false
+            display: false
           }
         }
       }
