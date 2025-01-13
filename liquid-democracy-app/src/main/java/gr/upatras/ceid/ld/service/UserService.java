@@ -4,6 +4,7 @@ import gr.upatras.ceid.ld.dto.UserInformationDto;
 import gr.upatras.ceid.ld.entity.AuditLogEntity;
 import gr.upatras.ceid.ld.entity.UserEntity;
 import gr.upatras.ceid.ld.enums.Action;
+import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.repository.AuditLogRepository;
 import gr.upatras.ceid.ld.repository.UserRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -84,7 +86,8 @@ public class UserService implements UserDetailsService {
 
     public UserInformationDto getUserDetails(String username) throws ValidationException {
         UserEntity user = findUser(username);
-        return new UserInformationDto(user.getUsername(), user.getName(), user.getSurname(), user.getEmail(), user.getRoles());
+        return new UserInformationDto(user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
+                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
 
     }
 
