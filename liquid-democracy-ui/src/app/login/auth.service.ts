@@ -7,8 +7,7 @@ import {Router} from "@angular/router";
   providedIn: 'root'
 })
 export class AuthService { //TODO: Split to business specific services
-  // private static readonly API_REL_PATH = '../authenticate';
-  private readonly API_REL_PATH = 'http://localhost:8080'; //TODO: For testing
+  private readonly API_REL_PATH = '..';
 
   private readonly AUTHENTICATION = '/authenticate';
   private readonly REGISTRATION = '/register';

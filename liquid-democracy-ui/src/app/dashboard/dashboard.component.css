@@ -23,13 +23,20 @@
 }
 
 .voting-title {
+  width: 14vw;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
   margin-top: 0;
 }
 
 .voting-topic {
+  width: 14vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
   font-size: 0.9rem;
   color: #888;
 }

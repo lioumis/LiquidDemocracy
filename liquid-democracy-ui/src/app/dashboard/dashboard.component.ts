@@ -10,6 +10,7 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {FormsModule} from "@angular/forms";
 import {ToastModule} from "primeng/toast";
 import {Router} from "@angular/router";
+import {TooltipModule} from "primeng/tooltip";
 
 @Component({
   selector: 'app-dashboard',
@@ -22,7 +23,8 @@ import {Router} from "@angular/router";
     TableModule,
     MultiSelectModule,
     FormsModule,
-    ToastModule
+    ToastModule,
+    TooltipModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './dashboard.component.html',

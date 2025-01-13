@@ -15,8 +15,8 @@
         <p-card class="voting-card">
           <div class="voting-content">
             <div class="voting-info">
-              <h4 class="voting-title">{{ voting.name }}</h4>
-              <p class="voting-topic">{{ voting.topic }}</p>
+              <h4 [pTooltip]="voting.name" tooltipPosition="left" class="voting-title">{{ voting.name }}</h4>
+              <p [pTooltip]="voting.topic" tooltipPosition="left" class="voting-topic">{{ voting.topic }}</p>
             </div>
             <div class="voting-stats">
               <div class="voting-icon">
