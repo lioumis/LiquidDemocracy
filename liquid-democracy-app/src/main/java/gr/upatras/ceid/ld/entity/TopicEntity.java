@@ -17,9 +17,6 @@ public class TopicEntity {
 
     private String title;
 
-    //TODO: Is it needed?
-    private String description;
-
     @OneToMany(mappedBy = "topic")
     private List<DelegationEntity> delegations;
 

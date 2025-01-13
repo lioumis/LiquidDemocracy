@@ -4,7 +4,6 @@
 }
 
 .voting-card {
-  padding: 15px;
   margin: 10px;
   border-radius: 8px;
 }
@@ -24,9 +23,10 @@
 }
 
 .voting-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0;
 }
 
 .voting-topic {
