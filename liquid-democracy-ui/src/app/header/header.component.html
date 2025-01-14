@@ -29,11 +29,11 @@
 @if (canShowSidebar()) {
   <p-sidebar #sidebar [(visible)]="visibleSidebar" [dismissible]="true" (onHide)="closeSidebar()" [style]="{'z-index':'1'}">
     <ul>
-      <li><i class="pi pi-home"></i> <a (click)="navigateTo('/dashboard')"> Κύρια Οθόνη</a></li>
-      <li><i class="pi pi-check-square"></i> <a (click)="navigateTo('/votings')"> Ψηφοφορίες</a></li>
-      <li><i class="pi pi-users"></i> <a (click)="navigateTo('/delegations')"> Αναθέσεις</a></li>
-      <li><i class="pi pi-cog"></i> <a (click)="navigateTo('/settings')"> Ρυθμίσεις</a></li>
-      <li><i class="pi pi-sign-out"></i> <a (click)="logout()"> Αποσύνδεση</a></li>
+      <li><p-button [plain]="true" label="Κύρια Οθόνη" [text]="true" icon="pi pi-home" (onClick)="navigateTo('/dashboard')"></p-button></li>
+      <li><p-button [plain]="true" label="Ψηφοφορίες" [text]="true" icon="pi pi-check-square" (onClick)="navigateTo('/votings')"></p-button></li>
+      <li><p-button [plain]="true" label="Αναθέσεις" [text]="true" icon="pi pi-users" (onClick)="navigateTo('/delegations')"></p-button></li>
+      <li><p-button [plain]="true" label="Ρυθμίσεις" [text]="true" icon="pi pi-cog" (onClick)="navigateTo('/settings')"></p-button></li>
+      <li><p-button [plain]="true" label="Αποσύνδεση" [text]="true" icon="pi pi-sign-out" (onClick)="logout()"></p-button></li>
     </ul>
   </p-sidebar>
 }
