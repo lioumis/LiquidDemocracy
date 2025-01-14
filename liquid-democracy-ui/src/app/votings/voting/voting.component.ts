@@ -5,7 +5,7 @@ import {AuthService} from "../../login/auth.service";
 import {MessageService} from "primeng/api";
 import {PanelModule} from "primeng/panel";
 import {DataViewModule} from "primeng/dataview";
-import {Button} from "primeng/button";
+import {Button, ButtonDirective} from "primeng/button";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgForOf} from "@angular/common";
 import {RadioButtonModule} from "primeng/radiobutton";
@@ -25,7 +25,8 @@ import {ChartModule} from "primeng/chart";
     RadioButtonModule,
     ReactiveFormsModule,
     InputTextareaModule,
-    ChartModule
+    ChartModule,
+    ButtonDirective
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',

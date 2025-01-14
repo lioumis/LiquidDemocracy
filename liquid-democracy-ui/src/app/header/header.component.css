@@ -3,7 +3,8 @@
   justify-content: center;
   align-items: center;
   height: 60px;
-  background-color: #2980b9;
+  background: linear-gradient(to right, #005f99, #007ad9);
+  color: #f8f9fa;
   margin: 0;
   padding: 0;
   position: relative;
@@ -62,4 +63,10 @@ p-sidebar li a {
 
 p-sidebar li a:hover {
   color: #007ad9;
+}
+
+.user-info {
+  color: #f8f9fa;
+  font-weight: bold;
+  margin-right: 10px;
 }

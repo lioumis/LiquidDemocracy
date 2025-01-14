@@ -73,32 +73,41 @@
             <h4>{{ comment.name + " " + comment.surname }}</h4>
             <p>{{ comment.message }}</p>
             <div class="comment-actions">
-              @if (comment.userAction === null) {
-                <span>{{ comment.likes }}
-                  <p-button icon="pi pi-thumbs-up" (onClick)="like(comment.id)" [outlined]="false"/></span>
-                <span>{{ comment.dislikes }}
-                  <p-button icon="pi pi-thumbs-down" (onClick)="dislike(comment.id)" [outlined]="false"/></span>
-              }
-              @if (comment.userAction === true) {
-                <span>{{ comment.likes }}
-                  <p-button icon="pi pi-thumbs-up-fill" (onClick)="like(comment.id)" [outlined]="false"/></span>
-                <span>{{ comment.dislikes }}
-                  <p-button icon="pi pi-thumbs-down" (onClick)="dislike(comment.id)" [outlined]="false"/></span>
-              }
-              @if (comment.userAction === false) {
-                <span>{{ comment.likes }}
-                  <p-button icon="pi pi-thumbs-up" (onClick)="like(comment.id)" [outlined]="false"/></span>
-                <span>{{ comment.dislikes }}
-                  <p-button icon="pi pi-thumbs-down-fill" (onClick)="dislike(comment.id)" [outlined]="false"/></span>
-              }
+              <button
+                pButton
+                icon="pi pi-thumbs-up"
+                label="{{ comment.likes }}"
+                class="like-button"
+                [class.selected]="comment.userAction === true"
+                (click)="like(comment.id)"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-thumbs-down"
+                label="{{ comment.dislikes }}"
+                class="dislike-button"
+                [class.selected]="comment.userAction === false"
+                (click)="dislike(comment.id)"
+              ></button>
             </div>
           </div>
         </div>
         <div class="new-comment">
-          <input type="text" class="comment-input" placeholder="Προσθέστε ένα σχόλιο..." [(ngModel)]="newComment">
-          <p-button type="button" [disabled]="checkComment()" label="Αποστολή" (onClick)="submitComment()"></p-button>
+          <input
+            type="text"
+            class="comment-input"
+            placeholder="Προσθέστε ένα σχόλιο..."
+            [(ngModel)]="newComment"
+          />
+          <p-button
+            type="button"
+            [disabled]="checkComment()"
+            label="Αποστολή"
+            (onClick)="submitComment()"
+          ></p-button>
         </div>
       </p-panel>
+
     </div>
   } @else {
     <div class="details">
