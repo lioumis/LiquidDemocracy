@@ -206,7 +206,7 @@ export class VotingComponent implements OnInit {
   }
 
   loadComments(): void {
-    if (this.votingId) { //TODO: & If the voting is still active
+    if (this.votingId && !this.isExpired()) {
       this.authService.getDiscussion(this.votingId).subscribe(
         (response) => {
           this.comments = response;
@@ -286,7 +286,7 @@ export class VotingComponent implements OnInit {
   }
 
   submitComment() {
-    if (this.newComment.trim() && this.votingId) { //TODO: If the voting is still active
+    if (this.newComment.trim() && this.votingId && !this.isExpired()) {
       this.authService.addComment(this.votingId, this.newComment).subscribe(
         () => {
           this.messageService.add({
@@ -310,7 +310,7 @@ export class VotingComponent implements OnInit {
   }
 
   submitFeedback() {
-    if (this.feedback.trim() && this.votingId) { //TODO: & If the voting is inactive
+    if (this.feedback.trim() && this.votingId && this.isExpired()) {
       this.authService.submitFeedback(this.votingId, this.feedback).subscribe(
         () => {
           this.messageService.add({

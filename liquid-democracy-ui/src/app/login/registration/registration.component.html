@@ -85,6 +85,11 @@
           <small class="error">Υποχρεωτικό πεδίο</small>
         </div>
       }
+      @if (registrationForm.errors?.['mismatch']) {
+        <div>
+          <small class="error">Οι κωδικοί πρόσβασης δεν ταιριάζουν</small>
+        </div>
+      }
     </div>
 
     <div class="form-group">
@@ -121,7 +126,6 @@
       <div>
         <small class="error">Η εγγραφή απέτυχε</small>
       </div>
-      <!--      TODO: Print the exact error coming from the BE -->
     }
 
     <p></p>

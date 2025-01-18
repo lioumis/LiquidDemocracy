@@ -31,15 +31,24 @@ export class RegistrationComponent {
     private readonly messageService: MessageService
   ) {
     this.registrationForm = this.fb.group({
-      username: ['', Validators.required],
-      email: ['', Validators.required],
-      name: ['', Validators.required],
-      surname: ['', Validators.required],
-      password: ['', Validators.required],
-      passwordRepeat: ['', Validators.required],
-      securityQuestion: ['', Validators.required],
-      securityAnswer: ['', Validators.required]
-    });
+        username: ['', Validators.required],
+        email: ['', Validators.required],
+        name: ['', Validators.required],
+        surname: ['', Validators.required],
+        password: ['', Validators.required],
+        passwordRepeat: ['', Validators.required],
+        securityQuestion: ['', Validators.required],
+        securityAnswer: ['', Validators.required]
+      },
+      {
+        validators: this.passwordMatchValidator
+      });
+  }
+
+  passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
+    const password = group.get('password')?.value;
+    const passwordRepeat = group.get('passwordRepeat')?.value;
+    return password === passwordRepeat ? null : {mismatch: true};
   }
 
   onSubmit(): void {
@@ -48,13 +57,8 @@ export class RegistrationComponent {
     if (this.registrationForm.valid) {
       const {username, email, name, surname, password, securityQuestion, securityAnswer} = this.registrationForm.value;
       this.authService.register(username, email, name, surname, password, securityQuestion, securityAnswer).subscribe(
-        (response) => {
+        () => {
           this.router.navigate(['/login']);
-          this.messageService.add({ //TODO: Somehow add on the app layer so that it is visible or login automatically & redirect to dashboard
-            severity: 'success',
-            summary: 'Επιτυχία Εγγραφής',
-            detail: ''
-          });
         },
         (error) => {
           console.error('Login failed', error.error.error);
