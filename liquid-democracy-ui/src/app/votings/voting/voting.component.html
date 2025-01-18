@@ -23,14 +23,14 @@
 
   @if (!isExpired()) {
     <div class="details">
-      <p-panel header="Ψήφος" class="vote-panel">
+      <p-panel header="Επιλογές" class="vote-panel">
         @if (votingDetails?.userVote) {
           @if (votingDetails?.votingType === 1) {
             <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
               @if (votingDetails?.delegated === false) {
-                <p>Η ψήφος σας (Άμεση)</p>
+                <p>Η επιλογή σας (Άμεση)</p>
               } @else if (votingDetails?.delegated === true) {
-                <p>Η ψήφος σας (Έμμεση)</p>
+                <p>Η επιλογή σας (Έμμεση)</p>
               }
               <div class="voting-option" *ngFor="let option of votingDetails?.results">
                 <p-radioButton
@@ -122,9 +122,9 @@
             @if (votingDetails?.votingType === 1) {
               <form class="flex flex-column gap-3" [formGroup]="formGroup">
                 @if (votingDetails?.delegated === false) {
-                  <p>Η ψήφος σας (Άμεση)</p>
+                  <p>Η επιλογή σας (Άμεση)</p>
                 } @else if (votingDetails?.delegated === true) {
-                  <p>Η ψήφος σας (Έμμεση)</p>
+                  <p>Η επιλογή σας (Έμμεση)</p>
                 }
                 <div class="voting-option" *ngFor="let option of votingDetails?.results">
                   <p-radioButton
