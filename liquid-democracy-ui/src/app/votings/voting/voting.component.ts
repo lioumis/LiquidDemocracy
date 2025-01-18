@@ -30,7 +30,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
     ButtonDirective,
     BreadcrumbModule
   ],
-  providers: [AuthService, MessageService, BreadcrumbModule],
+  providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
   styleUrl: './voting.component.css'
 })

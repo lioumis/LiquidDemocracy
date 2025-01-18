@@ -18,7 +18,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
     Button,
     BreadcrumbModule,
   ],
-  providers: [AuthService, MessageService, BreadcrumbModule],
+  providers: [AuthService, MessageService],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })

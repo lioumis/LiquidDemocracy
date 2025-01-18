@@ -28,7 +28,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
     DatePipe,
     BreadcrumbModule
   ],
-  providers: [AuthService, MessageService, BreadcrumbModule],
+  providers: [AuthService, MessageService],
   templateUrl: './votings.component.html',
   styleUrl: './votings.component.css'
 })

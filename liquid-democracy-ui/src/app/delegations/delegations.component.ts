@@ -26,7 +26,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
     Button,
     BreadcrumbModule
   ],
-  providers: [AuthService, MessageService, BreadcrumbModule],
+  providers: [AuthService, MessageService],
   templateUrl: './delegations.component.html',
   styleUrl: './delegations.component.css'
 })
