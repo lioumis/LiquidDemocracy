@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {ToastModule} from "primeng/toast";
 import {AuthService} from "../login/auth.service";
-import {MessageService} from "primeng/api";
+import {MenuItem, MessageService} from "primeng/api";
 import {PanelModule} from "primeng/panel";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Button} from "primeng/button";
+import {BreadcrumbModule} from "primeng/breadcrumb";
 
 @Component({
   selector: 'app-settings',
@@ -15,8 +16,9 @@ import {Button} from "primeng/button";
     FormsModule,
     ReactiveFormsModule,
     Button,
+    BreadcrumbModule,
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, MessageService, BreadcrumbModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
@@ -28,6 +30,12 @@ export class SettingsComponent implements OnInit {
   protected name: string | null = '';
   protected surname: string | null = '';
   protected email: string | null = '';
+
+  items: MenuItem[] = [
+    {label: 'Ρυθμίσεις'}
+  ];
+
+  home: MenuItem = {routerLink: ['/dashboard']};
 
   constructor(private readonly authService: AuthService,
               private readonly messageService: MessageService,

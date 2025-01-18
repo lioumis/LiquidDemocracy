@@ -5,13 +5,14 @@ import {PanelModule} from "primeng/panel";
 import {TableModule} from "primeng/table";
 import {FormsModule} from "@angular/forms";
 import {AuthService} from "../login/auth.service";
-import {MessageService} from "primeng/api";
+import {MenuItem, MessageService} from "primeng/api";
 import {Delegation, Topic} from "../dashboard/dashboard.component";
 import {Dropdown} from "primeng/dropdown";
 import {ButtonDirective} from "primeng/button";
 import {Ripple} from "primeng/ripple";
 import {DatePipe} from "@angular/common";
 import {Router} from "@angular/router";
+import {BreadcrumbModule} from "primeng/breadcrumb";
 
 @Component({
   selector: 'app-votings',
@@ -24,9 +25,10 @@ import {Router} from "@angular/router";
     FormsModule,
     ButtonDirective,
     Ripple,
-    DatePipe
+    DatePipe,
+    BreadcrumbModule
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, MessageService, BreadcrumbModule],
   templateUrl: './votings.component.html',
   styleUrl: './votings.component.css'
 })
@@ -43,6 +45,12 @@ export class VotingsComponent implements OnInit {
   hasVotedOptions = ['Ναι', 'Όχι'];
 
   loading: boolean = true;
+
+  items: MenuItem[] = [
+    {label: 'Ψηφοφορίες'}
+  ];
+
+  home: MenuItem = {routerLink: ['/dashboard']};
 
   constructor(private readonly authService: AuthService,
               private readonly router: Router,

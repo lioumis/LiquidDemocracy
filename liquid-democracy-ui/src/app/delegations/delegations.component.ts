@@ -1,7 +1,7 @@
 import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {MultiSelectModule} from "primeng/multiselect";
 import {PanelModule} from "primeng/panel";
-import {MessageService, PrimeTemplate} from "primeng/api";
+import {MenuItem, MessageService, PrimeTemplate} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Delegation, Topic} from "../dashboard/dashboard.component";
@@ -9,6 +9,7 @@ import {AuthService} from "../login/auth.service";
 import {Dropdown, DropdownModule} from "primeng/dropdown";
 import {Button} from "primeng/button";
 import {ToastModule} from "primeng/toast";
+import {BreadcrumbModule} from "primeng/breadcrumb";
 
 @Component({
   selector: 'app-delegations',
@@ -22,9 +23,10 @@ import {ToastModule} from "primeng/toast";
     ReactiveFormsModule,
     DropdownModule,
     ToastModule,
-    Button
+    Button,
+    BreadcrumbModule
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, MessageService, BreadcrumbModule],
   templateUrl: './delegations.component.html',
   styleUrl: './delegations.component.css'
 })
@@ -42,6 +44,12 @@ export class DelegationsComponent implements OnInit {
   completeTopics: Topic[] = [];
 
   loading: boolean = true;
+
+  items: MenuItem[] = [
+    {label: 'Αναθέσεις'}
+  ];
+
+  home: MenuItem = {routerLink: ['/dashboard']};
 
   constructor(private readonly authService: AuthService,
               private readonly messageService: MessageService,

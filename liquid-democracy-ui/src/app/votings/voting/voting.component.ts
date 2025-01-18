@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ToastModule} from "primeng/toast";
 import {ActivatedRoute} from "@angular/router";
 import {AuthService} from "../../login/auth.service";
-import {MessageService} from "primeng/api";
+import {MenuItem, MessageService} from "primeng/api";
 import {PanelModule} from "primeng/panel";
 import {DataViewModule} from "primeng/dataview";
 import {Button, ButtonDirective} from "primeng/button";
@@ -11,6 +11,7 @@ import {NgForOf} from "@angular/common";
 import {RadioButtonModule} from "primeng/radiobutton";
 import {InputTextareaModule} from "primeng/inputtextarea";
 import {ChartModule} from "primeng/chart";
+import {BreadcrumbModule} from "primeng/breadcrumb";
 
 @Component({
   selector: 'app-voting',
@@ -26,9 +27,10 @@ import {ChartModule} from "primeng/chart";
     ReactiveFormsModule,
     InputTextareaModule,
     ChartModule,
-    ButtonDirective
+    ButtonDirective,
+    BreadcrumbModule
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, MessageService, BreadcrumbModule],
   templateUrl: './voting.component.html',
   styleUrl: './voting.component.css'
 })
@@ -55,6 +57,10 @@ export class VotingComponent implements OnInit {
   distributionData: any;
 
   distributionOptions: any;
+
+  items: MenuItem[] | undefined;
+
+  home: MenuItem = {routerLink: ['/dashboard']};
 
   constructor(private readonly route: ActivatedRoute,
               private readonly authService: AuthService,
@@ -94,6 +100,12 @@ export class VotingComponent implements OnInit {
           if (this.votingDetails?.feedback) {
             this.feedback = this.votingDetails?.feedback;
           }
+
+          this.items = [
+            {label: 'Ψηφοφορίες', routerLink: ['/votings']},
+            {label: this.votingDetails?.name}
+          ];
+
         },
         (error) => {
           console.error('Σφάλμα:', error);
