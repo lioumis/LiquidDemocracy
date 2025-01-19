@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {Router, RouterOutlet} from '@angular/router';
 import {AuthService} from "./login/auth.service";
 import {HttpClientModule} from "@angular/common/http";
@@ -12,17 +12,18 @@ import {HeaderComponent} from "./header/header.component";
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent implements OnInit{
-  constructor(private readonly router: Router, private readonly authService: AuthService) {}
+export class AppComponent implements OnInit {
+  constructor(private readonly router: Router, private readonly authService: AuthService) {
+  }
 
   title = 'app';
 
   ngOnInit(): void {
     console.log('Is authenticated: ', this.authService.isAuthenticated()) //TODO: Remove all console.log() for delivery
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']).then();
     } else {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/dashboard']).then();
     }
   }
 }

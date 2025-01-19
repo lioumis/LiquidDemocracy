@@ -65,15 +65,15 @@ export class DelegationsComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']).then();
     }
 
-    this.authService.getTopics().subscribe(
-      (response: Topic[]) => {
+    this.authService.getTopics().subscribe({
+      next: (response: Topic[]) => {
         this.topics = response.map((topic) => topic.name);
         this.completeTopics = response;
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -81,7 +81,7 @@ export class DelegationsComponent implements OnInit {
           detail: error.error
         });
       }
-    )
+    });
 
     this.loadTable();
 
@@ -99,8 +99,8 @@ export class DelegationsComponent implements OnInit {
     this.messageService.clear();
     if (this.delegationForm.valid) {
       const {name, surname, topic} = this.delegationForm.value;
-      this.authService.createDelegation(name, surname, this.getTopicId(topic)).subscribe( //TODO: Verification Pop-up!
-        (response) => {
+      this.authService.createDelegation(name, surname, this.getTopicId(topic)).subscribe({ //TODO: Verification Pop-up!
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Επιτυχία',
@@ -109,7 +109,7 @@ export class DelegationsComponent implements OnInit {
           this.resetForm();
           this.loadTable();
         },
-        (error) => {
+        error: (error) => {
           console.error('Delegation failed', error);
           this.messageService.add({
             severity: 'error',
@@ -117,7 +117,7 @@ export class DelegationsComponent implements OnInit {
             detail: error.error.error //TODO: This works here. Check other places.
           });
         }
-      );
+      });
     }
   }
 
@@ -131,11 +131,11 @@ export class DelegationsComponent implements OnInit {
   }
 
   loadTable() {
-    this.authService.getDelegations().subscribe(
-      (response) => {
+    this.authService.getDelegations().subscribe({
+      next: (response) => {
         this.delegations = response;
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -143,7 +143,7 @@ export class DelegationsComponent implements OnInit {
           detail: error.error
         });
       }
-    )
+    });
   }
 
   @HostListener('document:click', ['$event'])

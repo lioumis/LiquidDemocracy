@@ -33,7 +33,7 @@ export class HeaderComponent {
 
   navigateTo(route: string) {
     this.closeSidebar();
-    this.router.navigate([route]);
+    this.router.navigate([route]).then();
   }
 
   logout() {

@@ -60,7 +60,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit() {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']).then();
     }
 
     this.username = localStorage.getItem("username");

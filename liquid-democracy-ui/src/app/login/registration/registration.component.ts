@@ -56,11 +56,11 @@ export class RegistrationComponent {
     this.messageService.clear();
     if (this.registrationForm.valid) {
       const {username, email, name, surname, password, securityQuestion, securityAnswer} = this.registrationForm.value;
-      this.authService.register(username, email, name, surname, password, securityQuestion, securityAnswer).subscribe(
-        () => {
-          this.router.navigate(['/login']);
+      this.authService.register(username, email, name, surname, password, securityQuestion, securityAnswer).subscribe({
+        next: () => {
+          this.router.navigate(['/login']).then();
         },
-        (error) => {
+        error: (error) => {
           console.error('Login failed', error.error.error);
           this.messageService.add({
             severity: 'error',
@@ -70,7 +70,7 @@ export class RegistrationComponent {
 
           this.registrationForm.setErrors({registrationError: true});
         }
-      );
+      });
     }
   }
 }

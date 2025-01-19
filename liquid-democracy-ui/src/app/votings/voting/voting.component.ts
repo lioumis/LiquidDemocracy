@@ -77,7 +77,7 @@ export class VotingComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']).then();
     }
 
     this.votingId = Number(this.route.snapshot.paramMap.get('id'));
@@ -87,8 +87,8 @@ export class VotingComponent implements OnInit {
 
   loadVotingDetails(): void {
     if (this.votingId) {
-      this.authService.getVotingDetails(this.votingId).subscribe(
-        (response) => {
+      this.authService.getVotingDetails(this.votingId).subscribe({
+        next: (response) => {
           this.votingDetails = response;
 
           if (this.votingDetails?.userVote) {
@@ -112,7 +112,7 @@ export class VotingComponent implements OnInit {
           ];
 
         },
-        (error) => {
+        error: (error) => {
           console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
@@ -120,7 +120,7 @@ export class VotingComponent implements OnInit {
             detail: error.error
           });
         }
-      );
+      });
     }
   }
 
@@ -212,11 +212,11 @@ export class VotingComponent implements OnInit {
 
   loadComments(): void {
     if (this.votingId && !this.isExpired()) {
-      this.authService.getDiscussion(this.votingId).subscribe(
-        (response) => {
+      this.authService.getDiscussion(this.votingId).subscribe({
+        next: (response) => {
           this.comments = response;
         },
-        (error) => {
+        error: (error) => {
           console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
@@ -224,7 +224,7 @@ export class VotingComponent implements OnInit {
             detail: error.error
           });
         }
-      );
+      });
     }
   }
 
@@ -234,8 +234,8 @@ export class VotingComponent implements OnInit {
       return;
     }
 
-    this.authService.react(comment.id, true).subscribe(
-      () => {
+    this.authService.react(comment.id, true).subscribe({
+      next: () => {
         if (comment?.userAction === null) {
           comment.userAction = true;
           comment.likes++;
@@ -248,7 +248,7 @@ export class VotingComponent implements OnInit {
           comment.dislikes--;
         }
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -256,7 +256,7 @@ export class VotingComponent implements OnInit {
           detail: error.error.error
         });
       }
-    );
+    });
   }
 
   dislike(id: number): void {
@@ -265,8 +265,8 @@ export class VotingComponent implements OnInit {
       return;
     }
 
-    this.authService.react(comment.id, false).subscribe(
-      () => {
+    this.authService.react(comment.id, false).subscribe({
+      next: () => {
         if (comment?.userAction === null) {
           comment.userAction = false;
           comment.dislikes++;
@@ -279,7 +279,7 @@ export class VotingComponent implements OnInit {
           comment.dislikes--;
         }
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -287,13 +287,13 @@ export class VotingComponent implements OnInit {
           detail: error.error.error
         });
       }
-    );
+    });
   }
 
   submitComment() {
     if (this.newComment.trim() && this.votingId && !this.isExpired()) {
-      this.authService.addComment(this.votingId, this.newComment).subscribe(
-        () => {
+      this.authService.addComment(this.votingId, this.newComment).subscribe({
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Επιτυχία',
@@ -301,7 +301,7 @@ export class VotingComponent implements OnInit {
           });
           this.loadComments();
         },
-        (error) => {
+        error: (error) => {
           console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
@@ -309,15 +309,15 @@ export class VotingComponent implements OnInit {
             detail: error.error.error
           });
         }
-      );
+      });
       this.newComment = '';
     }
   }
 
   submitFeedback() {
     if (this.feedback.trim() && this.votingId && this.isExpired()) {
-      this.authService.submitFeedback(this.votingId, this.feedback).subscribe(
-        () => {
+      this.authService.submitFeedback(this.votingId, this.feedback).subscribe({
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Επιτυχία',
@@ -325,7 +325,7 @@ export class VotingComponent implements OnInit {
           });
           this.loadVotingDetails()
         },
-        (error) => {
+        error: (error) => {
           console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
@@ -333,7 +333,7 @@ export class VotingComponent implements OnInit {
             detail: error.error.error
           });
         }
-      );
+      });
       this.newComment = '';
     }
   }

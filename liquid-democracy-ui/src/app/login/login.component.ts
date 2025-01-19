@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/dashboard']).then();
     }
   }
 
@@ -46,13 +46,13 @@ export class LoginComponent implements OnInit {
     this.messageService.clear();
     if (this.loginForm.valid) {
       const {username, password} = this.loginForm.value;
-      this.authService.login(username, password).subscribe(
-        (response) => {
+      this.authService.login(username, password).subscribe({
+        next: (response) => {
           localStorage.setItem('token', response.token);
           console.log('Token response', response.token);
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/dashboard']).then();
         },
-        (error) => {
+        error: (error) => {
           console.error('Login failed', error);
           this.messageService.add({
             severity: 'error',
@@ -62,7 +62,7 @@ export class LoginComponent implements OnInit {
 
           this.loginForm.setErrors({invalidCredentials: true});
         }
-      );
+      });
     }
   }
 }

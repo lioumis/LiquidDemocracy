@@ -59,14 +59,14 @@ export class VotingsComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']).then();
     }
 
-    this.authService.getTopics().subscribe(
-      (response: Topic[]) => {
+    this.authService.getTopics().subscribe({
+      next: (response: Topic[]) => {
         this.topics = response.map((topic) => topic.name);
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -74,10 +74,10 @@ export class VotingsComponent implements OnInit {
           detail: error.error
         });
       }
-    );
+    });
 
-    this.authService.getVotings().subscribe(
-      (response) => {
+    this.authService.getVotings().subscribe({
+      next: (response) => {
         this.votings = response.map((voting: Voting) => ({
           ...voting,
           startDate: new Date(voting.startDate),
@@ -85,7 +85,7 @@ export class VotingsComponent implements OnInit {
           hasVoted: voting.hasVoted ? 'Ναι' : 'Όχι',
         }));
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -93,13 +93,13 @@ export class VotingsComponent implements OnInit {
           detail: error.error
         });
       }
-    );
+    });
 
     this.loading = false;
   }
 
   selectVoting(id: number) {
-    this.router.navigate(['/voting', id]);
+    this.router.navigate(['/voting', id]).then();
   }
 
 }

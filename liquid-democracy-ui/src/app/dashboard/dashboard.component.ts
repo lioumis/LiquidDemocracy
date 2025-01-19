@@ -51,18 +51,18 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']).then();
     }
 
-    this.authService.getUserDetails().subscribe(
-      (response) => {
+    this.authService.getUserDetails().subscribe({
+      next: (response) => {
         localStorage.setItem('username', response.username);
         localStorage.setItem('name', response.name);
         localStorage.setItem('surname', response.surname);
         localStorage.setItem('email', response.email);
         localStorage.setItem('roles', response.roles);
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -70,13 +70,13 @@ export class DashboardComponent implements OnInit {
           detail: error.error
         });
       }
-    );
+    });
 
-    this.authService.getSuggestedVotings().subscribe(
-      (response) => {
+    this.authService.getSuggestedVotings().subscribe({
+      next: (response) => {
         this.votings = response;
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -84,13 +84,13 @@ export class DashboardComponent implements OnInit {
           detail: error.error
         });
       }
-    )
+    });
 
-    this.authService.getTopics().subscribe(
-      (response: Topic[]) => {
+    this.authService.getTopics().subscribe({
+      next: (response: Topic[]) => {
         this.topics = response.map((topic) => topic.name);
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -98,13 +98,13 @@ export class DashboardComponent implements OnInit {
           detail: error.error
         });
       }
-    )
+    });
 
-    this.authService.getDelegations().subscribe(
-      (response) => {
+    this.authService.getDelegations().subscribe({
+      next: (response) => {
         this.delegations = response;
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -112,13 +112,13 @@ export class DashboardComponent implements OnInit {
           detail: error.error
         });
       }
-    )
+    });
 
-    this.authService.getReceivedDelegations().subscribe(
-      (response) => {
+    this.authService.getReceivedDelegations().subscribe({
+      next: (response) => {
         this.receivedDelegations = response;
       },
-      (error) => {
+      error: (error) => {
         console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
@@ -126,7 +126,7 @@ export class DashboardComponent implements OnInit {
           detail: error.error
         });
       }
-    )
+    });
 
     this.responsiveOptions = [
       {
@@ -150,7 +150,7 @@ export class DashboardComponent implements OnInit {
   }
 
   selectVoting(id: number) {
-    this.router.navigate(['/voting', id]);
+    this.router.navigate(['/voting', id]).then();
   }
 
 }

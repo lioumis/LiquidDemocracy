@@ -48,12 +48,12 @@ export class PasswordResetComponent {
 
   onStepOneSubmit(): void {
     const {username, email} = this.stepOneForm.value;
-    this.authService.getSecurityQuestion(username, email).subscribe(
-      (response) => {
+    this.authService.getSecurityQuestion(username, email).subscribe({
+      next: (response) => {
         this.securityQuestion = response.message;
         this.currentStep = 2;
       },
-      (error) => {
+      error: (error) => {
         console.error('Error fetching security question:', error);
         this.messageService.add({
           severity: 'error',
@@ -62,23 +62,23 @@ export class PasswordResetComponent {
         });
         this.stepOneForm.setErrors({unknownUserError: true});
       }
-    );
+    });
   }
 
   onStepTwoSubmit(): void {
     const {username, email} = this.stepOneForm.value;
     const {securityAnswer, password} = this.stepTwoForm.value;
 
-    this.authService.reset(username, email, password, securityAnswer).subscribe(
-      () => {
+    this.authService.reset(username, email, password, securityAnswer).subscribe({
+      next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Επιτυχία',
           detail: 'Ο κωδικός πρόσβασης επαναφέρθηκε με επιτυχία.'
         });
-        this.router.navigate(['/login']);
+        this.router.navigate(['/login']).then();
       },
-      (error) => {
+      error: (error) => {
         console.error('Error during password reset:', error);
         this.messageService.add({
           severity: 'error',
@@ -88,7 +88,7 @@ export class PasswordResetComponent {
         console.log(error.error.error);
         this.stepTwoForm.setErrors({incorrectAnswerError: true});
       }
-    );
+    });
   }
 
   onPrevious(): void {
