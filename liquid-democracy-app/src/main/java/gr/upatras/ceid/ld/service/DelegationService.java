@@ -107,8 +107,8 @@ public class DelegationService {
     }
 
     @Transactional
-    public void removeDelegation(Long delegatorId, Long topicId) throws ValidationException {
-        UserEntity delegator = userRepository.findById(delegatorId)
+    public void removeDelegation(String username, Long topicId) throws ValidationException {
+        UserEntity delegator = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
         TopicEntity topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ValidationException("Το θέμα δεν βρέθηκε"));
@@ -118,7 +118,7 @@ public class DelegationService {
         delegationRepository.delete(delegation);
 
         AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION_REMOVAL,
-                "Ο χρήστης " + delegatorId + " αφαίρεσε την ανάθεση της ψήφου του για το θέμα " + topicId + ".");
+                "Ο χρήστης " + username + " αφαίρεσε την ανάθεση της ψήφου του για το θέμα " + topicId + ".");
         auditLogRepository.save(auditLog);
     }
 

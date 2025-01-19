@@ -69,16 +69,17 @@ public class DelegationController {
     }
 
     @PostMapping("/removeDelegation") //TODO: Should not be possible. Clarify and remove
-    public ResponseEntity<String> removeDelegation(@RequestParam("delegatorId") Long delegatorId, @RequestParam("topicId") Long topicId) {
+    public ResponseEntity<String> removeDelegation(@RequestParam("topicId") Long topicId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            Long userId = authorizationService.isUserAuthorized(username, ALLOWED_ROLES);
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
-            if (!delegatorId.equals(userId)) {
-                throw new AuthorizationException("You do not have permission to remove this delegation");
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
             }
-            delegationService.removeDelegation(delegatorId, topicId);
+
+            delegationService.removeDelegation(authorizedUsername, topicId);
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (AuthorizationException e) {

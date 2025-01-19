@@ -17,32 +17,16 @@ public class AuthorizationService {
         this.userRepository = userRepository;
     }
 
-    @Deprecated
-    public Long isUserAuthorized(String username, Set<Role> allowedRoles) throws AuthorizationException {
-        Optional<UserEntity> userEntity = userRepository.findByUsername(username);
-
-        if (userEntity.isEmpty()) {
-            throw new AuthorizationException("Unknown user");
-        }
-
-        UserEntity user = userEntity.get();
-        if (user.getRoles().stream().noneMatch(allowedRoles::contains)) {
-            throw new AuthorizationException("The user does not have the correct role for this operation");
-        }
-
-        return user.getId();
-    }
-
     public String getAuthorizedUser(String username, Set<Role> allowedRoles) throws AuthorizationException {
         Optional<UserEntity> userEntity = userRepository.findByUsername(username);
 
         if (userEntity.isEmpty()) {
-            throw new AuthorizationException("Unknown user");
+            throw new AuthorizationException("Άγνωστος χρήστης");
         }
 
         UserEntity user = userEntity.get();
         if (user.getRoles().stream().noneMatch(allowedRoles::contains)) {
-            throw new AuthorizationException("The user does not have the correct role for this operation");
+            throw new AuthorizationException("Δεν έχετε τον απαραίτητο ρόλο για αυτή τη λειτουργία");
         }
 
         return user.getUsername();
