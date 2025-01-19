@@ -111,7 +111,7 @@ public class VotingController {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            votingService.castVote(authorizedUsername, voteDto.votingId().longValue(), voteDto.vote());
+            votingService.castVote(authorizedUsername, voteDto.votingId().longValue(), voteDto.votes());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());

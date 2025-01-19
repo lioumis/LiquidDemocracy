@@ -12,6 +12,7 @@ import {RadioButtonModule} from "primeng/radiobutton";
 import {InputTextareaModule} from "primeng/inputtextarea";
 import {ChartModule} from "primeng/chart";
 import {BreadcrumbModule} from "primeng/breadcrumb";
+import {CheckboxModule} from "primeng/checkbox";
 
 @Component({
   selector: 'app-voting',
@@ -24,6 +25,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
     FormsModule,
     NgForOf,
     RadioButtonModule,
+    CheckboxModule,
     ReactiveFormsModule,
     InputTextareaModule,
     ChartModule,
@@ -37,6 +39,8 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
 export class VotingComponent implements OnInit {
 
   formGroup: FormGroup;
+
+  multipleFormGroup: FormGroup;
 
   feedbackForm: FormGroup;
 
@@ -70,6 +74,9 @@ export class VotingComponent implements OnInit {
     this.formGroup = this.fb.group({
       vote: [{value: '', disabled: false}, Validators.required]
     });
+    this.multipleFormGroup = this.fb.group({
+      vote: [{value: '', disabled: false}, Validators.required]
+    });
     this.feedbackForm = this.fb.group({
       feedback: ['', Validators.required]
     })
@@ -91,9 +98,20 @@ export class VotingComponent implements OnInit {
         next: (response) => {
           this.votingDetails = response;
 
-          if (this.votingDetails?.userVote) {
-            this.formGroup.get('vote')?.disable();
-            this.formGroup.get('vote')?.setValue(this.votingDetails?.userVote.title);
+
+          if (this.votingDetails?.votingType === 1) {
+            if (this.votingDetails?.userVote) {
+              this.formGroup.get('vote')?.disable();
+              this.formGroup.get('vote')?.setValue(this.votingDetails?.userVote[0]?.title);
+            }
+          }
+
+          if (this.votingDetails?.votingType === 2) {
+            if (this.votingDetails?.userVote) {
+              this.multipleFormGroup.get('vote')?.disable();
+              let userVoteTitles = this.votingDetails?.userVote.map(vote => vote.title) || [];
+              this.multipleFormGroup.get('vote')?.setValue(userVoteTitles);
+            }
           }
 
           if (this.isExpired()) {
@@ -365,6 +383,31 @@ export class VotingComponent implements OnInit {
     if (this.formGroup.valid && this.votingId) {
       const option = this.formGroup.value;
 
+      this.authService.castVote([option.vote], this.votingId).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: 'Η ψήφος καταχωρήθηκε επιτυχώς'
+          });
+          this.loadVotingDetails();
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error.error || 'Προέκυψε σφάλμα κατά την καταχώρηση της ψήφου'
+          });
+        }
+      });
+    }
+  }
+
+  onSubmitMultiple(): void {
+    this.messageService.clear();
+    if (this.multipleFormGroup.valid && this.votingId) {
+      const option = this.multipleFormGroup.value;
+
       this.authService.castVote(option.vote, this.votingId).subscribe({
         next: () => {
           this.messageService.add({
@@ -396,7 +439,7 @@ export interface VotingDetails {
   delegated: boolean | null;
   votingType: number;
   results: VotingResult[];
-  userVote: VotingOption;
+  userVote: VotingOption[];
   directVotes: number;
   delegatedVotes: number;
   feedback: string;

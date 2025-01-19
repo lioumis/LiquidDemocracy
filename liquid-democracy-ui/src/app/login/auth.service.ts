@@ -136,11 +136,11 @@ export class AuthService { //TODO: Split to business specific services
     return this.http.post(this.API_REL_PATH + this.VOTINGS + this.REACT, {messageId, action}, httpOptions);
   }
 
-  castVote(vote: string, votingId: number): Observable<any> {
+  castVote(votes: string[], votingId: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.VOTE, {vote, votingId}, httpOptions);
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.VOTE, {votes, votingId}, httpOptions);
   }
 
   getTopics(): Observable<any> {

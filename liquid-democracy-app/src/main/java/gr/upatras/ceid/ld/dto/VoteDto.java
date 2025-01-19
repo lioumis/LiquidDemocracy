@@ -1,7 +1,9 @@
 package gr.upatras.ceid.ld.dto;
 
+import java.util.List;
+
 public record VoteDto(
         Integer votingId,
-        String vote
+        List<String> votes
 ) {
 }

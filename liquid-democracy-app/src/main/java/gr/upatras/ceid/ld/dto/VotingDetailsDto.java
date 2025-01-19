@@ -11,7 +11,7 @@ public record VotingDetailsDto(
         Boolean delegated,
         Integer votingType,
         List<VotingResultDto> results,
-        VotingOptionDto userVote,
+        List<VotingOptionDto> userVote,
         Integer directVotes,
         Integer delegatedVotes,
         String feedback) {

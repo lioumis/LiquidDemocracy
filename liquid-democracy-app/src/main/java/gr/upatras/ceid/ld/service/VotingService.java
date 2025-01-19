@@ -57,7 +57,7 @@ public class VotingService {
     }
 
     @Transactional
-    public void castVote(String username, Long votingId, String voteChoice) throws ValidationException {
+    public void castVote(String username, Long votingId, List<String> voteChoices) throws ValidationException {
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
         VotingEntity voting = votingRepository.findById(votingId)
@@ -65,6 +65,14 @@ public class VotingService {
 
         if (voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
+        }
+
+        if (voteChoices == null || voteChoices.isEmpty()) {
+            throw new ValidationException("Δεν υπάρχει επιλογή");
+        }
+
+        if (voting.getVotingType().equals(VotingType.SINGLE) && voteChoices.size() > 1) {
+            throw new ValidationException("Η ψηφοφορία δεν επιτρέπει πολλές επιλογές");
         }
 
         if (voteRepository.existsByOriginalVoterAndVoting(voter, voting)) {
@@ -77,22 +85,30 @@ public class VotingService {
         }
 
         List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
-        VotingOptionsEntity optionEntity = votingOptions.stream().filter(option -> voteChoice.equals(option.getName())).findFirst()
-                .orElseThrow(() -> new ValidationException("Η επιλογή δεν βρέθηκε"));
-
-        VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, optionEntity);
+        Set<VotingOptionsEntity> selectedOptions = new HashSet<>();
 
         VoteEntity vote = new VoteEntity(voter, voting);
-        vote.addVoteDetails(voteDetailsEntity);
+
+        for (String voteChoice : voteChoices) {
+            VotingOptionsEntity votingOption = votingOptions.stream().filter(option -> voteChoice.equals(option.getName())).findFirst()
+                    .orElseThrow(() -> new ValidationException("Η επιλογή δεν βρέθηκε"));
+            selectedOptions.add(votingOption);
+        }
+
+        selectedOptions.forEach(votingOption -> {
+            VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, votingOption);
+            vote.addVoteDetails(voteDetailsEntity);
+        });
+
         voteRepository.save(vote);
 
         AuditLogEntity auditLog = new AuditLogEntity(voter, Action.DIRECT_VOTE, "Ο χρήστης " + voter.getUsername() + " ψήφισε για την ψηφοφορία " + votingId + ".");
         auditLogRepository.save(auditLog);
 
-        castDelegatedVote(voter, voting, optionEntity, voter);
+        castDelegatedVote(voter, voting, selectedOptions, voter);
     }
 
-    public void castDelegatedVote(UserEntity delegate, VotingEntity voting, VotingOptionsEntity votingOptions, UserEntity finalDelegate) {
+    public void castDelegatedVote(UserEntity delegate, VotingEntity voting, Set<VotingOptionsEntity> votingOptions, UserEntity finalDelegate) {
         List<DelegationEntity> delegations = delegationRepository.findByDelegateAndTopic(delegate, voting.getTopic());
 
         if (delegations.isEmpty()) {
@@ -101,10 +117,13 @@ public class VotingService {
 
         for (DelegationEntity delegation : delegations) {
             if (!voteRepository.existsByOriginalVoterAndVoting(delegation.getDelegator(), voting)) {
-                VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, votingOptions);
-
                 VoteEntity vote = new VoteEntity(finalDelegate, delegation.getDelegator(), voting);
-                vote.addVoteDetails(voteDetailsEntity);
+
+                votingOptions.forEach(votingOption -> {
+                    VoteDetailsEntity voteDetailsEntity = new VoteDetailsEntity(1, votingOption);
+                    vote.addVoteDetails(voteDetailsEntity);
+                });
+
                 voteRepository.save(vote);
 
                 AuditLogEntity auditLog = new AuditLogEntity(finalDelegate, Action.DELEGATED_VOTE,
@@ -260,7 +279,7 @@ public class VotingService {
         Map<VotingOptionDto, Integer> resultMap = new HashMap<>();
         AtomicInteger directVotes = new AtomicInteger();
         AtomicInteger delegatedVotes = new AtomicInteger();
-        VotingOptionDto userOption = null;
+        Set<VotingOptionDto> userOptions = new HashSet<>();
         Boolean delegated = null;
         Optional<VoteEntity> voteEntityOptional = voteRepository.findByOriginalVoterAndVoting(voter, voting);
 
@@ -268,9 +287,11 @@ public class VotingService {
             VoteEntity vote = voteEntityOptional.get();
             List<VoteDetailsEntity> voteDetails = vote.getVoteDetails();
             if (voteDetails != null && !voteDetails.isEmpty()) {
-                VoteDetailsEntity voteDetailsEntity = voteDetails.get(0); //TODO: Support multiple choices
-                VotingOptionsEntity votingOption = voteDetailsEntity.getVotingOption();
-                userOption = new VotingOptionDto(votingOption.getName(), votingOption.getDescription());
+                voteDetails.forEach(details -> {
+                    VotingOptionsEntity votingOption = details.getVotingOption();
+                    userOptions.add(new VotingOptionDto(votingOption.getName(), votingOption.getDescription()));
+                });
+
             }
             delegated = vote.getVoter() != null;
         }
@@ -282,9 +303,11 @@ public class VotingService {
 
         List<VoteEntity> votes = voting.getVotes();
         votes.forEach(v -> {
-            VoteDetailsEntity voteDetailsEntity = v.getVoteDetails().get(0); //TODO: Support multiple choices
-            VotingOptionDto votingOptionDto = new VotingOptionDto(voteDetailsEntity.getVotingOption().getName(), voteDetailsEntity.getVotingOption().getDescription());
-            resultMap.merge(votingOptionDto, 1, Integer::sum);
+            List<VoteDetailsEntity> voteDetailsEntities = v.getVoteDetails();
+            voteDetailsEntities.forEach(details -> {
+                VotingOptionDto votingOptionDto = new VotingOptionDto(details.getVotingOption().getName(), details.getVotingOption().getDescription());
+                resultMap.merge(votingOptionDto, 1, Integer::sum);
+            });
 
             if (v.getVoter() != null) {
                 delegatedVotes.incrementAndGet();
@@ -299,9 +322,14 @@ public class VotingService {
         Optional<FeedbackEntity> byVotingAndUser = feedbackRepository.findByVotingAndUser(voting, voter);
         String feedback = byVotingAndUser.map(FeedbackEntity::getContent).orElse(null);
 
+        List<VotingOptionDto> userOptionsList = null;
+        if (!userOptions.isEmpty()) {
+            userOptionsList = new ArrayList<>(userOptions);
+        }
+
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                delegated, voting.getVotingType().getId(), results, userOption, directVotes.get(), delegatedVotes.get(), feedback);
+                delegated, voting.getVotingType().getId(), results, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
     }
 
     private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {
@@ -312,17 +340,17 @@ public class VotingService {
 
         if (voteEntityOptional.isPresent()) {
             VoteEntity vote = voteEntityOptional.get();
-            VoteDetailsEntity voteDetailsEntity = vote.getVoteDetails().get(0);
-            VotingOptionDto votingOptionDto = new VotingOptionDto(voteDetailsEntity.getVotingOption().getName(),
-                    voteDetailsEntity.getVotingOption().getDescription());
+            List<VoteDetailsEntity> voteDetailsEntities = vote.getVoteDetails();
+            List<VotingOptionDto> votingOptionDtos = voteDetailsEntities.stream().map(voteDetailsEntity ->
+                    new VotingOptionDto(voteDetailsEntity.getVotingOption().getName(), voteDetailsEntity.getVotingOption().getDescription())).toList();
 
             return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                     toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                    vote.getVoter() != null, voting.getVotingType().getId(), votingResults, votingOptionDto, null,
+                    vote.getVoter() != null, voting.getVotingType().getId(), votingResults, votingOptionDtos, null,
                     null, null);
         }
 
-        return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(), //TODO: Support multiple choices
+        return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
                 null, voting.getVotingType().getId(), votingResults, null, null,
                 null, null);
