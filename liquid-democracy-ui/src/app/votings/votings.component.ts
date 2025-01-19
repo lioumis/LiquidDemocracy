@@ -58,6 +58,10 @@ export class VotingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+    }
+
     this.authService.getTopics().subscribe(
       (response: Topic[]) => {
         this.topics = response.map((topic) => topic.name);

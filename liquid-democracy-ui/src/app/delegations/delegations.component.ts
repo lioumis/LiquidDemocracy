@@ -10,6 +10,7 @@ import {Dropdown, DropdownModule} from "primeng/dropdown";
 import {Button} from "primeng/button";
 import {ToastModule} from "primeng/toast";
 import {BreadcrumbModule} from "primeng/breadcrumb";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-delegations',
@@ -53,6 +54,7 @@ export class DelegationsComponent implements OnInit {
 
   constructor(private readonly authService: AuthService,
               private readonly messageService: MessageService,
+              private readonly router: Router,
               private readonly fb: FormBuilder) {
     this.delegationForm = this.fb.group({
       name: ['', Validators.required],
@@ -62,6 +64,10 @@ export class DelegationsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+    }
+
     this.authService.getTopics().subscribe(
       (response: Topic[]) => {
         this.topics = response.map((topic) => topic.name);

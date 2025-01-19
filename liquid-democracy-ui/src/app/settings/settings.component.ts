@@ -6,6 +6,7 @@ import {PanelModule} from "primeng/panel";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Button} from "primeng/button";
 import {BreadcrumbModule} from "primeng/breadcrumb";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-settings',
@@ -39,6 +40,7 @@ export class SettingsComponent implements OnInit {
 
   constructor(private readonly authService: AuthService,
               private readonly messageService: MessageService,
+              private readonly router: Router,
               private readonly fb: FormBuilder) {
     this.passwordForm = this.fb.group({
         oldPassword: ['', Validators.required],
@@ -57,6 +59,10 @@ export class SettingsComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+    }
+
     this.username = localStorage.getItem("username");
     this.name = localStorage.getItem("name");
     this.surname = localStorage.getItem("surname");

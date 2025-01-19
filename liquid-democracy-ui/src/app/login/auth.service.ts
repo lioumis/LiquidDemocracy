@@ -183,7 +183,6 @@ export class AuthService { //TODO: Split to business specific services
 
   logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('identifier');
     localStorage.removeItem('email');
     localStorage.removeItem('name');
     localStorage.removeItem('roles');

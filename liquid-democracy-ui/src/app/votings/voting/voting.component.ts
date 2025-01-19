@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ToastModule} from "primeng/toast";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../login/auth.service";
 import {MenuItem, MessageService} from "primeng/api";
 import {PanelModule} from "primeng/panel";
@@ -63,6 +63,7 @@ export class VotingComponent implements OnInit {
   home: MenuItem = {routerLink: ['/dashboard']};
 
   constructor(private readonly route: ActivatedRoute,
+              private readonly router: Router,
               private readonly authService: AuthService,
               private readonly messageService: MessageService,
               private readonly fb: FormBuilder) {
@@ -75,6 +76,10 @@ export class VotingComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+    }
+
     this.votingId = Number(this.route.snapshot.paramMap.get('id'));
     this.loadVotingDetails();
     this.loadComments();

@@ -50,26 +50,27 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    let identifier = localStorage.getItem('identifier');
-    if (identifier) { //TODO: Check if needed
-      this.authService.getUserDetails().subscribe(
-        (response) => {
-          localStorage.setItem('username', response.username);
-          localStorage.setItem('name', response.name);
-          localStorage.setItem('surname', response.surname);
-          localStorage.setItem('email', response.email);
-          localStorage.setItem('roles', response.roles);
-        },
-        (error) => {
-          console.error('Σφάλμα:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Σφάλμα',
-            detail: error.error
-          });
-        }
-      );
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
     }
+
+    this.authService.getUserDetails().subscribe(
+      (response) => {
+        localStorage.setItem('username', response.username);
+        localStorage.setItem('name', response.name);
+        localStorage.setItem('surname', response.surname);
+        localStorage.setItem('email', response.email);
+        localStorage.setItem('roles', response.roles);
+      },
+      (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    );
 
     this.authService.getSuggestedVotings().subscribe(
       (response) => {
