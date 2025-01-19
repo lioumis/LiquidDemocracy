@@ -7,6 +7,7 @@ import gr.upatras.ceid.ld.entity.DelegationEntity;
 import gr.upatras.ceid.ld.entity.TopicEntity;
 import gr.upatras.ceid.ld.entity.UserEntity;
 import gr.upatras.ceid.ld.enums.Action;
+import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.repository.AuditLogRepository;
 import gr.upatras.ceid.ld.repository.DelegationRepository;
@@ -42,12 +43,16 @@ public class DelegationService {
         UserEntity delegate = userRepository.findByNameAndSurnameIgnoreCase(delegateName, delegateSurname)
                 .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος δεν βρέθηκε"));
 
-        TopicEntity topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new ValidationException("Το θέμα δεν βρέθηκε"));
+        if (!delegate.getRoles().contains(Role.REPRESENTATIVE)) {
+            throw new ValidationException("Ο χρήστης που επιλέξατε δεν είναι αντιπρόσωπος");
+        }
 
         if (delegator.equals(delegate)) {
             throw new ValidationException("Δεν μπορείτε να αναθέσετε την ψήφο στον εαυτό σας");
         }
+
+        TopicEntity topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ValidationException("Το θέμα δεν βρέθηκε"));
 
         if (delegationRepository.existsByDelegatorAndTopic(delegator, topic)) {
             throw new ValidationException("Υπάρχει ήδη ανάθεση ψήφου για το συγκεκριμένο θέμα.");
