@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum VotingType {
-    SINGLE(1, "Μονή Επιλογή"),
+    SINGLE(1, "Mία Επιλογή"),
     MULTIPLE(2, "Πολλαπλή Επιλογή");
 
     private final int id;

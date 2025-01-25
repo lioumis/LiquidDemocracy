@@ -38,6 +38,9 @@ public class VotingEntity {
     @Convert(converter = VotingTypeConverter.class)
     private VotingType votingType;
 
+    @Column()
+    private Integer voteLimit;
+
     @OneToMany(mappedBy = "voting", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<VotingOptionsEntity> votingOptions;
 

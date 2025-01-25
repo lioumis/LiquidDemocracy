@@ -75,6 +75,10 @@ public class VotingService {
             throw new ValidationException("Η ψηφοφορία δεν επιτρέπει πολλές επιλογές");
         }
 
+        if (voting.getVotingType().equals(VotingType.MULTIPLE) && voting.getVoteLimit() != null && voteChoices.size() > voting.getVoteLimit()) {
+            throw new ValidationException("Έχετε κάνει παραπάνω επιλογές από τις επιτρεπόμενες");
+        }
+
         if (voteRepository.existsByOriginalVoterAndVoting(voter, voting)) {
             throw new ValidationException("Έχετε ήδη ψηφίσει για αυτή την ψηφοφορία.");
         }
@@ -329,7 +333,7 @@ public class VotingService {
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                delegated, voting.getVotingType().getId(), results, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
+                delegated, voting.getVotingType().getId(), voting.getVoteLimit(), results, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
     }
 
     private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {
@@ -346,13 +350,13 @@ public class VotingService {
 
             return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                     toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                    vote.getVoter() != null, voting.getVotingType().getId(), votingResults, votingOptionDtos, null,
+                    vote.getVoter() != null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, votingOptionDtos, null,
                     null, null);
         }
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
-                null, voting.getVotingType().getId(), votingResults, null, null,
+                null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, null, null,
                 null, null);
     }
 

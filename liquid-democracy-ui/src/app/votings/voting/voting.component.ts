@@ -403,10 +403,37 @@ export class VotingComponent implements OnInit {
     }
   }
 
+  getVotingTypeString(votingType: any, voteLimit: any): string {
+    if (!votingType) {
+      return "";
+    }
+
+    switch (votingType) {
+      case 1:
+        return "Μία επιλογή";
+      case 2:
+        if (voteLimit) {
+          return "Πολλαπλή επιλογή, έως " + voteLimit + " ψήφοι";
+        }
+        return "Πολλαπλή επιλογή";
+      default:
+        return "";
+    }
+  }
+
   onSubmitMultiple(): void {
     this.messageService.clear();
     if (this.multipleFormGroup.valid && this.votingId) {
       const option = this.multipleFormGroup.value;
+
+      if (this.votingDetails?.voteLimit && this.votingDetails.voteLimit < option.vote.length) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: 'Έχετε κάνει παραπάνω επιλογές από τις επιτρεπόμενες'
+        });
+        return;
+      }
 
       this.authService.castVote(option.vote, this.votingId).subscribe({
         next: () => {
@@ -438,6 +465,7 @@ export interface VotingDetails {
   information: string;
   delegated: boolean | null;
   votingType: number;
+  voteLimit: number | null;
   results: VotingResult[];
   userVote: VotingOption[];
   directVotes: number;

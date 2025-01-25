@@ -23,7 +23,7 @@
 
   @if (!isExpired()) {
     <div class="details">
-      <p-panel header="Επιλογές" class="vote-panel">
+      <p-panel header="Επιλογές ({{getVotingTypeString(votingDetails?.votingType, votingDetails?.voteLimit)}})" class="vote-panel">
         @if (votingDetails?.userVote) {
           @if (votingDetails?.votingType === 1) {
             <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
