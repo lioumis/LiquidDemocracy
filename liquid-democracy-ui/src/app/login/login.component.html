@@ -1,6 +1,16 @@
 <p-toast></p-toast>
+<div class="description-container">
+  <p-card class="login-card">
+    <p class="description">
+      Η εφαρμογή <strong>Ρευστή Δημοκρατία</strong> σας προσφέρει έναν ασφαλή και άμεσο τρόπο συμμετοχής σε
+      ψηφοφορίες.
+      Επιλέξτε τις προτιμήσεις σας ή αναθέστε τη φωνή σας με διαφάνεια και εμπιστοσύνη σε κάποιον εκπρόσωπο της
+      επιλογής σας.
+    </p>
+  </p-card>
+</div>
 <div class="login-container">
-  <h2>Σύνδεση Χρήστη</h2>
+  <h2 class="login-title">Σύνδεση Χρήστη</h2>
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="username">Όνομα χρήστη / Διεύθυνση Email</label>
@@ -38,7 +48,7 @@
     }
 
     <div class="links">
-      <a routerLink="/forgot-password">Επαναφορά Κωδικού πρόσβασης</a>
+      <a routerLink="/forgot-password">Επαναφορά Κωδικού Πρόσβασης</a>
     </div>
 
     <p></p>
@@ -47,7 +57,5 @@
       <p-button routerLink="/register" severity="secondary" label="Εγγραφή"></p-button>
       <p-button type="submit" [disabled]="loginForm.invalid" label="Σύνδεση"></p-button>
     </div>
-
   </form>
-
 </div>

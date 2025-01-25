@@ -6,6 +6,7 @@ import {Router, RouterLink} from "@angular/router";
 import {MessageService} from "primeng/api";
 import {ButtonModule} from "primeng/button";
 import {ToastModule} from "primeng/toast";
+import {CardModule} from "primeng/card";
 
 @Component({
   selector: 'app-login',
@@ -15,7 +16,8 @@ import {ToastModule} from "primeng/toast";
     HttpClientModule,
     RouterLink,
     ButtonModule,
-    ToastModule
+    ToastModule,
+    CardModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './login.component.html',
