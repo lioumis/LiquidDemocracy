@@ -4,6 +4,6 @@ public record DelegationRequestDto(
         String delegator,
         String delegateName,
         String delegateSurname,
-        Long topicId
+        Long votingId
 ) {
 }

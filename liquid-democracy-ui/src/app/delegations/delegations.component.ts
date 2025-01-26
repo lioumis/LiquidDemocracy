@@ -4,7 +4,7 @@ import {PanelModule} from "primeng/panel";
 import {MenuItem, MessageService, PrimeTemplate} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {Delegation, Topic} from "../dashboard/dashboard.component";
+import {Delegation, Voting} from "../dashboard/dashboard.component";
 import {AuthService} from "../login/auth.service";
 import {Dropdown, DropdownModule} from "primeng/dropdown";
 import {Button} from "primeng/button";
@@ -36,13 +36,13 @@ export class DelegationsComponent implements OnInit {
 
   delegationForm: FormGroup;
 
-  selectedTopic: string = '';
+  selectedVoting: string = '';
 
   delegations: Delegation[] = [];
 
-  topics: string[] = [];
+  votings: string[] = [];
 
-  completeTopics: Topic[] = [];
+  completeVotings: Voting[] = [];
 
   loading: boolean = true;
 
@@ -59,7 +59,7 @@ export class DelegationsComponent implements OnInit {
     this.delegationForm = this.fb.group({
       name: ['', Validators.required],
       surname: ['', Validators.required],
-      topic: ['', Validators.required]
+      voting: ['', Validators.required]
     });
   }
 
@@ -68,10 +68,10 @@ export class DelegationsComponent implements OnInit {
       this.router.navigate(['/login']).then();
     }
 
-    this.authService.getTopics().subscribe({
-      next: (response: Topic[]) => {
-        this.topics = response.map((topic) => topic.name);
-        this.completeTopics = response;
+    this.authService.getAllVotings().subscribe({
+      next: (response: Voting[]) => {
+        this.votings = response.map((voting) => voting.name);
+        this.completeVotings = response;
       },
       error: (error) => {
         console.error('Σφάλμα:', error);
@@ -88,8 +88,8 @@ export class DelegationsComponent implements OnInit {
     this.loading = false;
   }
 
-  onTopicChange(event: any) {
-    this.selectedTopic = event.value;
+  onVotingChange(event: any) {
+    this.selectedVoting = event.value;
     if (this.dropdown) {
       this.dropdown.overlayVisible = false;
     }
@@ -98,8 +98,8 @@ export class DelegationsComponent implements OnInit {
   onSubmit(): void {
     this.messageService.clear();
     if (this.delegationForm.valid) {
-      const {name, surname, topic} = this.delegationForm.value;
-      this.authService.createDelegation(name, surname, this.getTopicId(topic)).subscribe({ //TODO: Verification Pop-up!
+      const {name, surname, voting} = this.delegationForm.value;
+      this.authService.createDelegation(name, surname, this.getVotingId(voting)).subscribe({ //TODO: Verification Pop-up!
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -121,9 +121,9 @@ export class DelegationsComponent implements OnInit {
     }
   }
 
-  getTopicId(topic: string) {
-    let completeTopic = this.completeTopics.find(t => t.name === topic);
-    return completeTopic ? completeTopic.id : -1;
+  getVotingId(voting: string) {
+    let completeVoting = this.completeVotings.find(v => v.name === voting);
+    return completeVoting ? completeVoting.id : -1;
   }
 
   resetForm() {

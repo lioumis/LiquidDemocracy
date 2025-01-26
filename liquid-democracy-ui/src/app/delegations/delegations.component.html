@@ -15,7 +15,7 @@
       [rows]="5"
       [loading]="loading"
       [paginator]="true"
-      [globalFilterFields]="['name', 'surname', 'username', 'topic']"
+      [globalFilterFields]="['name', 'surname', 'username', 'voting']"
       [tableStyle]="{ 'min-width': '100rem' }">
       <ng-template pTemplate="header">
         <tr>
@@ -31,9 +31,9 @@
             Όνομα χρήστη
             <p-sortIcon field="username"/>
           </th>
-          <th pSortableColumn="topic" class="center" style="width:25%">
-            Θέμα
-            <p-sortIcon field="topic"/>
+          <th pSortableColumn="voting" class="center" style="width:25%">
+            Ψηφοφορία
+            <p-sortIcon field="voting"/>
           </th>
         </tr>
         <tr>
@@ -62,15 +62,15 @@
               ariaLabel="Filter username"/>
           </th>
           <th>
-            <p-columnFilter field="topic" matchMode="in" [showMenu]="false">
+            <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
               <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                 <p-multiSelect
                   [ngModel]="value"
-                  [options]="topics"
-                  placeholder="Θέμα"
+                  [options]="votings"
+                  placeholder="Ψηφοφορία"
                   (onChange)="filter($event.value)"
                   [maxSelectedLabels]=1
-                  selectedItemsLabel="{0} θέματα επιλέχθηκαν"
+                  selectedItemsLabel="{0} ψηφοφορίες επιλέχθηκαν"
                   optionLabel="">
                   <ng-template let-option pTemplate="item">
                     <div class="inline-block vertical-align-middle">
@@ -95,7 +95,7 @@
             {{ delegation.username }}
           </td>
           <td>
-            {{ delegation.topic }}
+            {{ delegation.voting }}
           </td>
         </tr>
       </ng-template>
@@ -110,7 +110,7 @@
   <div class="new-delegation">
     <p-panel header="Νέα Ανάθεση">
       <p>Για τη διαδικασία ανάθεσης, θα χρειαστεί να εισάγετε το όνομα και το επώνυμο του αντιπροσώπου, καθώς και να
-        επιλέξετε το θέμα για το οποίο θέλετε να αναθέσετε την ψήφο σας.</p>
+        επιλέξετε την ψηφοφορία για την οποία θέλετε να αναθέσετε την ψήφο σας.</p>
       <form [formGroup]="delegationForm" (ngSubmit)="onSubmit()" class="form">
         <div class="form-group">
           <label for="name">Όνομα Αντιπροσώπου</label>
@@ -141,21 +141,21 @@
         </div>
 
         <div class="form-group">
-          <label for="topic">Θέμα Ανάθεσης</label>
+          <label for="voting">Ψηφοφορία</label>
           <p-dropdown
             #dropdown
-            id="topic"
-            [options]="topics"
+            id="voting"
+            [options]="votings"
             [panelStyleClass]="'upwards-panel'"
             [style]="{'width':'100%'}"
-            [(ngModel)]="selectedTopic"
-            placeholder="Θέμα"
-            formControlName="topic"
-            (onChange)="onTopicChange($event)"/>
+            [(ngModel)]="selectedVoting"
+            placeholder="Ψηφοφορία"
+            formControlName="voting"
+            (onChange)="onVotingChange($event)"/>
           <!--          TODO: Find a way to make the dropdown open upwards with 'upwards-panel' or remove and move the Νέα ανάθεση panel to the top-->
           <!--          TODO: Close dropdown after a value is selected or user clicks outside.-->
 
-          @if (delegationForm.get('topic')?.invalid && delegationForm.get('topic')?.touched) {
+          @if (delegationForm.get('voting')?.invalid && delegationForm.get('voting')?.touched) {
             <div>
               <small class="error">Υποχρεωτικό πεδίο</small>
             </div>

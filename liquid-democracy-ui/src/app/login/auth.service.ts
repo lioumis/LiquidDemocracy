@@ -20,6 +20,7 @@ export class AuthService { //TODO: Split to business specific services
   private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
   private readonly ALL_VOTINGS = '/getVotings';
   private readonly VOTING_DETAILS = '/getVotingDetails';
+  private readonly ALL_VOTING_TITLES = '/getVotingTitles';
   private readonly DISCUSSION = '/getDiscussion';
   private readonly COMMENT = '/comment';
   private readonly REACT = '/react';
@@ -61,7 +62,7 @@ export class AuthService { //TODO: Split to business specific services
     return this.http.post(this.API_REL_PATH + this.CHANGE_PASSWORD, {oldPassword, newPassword}, httpOptions);
   }
 
-  createDelegation(delegateName: string, delegateSurname: string, topicId: number): Observable<any> {
+  createDelegation(delegateName: string, delegateSurname: string, votingId: number): Observable<any> {
     const delegator = localStorage.getItem('username');
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
@@ -70,7 +71,7 @@ export class AuthService { //TODO: Split to business specific services
       delegator,
       delegateName,
       delegateSurname,
-      topicId
+      votingId
     }, httpOptions);
   }
 
@@ -147,6 +148,12 @@ export class AuthService { //TODO: Split to business specific services
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.TOPICS + this.ALL_TOPICS, {headers});
+  }
+
+  getAllVotings(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_VOTING_TITLES, {headers});
   }
 
   getDelegations(): Observable<any> {

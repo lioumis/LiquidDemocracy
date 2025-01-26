@@ -44,6 +44,9 @@ public class VotingEntity {
     @OneToMany(mappedBy = "voting", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<VotingOptionsEntity> votingOptions;
 
+    @OneToMany(mappedBy = "voting")
+    private List<DelegationEntity> delegations;
+
     @ManyToOne
     @JoinColumn(name = "topic_id")
     private TopicEntity topic;

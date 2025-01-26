@@ -83,7 +83,7 @@ public class VotingService {
             throw new ValidationException("Έχετε ήδη ψηφίσει για αυτή την ψηφοφορία.");
         }
 
-        Optional<DelegationEntity> delegationOpt = delegationRepository.findByDelegatorAndTopic(voter, voting.getTopic());
+        Optional<DelegationEntity> delegationOpt = delegationRepository.findByDelegatorAndVoting(voter, voting);
         if (delegationOpt.isPresent()) {
             throw new ValidationException("Έχετε ήδη αναθέσει την ψήφο σας σε άλλο χρήστη και δεν μπορείτε να ψηφίσετε άμεσα.");
         }
@@ -113,7 +113,7 @@ public class VotingService {
     }
 
     public void castDelegatedVote(UserEntity delegate, VotingEntity voting, Set<VotingOptionsEntity> votingOptions, UserEntity finalDelegate) {
-        List<DelegationEntity> delegations = delegationRepository.findByDelegateAndTopic(delegate, voting.getTopic());
+        List<DelegationEntity> delegations = delegationRepository.findByDelegateAndVoting(delegate, voting);
 
         if (delegations.isEmpty()) {
             return;
@@ -199,6 +199,11 @@ public class VotingService {
         }
 
         return getActiveVotingDetails(voting, voter);
+    }
+
+    public List<VotingTitleDto> getVotingTitles() {
+        return votingRepository.findAll().stream().map(votingEntity ->
+                new VotingTitleDto(votingEntity.getId().intValue(), votingEntity.getName())).toList();
     }
 
     public List<DiscussionDto> getDiscussions(String username, Long votingId) throws ValidationException {

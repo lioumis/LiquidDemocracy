@@ -4,18 +4,16 @@ import gr.upatras.ceid.ld.dto.DelegationDto;
 import gr.upatras.ceid.ld.dto.ReceivedDelegationDto;
 import gr.upatras.ceid.ld.entity.AuditLogEntity;
 import gr.upatras.ceid.ld.entity.DelegationEntity;
-import gr.upatras.ceid.ld.entity.TopicEntity;
 import gr.upatras.ceid.ld.entity.UserEntity;
+import gr.upatras.ceid.ld.entity.VotingEntity;
 import gr.upatras.ceid.ld.enums.Action;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.ValidationException;
-import gr.upatras.ceid.ld.repository.AuditLogRepository;
-import gr.upatras.ceid.ld.repository.DelegationRepository;
-import gr.upatras.ceid.ld.repository.TopicRepository;
-import gr.upatras.ceid.ld.repository.UserRepository;
+import gr.upatras.ceid.ld.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -24,19 +22,23 @@ public class DelegationService {
 
     private final AuditLogRepository auditLogRepository;
 
-    private final TopicRepository topicRepository;
-
     private final UserRepository userRepository;
 
-    public DelegationService(DelegationRepository delegationRepository, AuditLogRepository auditLogRepository, TopicRepository topicRepository, UserRepository userRepository) {
+    private final VotingRepository votingRepository;
+
+    private final VoteRepository voteRepository;
+
+    public DelegationService(DelegationRepository delegationRepository, AuditLogRepository auditLogRepository,
+                             UserRepository userRepository, VotingRepository votingRepository, VoteRepository voteRepository) {
         this.delegationRepository = delegationRepository;
         this.auditLogRepository = auditLogRepository;
-        this.topicRepository = topicRepository;
         this.userRepository = userRepository;
+        this.votingRepository = votingRepository;
+        this.voteRepository = voteRepository;
     }
 
     @Transactional
-    public void delegateVote(String delegatorUsername, String delegateName, String delegateSurname, Long topicId) throws ValidationException {
+    public void delegateVote(String delegatorUsername, String delegateName, String delegateSurname, Long votingId) throws ValidationException {
         UserEntity delegator = userRepository.findByUsername(delegatorUsername)
                 .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
 
@@ -51,20 +53,32 @@ public class DelegationService {
             throw new ValidationException("Δεν μπορείτε να αναθέσετε την ψήφο στον εαυτό σας");
         }
 
-        TopicEntity topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new ValidationException("Το θέμα δεν βρέθηκε"));
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
-        if (delegationRepository.existsByDelegatorAndTopic(delegator, topic)) {
-            throw new ValidationException("Υπάρχει ήδη ανάθεση ψήφου για το συγκεκριμένο θέμα.");
+        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Η επιλεγμένη ψηφοφορία έχει λήξει.");
         }
 
-        checkForCircularDelegation(delegator, delegate, topic);
+        if (delegationRepository.existsByDelegatorAndVoting(delegator, voting)) {
+            throw new ValidationException("Υπάρχει ήδη ανάθεση ψήφου για τη συγκεκριμένη ψηφοφορία.");
+        }
 
-        DelegationEntity delegation = new DelegationEntity(topic, delegator, delegate);
+        if (voteRepository.existsByOriginalVoterAndVoting(delegator, voting)) {
+            throw new ValidationException("Έχετε ήδη ψηφίσει για τη συγκεκριμένη ψηφοφορία");
+        }
+
+        if (voteRepository.existsByOriginalVoterAndVoting(delegate, voting)) {
+            throw new ValidationException("Ο επιλεγμένος αντιπρόσωπος έχει ήδη ψηφίσει για τη συγκεκριμένη ψηφοφορία");
+        }
+
+        checkForCircularDelegation(delegator, delegate, voting);
+
+        DelegationEntity delegation = new DelegationEntity(voting, delegator, delegate);
         delegationRepository.save(delegation);
 
         AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION,
-                "Ο χρήστης " + delegator.getId() + " ανέθεσε την ψήφο του στον χρήστη " + delegate.getId() + " για το θέμα " + topicId + ".");
+                "Ο χρήστης " + delegator.getId() + " ανέθεσε την ψήφο του στον χρήστη " + delegate.getId() + " για την ψηφοφορία " + votingId + ".");
         auditLogRepository.save(auditLog);
     }
 
@@ -75,7 +89,7 @@ public class DelegationService {
         List<DelegationEntity> delegations = delegationRepository.findByDelegator(delegator);
         return delegations.stream().map(delegation -> {
             UserEntity delegate = delegation.getDelegate();
-            return new DelegationDto(delegate.getName(), delegate.getSurname(), delegate.getUsername(), delegation.getTopic().getTitle());
+            return new DelegationDto(delegate.getName(), delegate.getSurname(), delegate.getUsername(), delegation.getVoting().getName());
         }).toList();
     }
 
@@ -96,12 +110,12 @@ public class DelegationService {
             }
             visitedDelegations.add(currentDelegation.getId());
 
-            String topicTitle = currentDelegation.getTopic().getTitle();
-            groupedDelegations.merge(topicTitle, 1, Integer::sum);
+            String votingTitle = currentDelegation.getVoting().getName();
+            groupedDelegations.merge(votingTitle, 1, Integer::sum);
 
-            List<DelegationEntity> nextDelegations = delegationRepository.findByDelegateAndTopic(
+            List<DelegationEntity> nextDelegations = delegationRepository.findByDelegateAndVoting(
                     currentDelegation.getDelegator(),
-                    currentDelegation.getTopic()
+                    currentDelegation.getVoting()
             );
             delegationQueue.addAll(nextDelegations);
         }
@@ -112,23 +126,23 @@ public class DelegationService {
     }
 
     @Transactional
-    public void removeDelegation(String username, Long topicId) throws ValidationException {
+    public void removeDelegation(String username, Long votingId) throws ValidationException {
         UserEntity delegator = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
-        TopicEntity topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new ValidationException("Το θέμα δεν βρέθηκε"));
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
-        DelegationEntity delegation = delegationRepository.findByDelegatorAndTopic(delegator, topic)
-                .orElseThrow(() -> new ValidationException("Δεν βρέθηκε ανάθεση για το θέμα από εσάς"));
+        DelegationEntity delegation = delegationRepository.findByDelegatorAndVoting(delegator, voting)
+                .orElseThrow(() -> new ValidationException("Δεν βρέθηκε ανάθεση για την ψηφοφορία από εσάς"));
         delegationRepository.delete(delegation);
 
         AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION_REMOVAL,
-                "Ο χρήστης " + username + " αφαίρεσε την ανάθεση της ψήφου του για το θέμα " + topicId + ".");
+                "Ο χρήστης " + username + " αφαίρεσε την ανάθεση της ψήφου του για το θέμα " + votingId + ".");
         auditLogRepository.save(auditLog);
     }
 
-    private void checkForCircularDelegation(UserEntity delegator, UserEntity delegate, TopicEntity topic) throws ValidationException {
-        Optional<DelegationEntity> byDelegate = delegationRepository.findByDelegatorAndTopic(delegate, topic);
+    private void checkForCircularDelegation(UserEntity delegator, UserEntity delegate, VotingEntity voting) throws ValidationException {
+        Optional<DelegationEntity> byDelegate = delegationRepository.findByDelegatorAndVoting(delegate, voting);
 
         if (byDelegate.isEmpty()) {
             return;
@@ -140,6 +154,6 @@ public class DelegationService {
             throw new ValidationException("Θα προκύψει κυκλική ανάθεση");
         }
 
-        checkForCircularDelegation(delegator, currentDelegate, topic);
+        checkForCircularDelegation(delegator, currentDelegate, voting);
     }
 }

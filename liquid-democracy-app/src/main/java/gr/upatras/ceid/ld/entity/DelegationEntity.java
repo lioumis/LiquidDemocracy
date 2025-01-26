@@ -22,11 +22,11 @@ public class DelegationEntity {
     private UserEntity delegate;
 
     @ManyToOne
-    @JoinColumn(name = "topic_id")
-    private TopicEntity topic;
+    @JoinColumn(name = "voting_id")
+    private VotingEntity voting;
 
-    public DelegationEntity(TopicEntity topic, UserEntity delegator, UserEntity delegate) {
-        this.topic = topic;
+    public DelegationEntity(VotingEntity voting, UserEntity delegator, UserEntity delegate) {
+        this.voting = voting;
         this.delegator = delegator;
         this.delegate = delegate;
     }

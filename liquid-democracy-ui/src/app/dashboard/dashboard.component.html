@@ -55,9 +55,9 @@
               Επώνυμο
               <p-sortIcon field="surname"/>
             </th>
-            <th pSortableColumn="topic" class="center" style="width:33%">
-              Θέμα
-              <p-sortIcon field="topic"/>
+            <th pSortableColumn="voting" class="center" style="width:33%">
+              Ψηφοφορία
+              <p-sortIcon field="voting"/>
             </th>
           </tr>
           <tr>
@@ -78,15 +78,15 @@
                 ariaLabel="Filter Surname"/>
             </th>
             <th>
-              <p-columnFilter field="topic" matchMode="in" [showMenu]="false">
+              <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
                 <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                   <p-multiSelect
                     [ngModel]="value"
-                    [options]="topics"
-                    placeholder="Θέμα"
+                    [options]="allVotings"
+                    placeholder="Ψηφοφορία"
                     (onChange)="filter($event.value)"
                     [maxSelectedLabels]=1
-                    selectedItemsLabel="{0} θέματα επιλέχθηκαν"
+                    selectedItemsLabel="{0} ψηφοφορίες επιλέχθηκαν"
                     optionLabel="">
                     <ng-template let-option pTemplate="item">
                       <div class="inline-block vertical-align-middle">
@@ -108,7 +108,7 @@
               {{ delegation.surname }}
             </td>
             <td>
-              {{ delegation.topic }}
+              {{ delegation.voting }}
             </td>
           </tr>
         </ng-template>
@@ -130,13 +130,13 @@
         sortField="votes" [sortOrder]="-1"
         [loading]="loading"
         [paginator]="true"
-        [globalFilterFields]="['topic', 'votes']"
+        [globalFilterFields]="['voting', 'votes']"
         [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="topic" class="center" style="width:33%">
-              Θέμα
-              <p-sortIcon field="topic"/>
+            <th pSortableColumn="voting" class="center" style="width:33%">
+              Ψηφοφορία
+              <p-sortIcon field="voting"/>
             </th>
             <th pSortableColumn="votes" class="center" style="width:33%">
               Αριθμός Ψήφων
@@ -145,15 +145,15 @@
           </tr>
           <tr>
             <th>
-              <p-columnFilter field="topic" matchMode="in" [showMenu]="false">
+              <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
                 <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                   <p-multiSelect
                     [ngModel]="value"
-                    [options]="topics"
-                    placeholder="Θέμα"
+                    [options]="allVotings"
+                    placeholder="Ψηφοφορία"
                     (onChange)="filter($event.value)"
                     [maxSelectedLabels]=1
-                    selectedItemsLabel="{0} θέματα επιλέχθηκαν"
+                    selectedItemsLabel="{0} ψηφοφορίες επιλέχθηκαν"
                     optionLabel="">
                     <ng-template let-option pTemplate="item">
                       <div class="inline-block vertical-align-middle">
@@ -177,7 +177,7 @@
         <ng-template pTemplate="body" let-receivedDelegation>
           <tr>
             <td>
-              {{ receivedDelegation.topic }}
+              {{ receivedDelegation.voting }}
             </td>
             <td class="center">
               {{ receivedDelegation.votes }}

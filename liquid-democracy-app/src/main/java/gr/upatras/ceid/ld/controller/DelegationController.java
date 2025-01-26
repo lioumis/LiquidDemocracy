@@ -48,7 +48,7 @@ public class DelegationController {
             }
 
             delegationService.delegateVote(delegationRequestDto.delegator(), delegationRequestDto.delegateName(),
-                    delegationRequestDto.delegateSurname(), delegationRequestDto.topicId());
+                    delegationRequestDto.delegateSurname(), delegationRequestDto.votingId());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
@@ -69,7 +69,7 @@ public class DelegationController {
     }
 
     @PostMapping("/removeDelegation") //TODO: Should not be possible. Clarify and remove
-    public ResponseEntity<String> removeDelegation(@RequestParam("topicId") Long topicId) {
+    public ResponseEntity<String> removeDelegation(@RequestParam("votingId") Long votingId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
@@ -79,7 +79,7 @@ public class DelegationController {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            delegationService.removeDelegation(authorizedUsername, topicId);
+            delegationService.removeDelegation(authorizedUsername, votingId);
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (AuthorizationException e) {

@@ -4,5 +4,5 @@ public record DelegationDto(
         String name,
         String surname,
         String username,
-        String topic) {
+        String voting) {
 }

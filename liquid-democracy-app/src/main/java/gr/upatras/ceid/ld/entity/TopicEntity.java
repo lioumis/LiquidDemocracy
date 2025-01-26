@@ -18,9 +18,6 @@ public class TopicEntity {
     private String title;
 
     @OneToMany(mappedBy = "topic")
-    private List<DelegationEntity> delegations;
-
-    @OneToMany(mappedBy = "topic")
     private List<VotingEntity> votings;
 
     public TopicEntity(Long id) {

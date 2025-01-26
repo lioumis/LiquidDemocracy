@@ -36,11 +36,11 @@ export class DashboardComponent implements OnInit {
 
   receivedDelegations: ReceivedDelegation[] = [];
 
-  topics: string[] = [];
-
   loading: boolean = true;
 
   votings: Voting[] = [];
+
+  allVotings: string[] = [];
 
   responsiveOptions: any[] | undefined;
 
@@ -86,9 +86,9 @@ export class DashboardComponent implements OnInit {
       }
     });
 
-    this.authService.getTopics().subscribe({
-      next: (response: Topic[]) => {
-        this.topics = response.map((topic) => topic.name);
+    this.authService.getAllVotings().subscribe({
+      next: (response: Voting[]) => {
+        this.allVotings = response.map((voting) => voting.name);
       },
       error: (error) => {
         console.error('Σφάλμα:', error);
@@ -166,7 +166,12 @@ export interface Voting {
 export interface Delegation {
   name: string;
   surname: string;
-  topic: string;
+  voting: string;
+}
+
+export interface Voting {
+  id: number;
+  name: string;
 }
 
 export interface Topic {
@@ -175,6 +180,6 @@ export interface Topic {
 }
 
 export interface ReceivedDelegation {
-  topic: string;
+  voting: string;
   votes: number;
 }

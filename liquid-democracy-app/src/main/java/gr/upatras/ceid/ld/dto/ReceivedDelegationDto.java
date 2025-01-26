@@ -1,7 +1,7 @@
 package gr.upatras.ceid.ld.dto;
 
 public record ReceivedDelegationDto(
-        String topic,
+        String voting,
         int votes
 ) {
 }

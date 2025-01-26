@@ -100,6 +100,26 @@ public class VotingController {
         }
     }
 
+    @GetMapping("/getVotingTitles")
+    public ResponseEntity<Object> getVotingTitles() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            List<VotingTitleDto> votingTitles = votingService.getVotingTitles();
+            return ResponseEntity.status(HttpStatus.OK).body(votingTitles);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
     @PostMapping("/vote")
     public ResponseEntity<Map<String, String>> castVote(@RequestBody VoteDto voteDto) {
         try {
