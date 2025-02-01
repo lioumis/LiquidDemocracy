@@ -9,9 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,9 +19,12 @@ import java.util.Set;
 @RequestMapping("/topics")
 public class TopicController {
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
+    private static final Set<Role> TOPIC_CREATION_ROLES = new HashSet<>();
 
     static {
         ALLOWED_ROLES.addAll(List.of(Role.values()));
+
+        TOPIC_CREATION_ROLES.add(Role.SYSTEM_ADMIN);
     }
 
     private final TopicService topicService;
@@ -48,6 +49,24 @@ public class TopicController {
 
             List<TopicDto> topics = topicService.getTopics();
             return ResponseEntity.status(HttpStatus.OK).body(topics);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/createTopic")
+    public ResponseEntity<Object> createTopic(@RequestBody TopicDto topicDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, TOPIC_CREATION_ROLES);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            topicService.createTopic(topicDto.name());
+            return ResponseEntity.status(HttpStatus.OK).body("Το θέμα δημιουργήθηκε με επιτυχία");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

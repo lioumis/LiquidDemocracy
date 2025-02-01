@@ -19,12 +19,15 @@ import java.util.*;
 public class VotingController {
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_ROLES_FOR_CREATION = new HashSet<>();
+    private static final Set<Role> ALLOWED_ROLES_FOR_UPDATE = new HashSet<>();
 
     static {
         ALLOWED_ROLES.add(Role.VOTER);
         ALLOWED_ROLES.add(Role.REPRESENTATIVE);
 
-        ALLOWED_ROLES_FOR_CREATION.add(Role.ELECTORAL_COMMITTEE);
+        ALLOWED_ROLES_FOR_CREATION.add(Role.SYSTEM_ADMIN);
+
+        ALLOWED_ROLES_FOR_UPDATE.add(Role.ELECTORAL_COMMITTEE);
     }
 
     private final VotingService votingService;
@@ -149,6 +152,114 @@ public class VotingController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Vote cast successfully!");
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/getRequests")
+    public ResponseEntity<Object> getRequests(@RequestParam("voting") Long votingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            List<ParticipationRequestDto> participationRequests = votingService.getRequests(votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(participationRequests);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/processRequest")
+    public ResponseEntity<Map<String, String>> processRequest(@RequestBody RequestProcessDto requestProcessDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            votingService.processRequest(authorizedUsername, requestProcessDto.requestId(), requestProcessDto.approve());
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+
+        Map<String, String> response = new HashMap<>();
+        if (requestProcessDto.approve()) {
+            response.put("message", "Το αίτημα εγκρίθηκε επιτυχώς");
+        } else {
+            response.put("message", "Το αίτημα απορρίφθηκε επιτυχώς");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/requestAccessToVoting")
+    public ResponseEntity<Map<String, String>> requestAccessToVoting(@RequestBody Integer votingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            votingService.requestAccess(authorizedUsername, votingId.longValue());
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Το αίτημα συμμετοχής καταχωρήθηκε επιτυχώς");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/hasAccessToVoting")
+    public ResponseEntity<Object> hasAccessToVoting(@RequestParam("voting") Long votingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            VotingAccessDto votingAccess = votingService.hasAccess(authorizedUsername, votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(votingAccess);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/createVoting")
@@ -289,6 +400,28 @@ public class VotingController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Feedback saved successfully!");
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/getFeedback")
+    public ResponseEntity<Object> getFeedback(@RequestParam("voting") Long votingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            List<FeedbackDto> feedbackDtoList = votingService.getFeedback(votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(feedbackDtoList);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
 }

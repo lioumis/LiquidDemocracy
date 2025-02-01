@@ -23,4 +23,8 @@ public class TopicEntity {
     public TopicEntity(Long id) {
         this.id = id;
     }
+
+    public TopicEntity(String title) {
+        this.title = title;
+    }
 }

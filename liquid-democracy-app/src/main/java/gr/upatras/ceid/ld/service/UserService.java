@@ -16,13 +16,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
 
-    private static final String USER_NOT_FOUND_MESSAGE = "User not found";
+    private static final String USER_NOT_FOUND_MESSAGE = "Ο χρήστης δεν βρέθηκε";
 
     private final UserRepository userRepository;
 
@@ -88,6 +89,12 @@ public class UserService implements UserDetailsService {
         UserEntity user = findUser(username);
         return new UserInformationDto(user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
                 user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
+    }
+
+    public List<UserInformationDto> getAllUserDetails() {
+        return userRepository.findAll().stream().map(user ->
+                new UserInformationDto(user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
+                        user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))).toList();
 
     }
 

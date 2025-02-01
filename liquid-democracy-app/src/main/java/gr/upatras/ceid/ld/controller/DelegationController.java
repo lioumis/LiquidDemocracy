@@ -37,7 +37,6 @@ public class DelegationController {
 
     @PostMapping("/delegate")
     public ResponseEntity<Map<String, String>> delegateVote(@RequestBody DelegationRequestDto delegationRequestDto) {
-        //TODO: Parameter validation
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
@@ -64,7 +63,7 @@ public class DelegationController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Vote delegated successfully!");
+        response.put("message", "Η ψήφος ανατέθηκε με επιτυχία");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

@@ -20,9 +20,11 @@ import java.util.*;
 @RestController
 public class UserController {
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
+    private static final Set<Role> MANAGEMENT_ROLES = new HashSet<>();
 
     static {
         ALLOWED_ROLES.addAll(List.of(Role.values()));
+        MANAGEMENT_ROLES.add(Role.SYSTEM_ADMIN);
     }
 
     private final UserService userService;
@@ -85,6 +87,22 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getAllUserDetails")
+    public ResponseEntity<Object> getAllUserDetails() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            authorizationService.getAuthorizedUser(usernameFromToken, MANAGEMENT_ROLES);
+
+            List<UserInformationDto> userDetails = userService.getAllUserDetails();
+            return ResponseEntity.status(HttpStatus.OK).body(userDetails);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

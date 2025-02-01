@@ -2,10 +2,7 @@ package gr.upatras.ceid.ld.service;
 
 import gr.upatras.ceid.ld.dto.DelegationDto;
 import gr.upatras.ceid.ld.dto.ReceivedDelegationDto;
-import gr.upatras.ceid.ld.entity.AuditLogEntity;
-import gr.upatras.ceid.ld.entity.DelegationEntity;
-import gr.upatras.ceid.ld.entity.UserEntity;
-import gr.upatras.ceid.ld.entity.VotingEntity;
+import gr.upatras.ceid.ld.entity.*;
 import gr.upatras.ceid.ld.enums.Action;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -28,13 +25,17 @@ public class DelegationService {
 
     private final VoteRepository voteRepository;
 
+    private final ParticipantRepository participantRepository;
+
     public DelegationService(DelegationRepository delegationRepository, AuditLogRepository auditLogRepository,
-                             UserRepository userRepository, VotingRepository votingRepository, VoteRepository voteRepository) {
+                             UserRepository userRepository, VotingRepository votingRepository, VoteRepository voteRepository,
+                             ParticipantRepository participantRepository) {
         this.delegationRepository = delegationRepository;
         this.auditLogRepository = auditLogRepository;
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
         this.voteRepository = voteRepository;
+        this.participantRepository = participantRepository;
     }
 
     @Transactional
@@ -45,6 +46,7 @@ public class DelegationService {
         UserEntity delegate = userRepository.findByNameAndSurnameIgnoreCase(delegateName, delegateSurname)
                 .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος δεν βρέθηκε"));
 
+        //TODO: Move to Validator classes
         if (!delegate.getRoles().contains(Role.REPRESENTATIVE)) {
             throw new ValidationException("Ο χρήστης που επιλέξατε δεν είναι αντιπρόσωπος");
         }
@@ -70,6 +72,24 @@ public class DelegationService {
 
         if (voteRepository.existsByOriginalVoterAndVoting(delegate, voting)) {
             throw new ValidationException("Ο επιλεγμένος αντιπρόσωπος έχει ήδη ψηφίσει για τη συγκεκριμένη ψηφοφορία");
+        }
+
+        ParticipantEntity delegatorParticipantEntity = participantRepository.findByUserAndVoting(delegator, voting)
+                .orElseThrow(() -> new ValidationException("Δεν συμμετέχετε σε αυτή την ψηφοφορία"));
+
+        if (delegatorParticipantEntity.getStatus() == null) {
+            throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία δεν έχει εξεταστεί ακόμα");
+        }
+
+        if (Boolean.FALSE.equals(delegatorParticipantEntity.getStatus())) {
+            throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί");
+        }
+
+        ParticipantEntity delegateParticipantEntity = participantRepository.findByUserAndVoting(delegator, voting)
+                .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία"));
+
+        if (!Boolean.TRUE.equals(delegateParticipantEntity.getStatus())) {
+            throw new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία");
         }
 
         checkForCircularDelegation(delegator, delegate, voting);
