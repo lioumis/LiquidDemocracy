@@ -99,6 +99,26 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
+    public void addRole(String username, int roleId) throws ValidationException {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
+
+        Role role;
+        try {
+            role = Role.fromId(roleId);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Ο ρόλος δεν βρέθηκε");
+        }
+
+        if (user.getRoles().contains(role)) {
+            throw new ValidationException("Ο χρήστης έχει ήδη το συγκεκριμένο ρόλο");
+        }
+
+        user.getRoles().add(role);
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void resetPassword(String username, String email, String securityAnswer, String newRawPassword) throws ValidationException {
         userValidator.validateUsername(username);
         userValidator.validateEmail(email);

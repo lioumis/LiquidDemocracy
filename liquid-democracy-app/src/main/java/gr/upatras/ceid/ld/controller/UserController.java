@@ -1,9 +1,6 @@
 package gr.upatras.ceid.ld.controller;
 
-import gr.upatras.ceid.ld.dto.ChangePasswordDto;
-import gr.upatras.ceid.ld.dto.RegistrationDto;
-import gr.upatras.ceid.ld.dto.ResetDto;
-import gr.upatras.ceid.ld.dto.UserInformationDto;
+import gr.upatras.ceid.ld.dto.*;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -105,6 +102,36 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/addRole")
+    public ResponseEntity<Map<String, String>> addRole(@RequestBody RoleDto roleDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException("You do not have permission to perform this action");
+            }
+
+            userService.addRole(roleDto.username(), roleDto.role().intValue());
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Ο ρόλος ανατέθηκε επιτυχώς");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
