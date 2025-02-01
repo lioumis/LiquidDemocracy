@@ -145,29 +145,112 @@ public class VotingService {
     }
 
     @Transactional
-    public void createVoting(String username, VotingCreationDto votingCreationDto) throws ValidationException {
-        //TODO: Validation
+    public void initializeVoting(String username, VotingInitializationDto votingInitializationDto) throws ValidationException {
+        if (votingInitializationDto == null) {
+            throw new ValidationException("Εσφαλμένα δεδομένα");
+        }
+
+        if (votingInitializationDto.name() == null || votingInitializationDto.name().trim().isEmpty()) {
+            throw new ValidationException("Ο τίτλος της ψηφοφορίας είναι κενός");
+        }
+
+        if (votingInitializationDto.committee() == null || votingInitializationDto.committee().isEmpty()) {
+            throw new ValidationException("Η εφορευτική επιτροπή είναι κενή");
+        }
+
+        if (votingInitializationDto.committee().size() != 3) {
+            throw new ValidationException("Η εφορευτική επιτροπή πρέπει να αποτελείται από 3 άτομα");
+        }
 
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
 
-        TopicEntity topic = topicRepository.findById(Long.valueOf(votingCreationDto.topic())) //TODO: Find by title
+        TopicEntity topic = topicRepository.findById(votingInitializationDto.topic())
                 .orElseThrow(() -> new ValidationException("Η θεματική περιοχή δεν βρέθηκε"));
 
-        VotingEntity votingEntity = new VotingEntity(votingCreationDto.name(), votingCreationDto.description(), //TODO: Check if already exists
-                toLocalDateTime(votingCreationDto.startDate()), toLocalDateTime(votingCreationDto.endDate()),
-                VotingType.valueOf(votingCreationDto.mechanism()), topic, Set.of(user)); //TODO: What about the committee?
+        if (votingRepository.existsByNameIgnoreCase(votingInitializationDto.name())) {
+            throw new ValidationException("Υπάρχει ήδη ψηφοφορία με αυτό το όνομα");
+        }
 
-        votingCreationDto.options().forEach(option ->
-                votingEntity.addVotingOption(option.title(), option.details()));
+        Set<UserEntity> committee = new HashSet<>();
 
-        votingEntity.addMessage(votingCreationDto.comment(), user); //TODO: Message is optional
+        for (int i = 0; i < votingInitializationDto.committee().size(); i++) {
+            String usernameString = votingInitializationDto.committee().get(i);
+            UserEntity member = userRepository.findByUsername(usernameString)
+                    .orElseThrow(() -> new ValidationException("Το μέλος δεν βρέθηκε")); //TODO: Handle committee roles
+            committee.add(member);
+        }
+
+
+        VotingEntity votingEntity = new VotingEntity(votingInitializationDto.name(), topic, committee);
 
         votingRepository.save(votingEntity);
 
         AuditLogEntity auditLog = new AuditLogEntity(user, Action.VOTING_CREATION,
                 "Ο χρήστης " + user.getUsername() + " δημιούργησε την ψηφοφορία " + votingEntity.getId() +
-                        " με τίτλο " + votingCreationDto.name() + " στη θεματική περιοχή " + topic.getTitle() + ".");
+                        " με τίτλο " + votingInitializationDto.name() + " στη θεματική περιοχή " + topic.getTitle() + ".");
+        auditLogRepository.save(auditLog);
+    }
+
+    @Transactional
+    public void editVoting(String username, VotingCreationDto votingCreationDto) throws ValidationException, AuthorizationException {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+
+        VotingEntity voting = votingRepository.findById(votingCreationDto.id())
+                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+
+        if (!voting.getElectoralCommittee().contains(user)) {
+            throw new AuthorizationException("Δεν ανήκετε στην εφορευτική επιτροπή της ψηφοφορίας");
+        }
+
+        if (votingCreationDto.startDate() != null) {
+            //TODO: Validate format & business
+            voting.setStartDate(toLocalDateTime(votingCreationDto.startDate()));
+        }
+
+        if (votingCreationDto.endDate() != null) {
+            //TODO: Validate format & business
+            voting.setEndDate(toLocalDateTime(votingCreationDto.endDate()));
+        }
+
+        if (votingCreationDto.description() != null && !votingCreationDto.description().trim().isEmpty()) {
+            //TODO: Validate length
+            voting.setInformation(votingCreationDto.description());
+        }
+
+        if (votingCreationDto.mechanism() != null) {
+            try {
+                VotingType type = VotingType.valueOf(votingCreationDto.mechanism());
+                voting.setVotingType(type);
+            } catch (IllegalArgumentException e) {
+                throw new ValidationException("Ο τύπος ψηφοφορίας είναι εσφαλμένος");
+            }
+        }
+
+        if (votingCreationDto.options() != null && !votingCreationDto.options().isEmpty()) {
+            //TODO: Validate each and if all valid, proceed to replace all
+            voting.clearVotingOptions();
+            votingCreationDto.options().forEach(option ->
+                    voting.addVotingOption(option.title(), option.details()));
+        }
+
+        if (votingCreationDto.comment() != null && !votingCreationDto.comment().trim().isEmpty()) {
+            //TODO: Validate length
+            //TODO: Clear the old one or just add?
+            voting.addMessage(votingCreationDto.comment(), user);
+        }
+
+        if (votingCreationDto.voteLimit() != null) {
+            //TODO: Validate if smaller than the number of options & if the voting is of multiple choice type
+            voting.setVoteLimit(votingCreationDto.voteLimit().intValue());
+        }
+
+        votingRepository.save(voting);
+
+        AuditLogEntity auditLog = new AuditLogEntity(user, Action.VOTING_CREATION,
+                "Ο χρήστης " + user.getUsername() + " επεξεργάστηκε την ψηφοφορία " + voting.getId() +
+                        " με τίτλο " + voting.getName() + " στη θεματική περιοχή " + voting.getTopic().getTitle() + ".");
         auditLogRepository.save(auditLog);
     }
 

@@ -262,15 +262,15 @@ public class VotingController {
         }
     }
 
-    @PostMapping("/createVoting")
-    public ResponseEntity<String> createVoting(@RequestBody VotingCreationDto votingCreationDto) {
+    @PostMapping("/initializeVoting")
+    public ResponseEntity<String> initializeVoting(@RequestBody VotingInitializationDto votingInitializationDto) {
         try {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String usernameFromToken = authentication.getName();  //TODO: Check if the specific user is allowed to create this voting.
+            String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
 
-            votingService.createVoting(authorizedUsername, votingCreationDto);
+            votingService.initializeVoting(authorizedUsername, votingInitializationDto);
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (AuthorizationException e) {
@@ -279,7 +279,27 @@ public class VotingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Voting created successfully!");
+        return ResponseEntity.status(HttpStatus.OK).body("Η ψηφοφορία δημιουργήθηκε επιτυχώς");
+    }
+
+    @PostMapping("/editVoting")
+    public ResponseEntity<String> editVoting(@RequestBody VotingCreationDto votingCreationDto) {
+        try {
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
+
+            votingService.editVoting(authorizedUsername, votingCreationDto);
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body("Η ψηφοφορία τροποποιήθηκε επιτυχώς");
     }
 
     @GetMapping("/getDiscussion")
@@ -332,7 +352,7 @@ public class VotingController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Reaction saved successfully!");
+        response.put("message", "Η αντίδραση αποθηκεύτηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -365,7 +385,7 @@ public class VotingController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Comment saved successfully!");
+        response.put("message", "Το σχόλιο αποθηκεύτηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -398,7 +418,7 @@ public class VotingController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Feedback saved successfully!");
+        response.put("message", "Η ανατροφοδότηση αποθηκεύτηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

@@ -5,6 +5,7 @@ import gr.upatras.ceid.ld.enums.VotingType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,22 +24,27 @@ public class VotingEntity {
     @Column(nullable = false)
     private String name;
 
+    @Setter
     @Column(nullable = false)
     private String information;
 
+    @Setter
     @Column(nullable = false)
     private LocalDateTime startDate;
 
+    @Setter
     @Column(nullable = false)
     private LocalDateTime endDate;
 
     @OneToMany(mappedBy = "voting")
     private List<VoteEntity> votes;
 
+    @Setter
     @Convert(converter = VotingTypeConverter.class)
     private VotingType votingType;
 
-    @Column()
+    @Setter
+    @Column
     private Integer voteLimit;
 
     @OneToMany(mappedBy = "voting", cascade = CascadeType.PERSIST, orphanRemoval = true)
@@ -62,13 +68,8 @@ public class VotingEntity {
     )
     private Set<UserEntity> electoralCommittee = new HashSet<>();
 
-    public VotingEntity(String name, String information, LocalDateTime startDate, LocalDateTime endDate,
-                        VotingType votingType, TopicEntity topic, Set<UserEntity> electoralCommittee) {
+    public VotingEntity(String name, TopicEntity topic, Set<UserEntity> electoralCommittee) {
         this.name = name;
-        this.information = information;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.votingType = votingType;
         this.topic = topic;
         this.electoralCommittee = electoralCommittee;
     }
@@ -78,6 +79,10 @@ public class VotingEntity {
             this.votingOptions = new ArrayList<>();
         }
         this.votingOptions.add(new VotingOptionsEntity(name, description, this));
+    }
+
+    public void clearVotingOptions() {
+        this.votingOptions = null;
     }
 
     public void addMessage(String message, UserEntity user) {
