@@ -154,7 +154,7 @@ export class DashboardComponent implements OnInit {
     this.loading = false;
   }
 
-  selectVoting(event: Event, id: number) {
+  selectVoting(id: number) {
     this.messageService.clear();
     this.authService.hasAccessToVoting(id).subscribe({
       next: (response) => {
@@ -175,7 +175,7 @@ export class DashboardComponent implements OnInit {
             this.router.navigate(['/voting', id]).then();
           }
         } else {
-          this.displayDialog(event, id);
+          this.displayDialog(id);
         }
       },
       error: (error) => {
@@ -183,7 +183,7 @@ export class DashboardComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
-          detail: error.error
+          detail: error.error.error
         });
       }
     });
@@ -196,9 +196,8 @@ export class DashboardComponent implements OnInit {
     }, 0);
   }
 
-  displayDialog(event: Event, id: number) {
+  displayDialog(id: number) {
     this.confirmationService.confirm({
-      target: event.target as EventTarget,
       acceptLabel: "Ναι",
       rejectLabel: "Όχι",
       message: 'Θέλετε να δημιουργήσετε αίτημα συμμετοχής για αυτή την ψηφοφορία;',

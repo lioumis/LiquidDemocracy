@@ -1,9 +1,13 @@
 <p-toast></p-toast>
 
+@if (showConfirmDialog) {
+  <p-confirmDialog></p-confirmDialog>
+}
+
 <p-breadcrumb
   class="max-w-full"
   [model]="items"
-  [home]="home" />
+  [home]="home"/>
 
 <div class="dashboard">
   <p-panel header="Ψηφοφορίες">
@@ -148,7 +152,7 @@
               pButton
               pRipple
               icon="pi pi-plus"
-              (click)="selectVoting(voting.id)">
+              (click)="selectVoting(voting)">
             </button>
           </td>
         </tr>

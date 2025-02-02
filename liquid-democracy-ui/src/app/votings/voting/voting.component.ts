@@ -87,6 +87,8 @@ export class VotingComponent implements OnInit {
       this.router.navigate(['/login']).then();
     }
 
+    // TODO: Check if allowed participant. If not, send back.
+
     this.votingId = Number(this.route.snapshot.paramMap.get('id'));
     this.loadVotingDetails();
     this.loadComments();

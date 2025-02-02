@@ -5,7 +5,7 @@ import {PanelModule} from "primeng/panel";
 import {TableModule} from "primeng/table";
 import {FormsModule} from "@angular/forms";
 import {AuthService} from "../login/auth.service";
-import {MenuItem, MessageService} from "primeng/api";
+import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import {Delegation, Topic} from "../dashboard/dashboard.component";
 import {Dropdown} from "primeng/dropdown";
 import {ButtonDirective} from "primeng/button";
@@ -13,6 +13,7 @@ import {Ripple} from "primeng/ripple";
 import {DatePipe} from "@angular/common";
 import {Router} from "@angular/router";
 import {BreadcrumbModule} from "primeng/breadcrumb";
+import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 @Component({
   selector: 'app-votings',
@@ -26,9 +27,10 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
     ButtonDirective,
     Ripple,
     DatePipe,
-    BreadcrumbModule
+    BreadcrumbModule,
+    ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, MessageService, ConfirmationService],
   templateUrl: './votings.component.html',
   styleUrl: './votings.component.css'
 })
@@ -52,9 +54,12 @@ export class VotingsComponent implements OnInit {
 
   home: MenuItem = {routerLink: ['/dashboard']};
 
+  showConfirmDialog: boolean = true;
+
   constructor(private readonly authService: AuthService,
               private readonly router: Router,
-              private readonly messageService: MessageService) {
+              private readonly messageService: MessageService,
+              private readonly confirmationService: ConfirmationService) {
   }
 
   ngOnInit(): void {
@@ -98,8 +103,101 @@ export class VotingsComponent implements OnInit {
     this.loading = false;
   }
 
-  selectVoting(id: number) {
-    this.router.navigate(['/voting', id]).then();
+  selectVoting(voting: Voting) {
+    this.messageService.clear();
+
+    if (this.isExpired(voting)) {
+      this.router.navigate(['/voting', voting.id]).then();
+    }
+
+    this.authService.hasAccessToVoting(voting.id).subscribe({ //TODO: Only for voters?
+      next: (response) => {
+        if (response.isPresent) {
+          if (response.hasAccess === null) {
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Πληροφορία',
+              detail: 'Η συμμετοχή σας σε αυτή την ψηφοφορία δεν έχει εξεταστεί ακόμα'
+            });
+          } else if (response.hasAccess === false) {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Προσοχή',
+              detail: 'Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί'
+            });
+          } else {
+            this.router.navigate(['/voting', voting.id]).then();
+          }
+        } else {
+          this.displayDialog(voting.id);
+        }
+      },
+      error: (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    });
+  }
+
+  resetConfirmDialog() {
+    this.showConfirmDialog = false;
+    setTimeout(() => {
+      this.showConfirmDialog = true;
+    }, 0);
+  }
+
+  displayDialog(id: number) {
+    this.confirmationService.confirm({
+      acceptLabel: "Ναι",
+      rejectLabel: "Όχι",
+      message: 'Θέλετε να δημιουργήσετε αίτημα συμμετοχής για αυτή την ψηφοφορία;',
+      header: 'Αίτημα συμμετοχής',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.createAccessRequest(id);
+        this.resetConfirmDialog();
+      },
+      reject: () => {
+        this.resetConfirmDialog();
+      }
+    });
+  }
+
+  createAccessRequest(id: number) {
+    this.authService.requestAccessToVoting(id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Πληροφορία',
+          detail: 'Το αίτημα συμμετοχής δημιουργήθηκε'
+        });
+      },
+      error: (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error.error
+        });
+      }
+    });
+  }
+
+  isExpired(voting: Voting) {
+    if (voting?.endDate) {
+      const currentDate = new Date();
+      const votingEndDate = new Date(voting.endDate);
+      votingEndDate.setHours(23, 59, 59, 999); //TODO: Check if expires at EOD
+      return currentDate > votingEndDate;
+    }
+    return false;
   }
 
 }
