@@ -210,7 +210,7 @@ public class VotingController {
     }
 
     @PostMapping("/requestAccessToVoting")
-    public ResponseEntity<Map<String, String>> requestAccessToVoting(@RequestBody Integer votingId) {
+    public ResponseEntity<Map<String, String>> requestAccessToVoting(@RequestBody AccessRequestDto accessRequestDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
@@ -220,7 +220,7 @@ public class VotingController {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            votingService.requestAccess(authorizedUsername, votingId.longValue());
+            votingService.requestAccess(authorizedUsername, accessRequestDto.votingId());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());

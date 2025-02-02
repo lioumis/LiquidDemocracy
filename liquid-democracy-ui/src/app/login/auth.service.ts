@@ -26,6 +26,8 @@ export class AuthService { //TODO: Split to business specific services
   private readonly REACT = '/react';
   private readonly VOTE = '/vote';
   private readonly FEEDBACK = '/feedback';
+  private readonly HAS_ACCESS = '/hasAccessToVoting';
+  private readonly REQUEST_ACCESS = '/requestAccessToVoting';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -88,6 +90,20 @@ export class AuthService { //TODO: Split to business specific services
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.USER_DETAILS, {headers});
+  }
+
+  hasAccessToVoting(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const params = new HttpParams().set('voting', id);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.HAS_ACCESS, {params, headers});
+  }
+
+  requestAccessToVoting(votingId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.REQUEST_ACCESS, {votingId}, httpOptions);
   }
 
   getSuggestedVotings(): Observable<any> {
