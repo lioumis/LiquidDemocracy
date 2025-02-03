@@ -3,7 +3,7 @@
 <p-breadcrumb
   class="max-w-full"
   [model]="items"
-  [home]="home" />
+  [home]="home"/>
 
 <div class="dashboard">
 
@@ -142,18 +142,19 @@
 
         <div class="form-group">
           <label for="voting">Ψηφοφορία</label>
-          <p-dropdown
-            #dropdown
-            id="voting"
-            [options]="votings"
-            [panelStyleClass]="'upwards-panel'"
-            [style]="{'width':'100%'}"
-            [(ngModel)]="selectedVoting"
-            placeholder="Ψηφοφορία"
-            formControlName="voting"
-            (onChange)="onVotingChange($event)"/>
+          @if (allowDropdown) {
+            <p-dropdown
+              #dropdown
+              id="voting"
+              [options]="votings"
+              [panelStyleClass]="'upwards-panel'"
+              [style]="{'width':'100%'}"
+              [(ngModel)]="selectedVoting"
+              placeholder="Ψηφοφορία"
+              formControlName="voting"
+              (onChange)="onVotingChange($event)"/>
+          }
           <!--          TODO: Find a way to make the dropdown open upwards with 'upwards-panel' or remove and move the Νέα ανάθεση panel to the top-->
-          <!--          TODO: Close dropdown after a value is selected or user clicks outside.-->
 
           @if (delegationForm.get('voting')?.invalid && delegationForm.get('voting')?.touched) {
             <div>

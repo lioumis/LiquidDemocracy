@@ -22,4 +22,14 @@ public enum Role {
         }
         throw new IllegalArgumentException("Invalid ID for Role: " + id);
     }
+
+    public static Role fromName(String name) {
+        for (Role role : values()) {
+            if (role.getName().equalsIgnoreCase(name)) {
+                return role;
+            }
+        }
+        throw new IllegalArgumentException("Invalid name for Role: " + name);
+    }
+
 }

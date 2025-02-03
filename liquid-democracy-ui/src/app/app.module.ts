@@ -14,6 +14,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RouterModule} from "@angular/router";
 import {VotingsComponent} from "./votings/votings.component";
 import {VotingComponent} from "./votings/voting/voting.component";
+import {AdministrationComponent} from "./administration/administration.component";
 
 @NgModule({
   declarations: [],
@@ -32,6 +33,7 @@ import {VotingComponent} from "./votings/voting/voting.component";
     PasswordResetComponent,
     VotingsComponent,
     VotingComponent,
+    AdministrationComponent,
     BrowserAnimationsModule
   ],
   providers: [MessageService]

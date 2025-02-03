@@ -3,6 +3,7 @@ package gr.upatras.ceid.ld.controller;
 import gr.upatras.ceid.ld.dto.TopicDto;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
+import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.service.AuthorizationService;
 import gr.upatras.ceid.ld.service.TopicService;
 import org.springframework.http.HttpStatus;
@@ -11,9 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/topics")
@@ -55,7 +54,7 @@ public class TopicController {
     }
 
     @PostMapping("/createTopic")
-    public ResponseEntity<Object> createTopic(@RequestBody TopicDto topicDto) {
+    public ResponseEntity<Map<String, String>> createTopic(@RequestBody TopicDto topicDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
@@ -66,9 +65,21 @@ public class TopicController {
             }
 
             topicService.createTopic(topicDto.name());
-            return ResponseEntity.status(HttpStatus.OK).body("Το θέμα δημιουργήθηκε με επιτυχία");
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Το θέμα δημιουργήθηκε με επιτυχία");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 }

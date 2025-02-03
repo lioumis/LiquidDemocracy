@@ -46,6 +46,8 @@ export class DelegationsComponent implements OnInit {
 
   loading: boolean = true;
 
+  allowDropdown: boolean = true;
+
   items: MenuItem[] = [
     {label: 'Αναθέσεις'}
   ];
@@ -84,14 +86,20 @@ export class DelegationsComponent implements OnInit {
     });
 
     this.loadTable();
-
-    this.loading = false;
   }
 
   onVotingChange(event: any) {
     this.selectedVoting = event.value;
+    this.resetDropdown();
+  }
+
+  resetDropdown() {
     if (this.dropdown) {
+      this.allowDropdown = false;
       this.dropdown.overlayVisible = false;
+      setTimeout(() => {
+        this.allowDropdown = true;
+      }, 0);
     }
   }
 
@@ -131,6 +139,7 @@ export class DelegationsComponent implements OnInit {
   }
 
   loadTable() {
+    this.loading = true;
     this.authService.getDelegations().subscribe({
       next: (response) => {
         this.delegations = response;
@@ -144,14 +153,14 @@ export class DelegationsComponent implements OnInit {
         });
       }
     });
+    this.loading = false;
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
-    if (this.dropdown && !this.dropdown.el.nativeElement.contains(target)) {
-      this.dropdown.overlayVisible = true;
-      this.dropdown.overlayVisible = false;
+    if (this.dropdown && this.dropdown.overlayVisible && !this.dropdown.el.nativeElement.contains(target)) {
+      this.resetDropdown();
     }
   }
 }

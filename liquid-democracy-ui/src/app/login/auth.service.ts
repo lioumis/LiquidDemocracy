@@ -14,7 +14,9 @@ export class AuthService { //TODO: Split to business specific services
   private readonly RESET = '/resetPassword';
   private readonly SECURITY_QUESTION = '/getSecurityQuestion';
   private readonly USER_DETAILS = '/getUserDetails';
+  private readonly ALL_USER_DETAILS = '/getAllUserDetails';
   private readonly CHANGE_PASSWORD = '/changePassword';
+  private readonly ADD_ROLE = '/addRole';
 
   private readonly VOTINGS = '/votings';
   private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
@@ -31,6 +33,7 @@ export class AuthService { //TODO: Split to business specific services
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
+  private readonly CREATE_TOPIC = '/createTopic';
 
   private readonly DELEGATIONS = '/delegations';
   private readonly MY_DELEGATIONS = '/getDelegations';
@@ -77,6 +80,20 @@ export class AuthService { //TODO: Split to business specific services
     }, httpOptions);
   }
 
+  createTopic(name: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.TOPICS + this.CREATE_TOPIC, {name}, httpOptions);
+  }
+
+  addRole(role: string, userId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.ADD_ROLE, {role, userId}, httpOptions);
+  }
+
   reset(username: string, email: string, newPassword: string, securityAnswer: string): Observable<any> {
     return this.http.post(this.API_REL_PATH + this.RESET, {username, email, newPassword, securityAnswer});
   }
@@ -90,6 +107,12 @@ export class AuthService { //TODO: Split to business specific services
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.USER_DETAILS, {headers});
+  }
+
+  getAllUserDetails(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.get(this.API_REL_PATH + this.ALL_USER_DETAILS, {headers});
   }
 
   hasAccessToVoting(id: number): Observable<any> {

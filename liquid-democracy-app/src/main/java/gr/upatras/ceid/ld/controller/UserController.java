@@ -116,7 +116,7 @@ public class UserController {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            userService.addRole(roleDto.username(), roleDto.role().intValue());
+            userService.addRole(roleDto.userId(), roleDto.role());
             Map<String, String> response = new HashMap<>();
             response.put("message", "Ο ρόλος ανατέθηκε επιτυχώς");
             return ResponseEntity.status(HttpStatus.OK).body(response);

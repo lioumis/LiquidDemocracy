@@ -87,25 +87,25 @@ public class UserService implements UserDetailsService {
 
     public UserInformationDto getUserDetails(String username) throws ValidationException {
         UserEntity user = findUser(username);
-        return new UserInformationDto(user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
+        return new UserInformationDto(user.getId(), user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
                 user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
     }
 
     public List<UserInformationDto> getAllUserDetails() {
         return userRepository.findAll().stream().map(user ->
-                new UserInformationDto(user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
+                new UserInformationDto(user.getId(), user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
                         user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))).toList();
 
     }
 
     @Transactional
-    public void addRole(String username, int roleId) throws ValidationException {
-        UserEntity user = userRepository.findByUsername(username)
+    public void addRole(Long userId, String roleString) throws ValidationException {
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
 
         Role role;
         try {
-            role = Role.fromId(roleId);
+            role = Role.fromName(roleString);
         } catch (IllegalArgumentException e) {
             throw new ValidationException("Ο ρόλος δεν βρέθηκε");
         }

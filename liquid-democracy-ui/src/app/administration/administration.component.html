@@ -1,0 +1,203 @@
+<p-toast></p-toast>
+
+<p-breadcrumb
+  class="max-w-full"
+  [model]="items"
+  [home]="home"/>
+
+<div class="dashboard">
+  <p-tabView>
+    <p-tabPanel header="Χρήστες & Ρόλοι" [cache]="false">
+      <ng-template pTemplate="content">
+        <p-table
+          #dt
+          [value]="userDetails"
+          [rows]="5"
+          [loading]="loading"
+          [paginator]="true"
+          selectionMode="single"
+          [(selection)]="selectedUser"
+          dataKey="username"
+          [globalFilterFields]="['name', 'surname', 'username', 'email', 'roles']"
+          [tableStyle]="{ 'min-width': '100rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name" class="center" style="width:20%">
+                Όνομα
+                <p-sortIcon field="name"/>
+              </th>
+              <th pSortableColumn="surname" class="center" style="width:20%">
+                Επώνυμο
+                <p-sortIcon field="surname"/>
+              </th>
+              <th pSortableColumn="username" class="center" style="width:20%">
+                Όνομα χρήστη
+                <p-sortIcon field="username"/>
+              </th>
+              <th pSortableColumn="email" class="center" style="width:20%">
+                Διεύθυνση Email
+                <p-sortIcon field="email"/>
+              </th>
+              <th pSortableColumn="roles" class="center" style="width:20%">
+                Ρόλοι
+                <p-sortIcon field="roles"/>
+              </th>
+            </tr>
+            <tr>
+              <th>
+                <p-columnFilter
+                  [showMenu]="false"
+                  type="text"
+                  field="name"
+                  placeholder="Όνομα"
+                  ariaLabel="Filter Name"/>
+              </th>
+              <th>
+                <p-columnFilter
+                  [showMenu]="false"
+                  type="text"
+                  field="surname"
+                  placeholder="Επώνυμο"
+                  ariaLabel="Filter Surname"/>
+              </th>
+              <th>
+                <p-columnFilter
+                  [showMenu]="false"
+                  type="text"
+                  field="username"
+                  placeholder="Όνομα χρήστη"
+                  ariaLabel="Filter username"/>
+              </th>
+              <th>
+                <p-columnFilter
+                  [showMenu]="false"
+                  type="text"
+                  field="email"
+                  placeholder="Διεύθυνση Email"
+                  ariaLabel="Filter email"/>
+              </th>
+              <th>
+                <p-columnFilter field="roles" matchMode="customArray" [showMenu]="false">
+                  <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                    <p-multiSelect
+                      [ngModel]="value"
+                      [options]="allRoles"
+                      placeholder="Ρόλοι"
+                      (onChange)="filter($event.value)"
+                      [maxSelectedLabels]=1
+                      selectedItemsLabel="{0} ρόλοι επιλέχθηκαν"
+                      optionLabel="">
+                      <ng-template let-option pTemplate="item">
+                        <div class="inline-block vertical-align-middle">
+                          {{ option }}
+                        </div>
+                      </ng-template>
+                    </p-multiSelect>
+                  </ng-template>
+                </p-columnFilter>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-user>
+            <tr [pSelectableRow]="user">
+              <td>
+                {{ user.name }}
+              </td>
+              <td>
+                {{ user.surname }}
+              </td>
+              <td>
+                {{ user.username }}
+              </td>
+              <td>
+                {{ user.email }}
+              </td>
+              <td>
+                {{ user.roles.join(', ') }}
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4">Δεν βρέθηκαν χρήστες</td>
+            </tr>
+          </ng-template>
+        </p-table>
+        <div class="table-button-container">
+          <p-button (onClick)="assignRole()" [disabled]="!selectedUser" label="Ανάθεση ρόλου"></p-button>
+        </div>
+      </ng-template>
+    </p-tabPanel>
+    <p-tabPanel header="Θεματικές Περιοχές" [cache]="false">
+      <ng-template pTemplate="content">
+        <div class="card flex justify-content-center">
+          <p-scroller
+            [items]="topics"
+            [itemSize]="50"
+            scrollHeight="400px"
+            styleClass="border-1 surface-border"
+            [style]="{'width': '300px', 'height': '400px'}">
+            <ng-template pTemplate="item" let-item let-options="options">
+              <div class="flex align-items-center p-2" [ngClass]="{ 'surface-ground': options.odd }"
+                   style="height: 50px;">
+                {{ item }}
+              </div>
+            </ng-template>
+          </p-scroller>
+        </div>
+        <form [formGroup]="newTopicForm" (ngSubmit)="onTopicSubmit()" class="form">
+          <div class="form-group">
+            <label for="name">Όνομα Θεματικής Περιοχής</label>
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+            />
+            @if (newTopicForm.get('name')?.invalid && newTopicForm.get('name')?.touched) {
+              <div>
+                <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+          </div>
+
+          <p></p>
+
+          <div class="button-container">
+            <p-button type="submit" [disabled]="newTopicForm.invalid" label="Δημιουργία"></p-button>
+          </div>
+
+        </form>
+      </ng-template>
+
+    </p-tabPanel>
+    <p-tabPanel header="Νέα ψηφοφορία" [cache]="false">
+      <ng-template pTemplate="content">New voting</ng-template>
+    </p-tabPanel>
+  </p-tabView>
+</div>
+
+@if (allowDialog) {
+  <p-dialog header="Ανάθεση ρόλου" draggable="false" closable="false" [modal]="true" [(visible)]="roleDialogVisible"
+            [style]="{ width: '25rem', height: '17rem' }">
+    <div class="dialog-content">
+      @if (allowDropdown) {
+        <p-dropdown
+          #dropdown
+          id="voting"
+          [options]="allRoles"
+          [style]="{'width':'100%', 'z-index':'1050', 'margin-bottom':'15px'}"
+          [(ngModel)]="selectedRole"
+          placeholder="Ρόλος"
+          (onChange)="onRoleChange()"
+        />
+      }
+      <div class="p-text-secondary block mb-5">{{ selectedUser?.name }} {{ selectedUser?.surname }}</div>
+      <div class="p-text-secondary block mb-5">{{ selectedUser?.username }}</div>
+      <div class="p-text-secondary block mb-5">{{ selectedUser?.email }}</div>
+    </div>
+    <div class="dialog-button-container">
+      <p-button label="Άκυρο" severity="secondary" (onClick)="this.resetRoleDialog()"/>
+      <p-button label="Αποθήκευση" [disabled]="!selectedRole" (onClick)="this.addRole()"/>
+    </div>
+  </p-dialog>
+}
