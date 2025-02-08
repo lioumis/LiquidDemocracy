@@ -135,10 +135,10 @@
             {{ voting.topic }}
           </td>
           <td>
-            {{ voting.startDate | date: 'dd/MM/yyyy' }}
+            {{ voting.startDate ? (voting.startDate | date: 'dd/MM/yyyy') : '' }}
           </td>
           <td>
-            {{ voting.endDate | date: 'dd/MM/yyyy' }}
+            {{ voting.endDate ? (voting.endDate | date: 'dd/MM/yyyy') : '' }}
           </td>
           <td class="center">
             {{ voting.hasVoted }}

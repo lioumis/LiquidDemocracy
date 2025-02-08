@@ -558,6 +558,9 @@ public class VotingService {
     }
 
     private String toString(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return "";
+        }
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
         return localDateTime.format(formatter);
     }

@@ -85,8 +85,8 @@ export class VotingsComponent implements OnInit {
       next: (response) => {
         this.votings = response.map((voting: Voting) => ({
           ...voting,
-          startDate: new Date(voting.startDate),
-          endDate: new Date(voting.endDate),
+          startDate: voting.startDate ? new Date(voting.startDate) : null,
+          endDate: voting.endDate ? new Date(voting.endDate) : null,
           hasVoted: voting.hasVoted ? 'Ναι' : 'Όχι',
         }));
       },

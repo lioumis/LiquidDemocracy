@@ -128,15 +128,15 @@
         </div>
       </ng-template>
     </p-tabPanel>
+
     <p-tabPanel header="Θεματικές Περιοχές" [cache]="false">
       <ng-template pTemplate="content">
-        <div class="card flex justify-content-center">
+        <div class="card flex flex-column align-items-center gap-4">
           <p-scroller
             [items]="topics"
             [itemSize]="50"
             scrollHeight="400px"
-            styleClass="border-1 surface-border"
-            [style]="{'width': '300px', 'height': '400px'}">
+            styleClass="border-1 surface-border scroller">
             <ng-template pTemplate="item" let-item let-options="options">
               <div class="flex align-items-center p-2" [ngClass]="{ 'surface-ground': options.odd }"
                    style="height: 50px;">
@@ -145,8 +145,9 @@
             </ng-template>
           </p-scroller>
         </div>
-        <form [formGroup]="newTopicForm" (ngSubmit)="onTopicSubmit()" class="form">
-          <div class="form-group">
+
+        <form [formGroup]="newTopicForm" (ngSubmit)="onTopicSubmit()" class="topic-form-container">
+          <div class="voting-form-group">
             <label for="name">Όνομα Θεματικής Περιοχής</label>
             <input
               type="text"
@@ -162,7 +163,7 @@
 
           <p></p>
 
-          <div class="button-container">
+          <div class="topic-button-container">
             <p-button type="submit" [disabled]="newTopicForm.invalid" label="Δημιουργία"></p-button>
           </div>
 
@@ -170,7 +171,7 @@
       </ng-template>
 
     </p-tabPanel>
-    <p-tabPanel header="Νέα ψηφοφορία" [cache]="false">
+    <p-tabPanel header="Νέα Ψηφοφορία" [cache]="false">
       <ng-template pTemplate="content">
         <form [formGroup]="newVotingForm" (ngSubmit)="onSubmit()" class="form-container">
           <div class="voting-form-group">

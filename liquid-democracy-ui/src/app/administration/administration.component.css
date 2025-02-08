@@ -104,3 +104,28 @@ p-multiselect-panel {
   justify-content: space-between;
   margin-top: 20px;
 }
+
+.card {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+}
+
+.scroller {
+  width: 100%;
+  max-width: 300px;
+}
+
+.topic-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  padding-top: 3.5%;
+}
+
+.topic-button-container {
+  text-align: center;
+}
