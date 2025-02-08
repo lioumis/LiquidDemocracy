@@ -294,13 +294,13 @@ export class AdministrationComponent implements OnInit {
 
   duplicateValuesValidator(fields: string[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const values = fields.map(field => control.get(field)?.value.toLowerCase());
+      const values = fields.map(field => control.get(field)?.value?.toLowerCase());
       const duplicates = values.filter((value, index, arr) => value && arr.indexOf(value) !== index);
 
       fields.forEach(field => {
         const fieldControl = control.get(field);
         if (fieldControl) {
-          const isDuplicate = duplicates.includes(fieldControl.value.toLowerCase());
+          const isDuplicate = duplicates.includes(fieldControl.value?.toLowerCase());
           if (isDuplicate) {
             fieldControl.setErrors({...fieldControl.errors, duplicate: true});
           } else {
