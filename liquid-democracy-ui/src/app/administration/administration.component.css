@@ -79,3 +79,28 @@ p-multiselect-panel {
 .center {
   text-align: center;
 }
+
+
+.left-button {
+  padding-right: 20px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.voting-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.voting-button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}

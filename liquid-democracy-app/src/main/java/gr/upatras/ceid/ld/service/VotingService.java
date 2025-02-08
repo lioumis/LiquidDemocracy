@@ -6,6 +6,7 @@ import gr.upatras.ceid.ld.enums.Action;
 import gr.upatras.ceid.ld.enums.VotingType;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
+import gr.upatras.ceid.ld.exception.VotingCreationException;
 import gr.upatras.ceid.ld.repository.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -156,7 +157,7 @@ public class VotingService {
     }
 
     @Transactional
-    public void initializeVoting(String username, VotingInitializationDto votingInitializationDto) throws ValidationException {
+    public void initializeVoting(String username, VotingInitializationDto votingInitializationDto) throws ValidationException, VotingCreationException {
         if (votingInitializationDto == null) {
             throw new ValidationException("Εσφαλμένα δεδομένα");
         }
@@ -176,22 +177,31 @@ public class VotingService {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
 
-        TopicEntity topic = topicRepository.findById(votingInitializationDto.topic())
+        TopicEntity topic = topicRepository.findByTitle(votingInitializationDto.topic())
                 .orElseThrow(() -> new ValidationException("Η θεματική περιοχή δεν βρέθηκε"));
 
         if (votingRepository.existsByNameIgnoreCase(votingInitializationDto.name())) {
             throw new ValidationException("Υπάρχει ήδη ψηφοφορία με αυτό το όνομα");
         }
 
+        Map<Integer, String> errorMetaData = new HashMap<>();
         Set<UserEntity> committee = new HashSet<>();
 
         for (int i = 0; i < votingInitializationDto.committee().size(); i++) {
             String usernameString = votingInitializationDto.committee().get(i);
-            UserEntity member = userRepository.findByUsername(usernameString)
-                    .orElseThrow(() -> new ValidationException("Το μέλος δεν βρέθηκε")); //TODO: Handle committee roles
-            committee.add(member);
+            Optional<UserEntity> memberOptional = userRepository.findByUsername(usernameString);
+            if (memberOptional.isEmpty()) {
+                errorMetaData.put(i, "Το μέλος δεν βρέθηκε");//TODO: Handle committee roles
+            } else {
+                if (!committee.add(memberOptional.get())) {
+                    throw new ValidationException("Παρακαλώ εισάγετε διαφορετικούς χρήστες");
+                }
+            }
         }
 
+        if (!errorMetaData.isEmpty()) {
+            throw new VotingCreationException("Τουλάχιστον ένα από τα μέλη δεν βρέθηκε", errorMetaData);
+        }
 
         VotingEntity votingEntity = new VotingEntity(votingInitializationDto.name(), topic, committee);
 

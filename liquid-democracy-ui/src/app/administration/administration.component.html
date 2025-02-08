@@ -171,7 +171,124 @@
 
     </p-tabPanel>
     <p-tabPanel header="Νέα ψηφοφορία" [cache]="false">
-      <ng-template pTemplate="content">New voting</ng-template>
+      <ng-template pTemplate="content">
+        <form [formGroup]="newVotingForm" (ngSubmit)="onSubmit()" class="form-container">
+          <div class="voting-form-group">
+            <label for="votingName">Όνομα Ψηφοφορίας</label>
+            <input
+              type="text"
+              id="votingName"
+              formControlName="votingName"
+            />
+            @if (newVotingForm.get('votingName')?.invalid && newVotingForm.get('votingName')?.touched) {
+              <div>
+                <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+          </div>
+
+          <div class="voting-form-group">
+            <label for="topic">Θεματική Περιοχή</label>
+            @if (allowTopicDropdown) {
+              <p-dropdown
+                #topicDropdown
+                id="topic"
+                [options]="topics"
+                [panelStyleClass]="'upwards-panel'"
+                [style]="{'width':'100%'}"
+                [(ngModel)]="selectedTopic"
+                placeholder="Θεματική Περιοχή"
+                formControlName="topic"
+                (onChange)="onTopicChange($event)"/>
+            }
+
+            @if (newVotingForm.get('topic')?.invalid && newVotingForm.get('topic')?.touched) {
+              <div>
+                <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+          </div>
+
+          <div class="voting-form-group">
+            <label for="member1">Εφορευτική Επιτροπή (Όνομα Χρήστη)</label>
+            <input
+              type="text"
+              id="member1"
+              formControlName="member1"
+            />
+            @if (newVotingForm.get('member1')?.errors?.['required'] && newVotingForm.get('member1')?.touched) {
+              <div>
+                <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+            @if (newVotingForm.get('member1')?.errors?.['backend']) {
+              <div>
+                <small class="error">{{ newVotingForm.get('member1')?.errors?.['backend'] }}</small>
+              </div>
+            }
+            @if (newVotingForm.get('member1')?.errors?.['duplicate']) {
+              <div>
+                <small class="error">Ο χρήστης υπάρχει ήδη σε άλλο πεδίο</small>
+              </div>
+            }
+          </div>
+
+          <div class="voting-form-group">
+            <input
+              type="text"
+              id="member2"
+              formControlName="member2"
+            />
+            @if (newVotingForm.get('member2')?.errors?.['required'] && newVotingForm.get('member2')?.touched) {
+              <div>
+                <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+            @if (newVotingForm.get('member2')?.errors?.['backend']) {
+              <div>
+                <small class="error">{{ newVotingForm.get('member2')?.errors?.['backend'] }}</small>
+              </div>
+            }
+            @if (newVotingForm.get('member2')?.errors?.['duplicate']) {
+              <div>
+                <small class="error">Ο χρήστης υπάρχει ήδη σε άλλο πεδίο</small>
+              </div>
+            }
+          </div>
+
+          <div class="voting-form-group">
+            <input
+              type="text"
+              id="member3"
+              formControlName="member3"
+            />
+            @if (newVotingForm.get('member3')?.errors?.['required'] && newVotingForm.get('member3')?.touched) {
+              <div>
+                <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+            @if (newVotingForm.get('member3')?.errors?.['backend']) {
+              <div>
+                <small class="error">{{ newVotingForm.get('member3')?.errors?.['backend'] }}</small>
+              </div>
+            }
+            @if (newVotingForm.get('member3')?.errors?.['duplicate']) {
+              <div>
+                <small class="error">Ο χρήστης υπάρχει ήδη σε άλλο πεδίο</small>
+              </div>
+            }
+          </div>
+
+          <p></p>
+
+          <div class="voting-button-container">
+            <p-button (onClick)="resetVotingForm()" severity="secondary"
+                      label="Επαναφορά"></p-button>
+            <p-button type="submit" [disabled]="newVotingForm.invalid" label="Δημιουργία"></p-button>
+          </div>
+
+        </form>
+      </ng-template>
     </p-tabPanel>
   </p-tabView>
 </div>

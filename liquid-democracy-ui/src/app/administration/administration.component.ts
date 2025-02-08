@@ -7,7 +7,16 @@ import {TabViewModule} from "primeng/tabview";
 import {Topic} from "../dashboard/dashboard.component";
 import {ScrollerModule} from "primeng/scroller";
 import {NgClass} from "@angular/common";
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from "@angular/forms";
 import {Button} from "primeng/button";
 import {Dropdown, DropdownModule} from "primeng/dropdown";
 import {MultiSelectModule} from "primeng/multiselect";
@@ -40,6 +49,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 export class AdministrationComponent implements OnInit {
   @ViewChild('dt') dt: Table | undefined;
   @ViewChild('dropdown') dropdown: Dropdown | undefined;
+  @ViewChild('topicDropdown') topicDropdown: Dropdown | undefined;
 
   items: MenuItem[] = [
     {label: 'Διαχείριση'}
@@ -50,6 +60,8 @@ export class AdministrationComponent implements OnInit {
   topics: string[] = [];
 
   newTopicForm: FormGroup;
+
+  newVotingForm: FormGroup;
 
   userDetails: UserDetails[] = [];
 
@@ -72,12 +84,25 @@ export class AdministrationComponent implements OnInit {
 
   allowDropdown: boolean = true;
 
+  allowTopicDropdown: boolean = true;
+
+  selectedTopic: string = '';
+
   constructor(private readonly authService: AuthService,
               private readonly messageService: MessageService,
               private readonly fb: FormBuilder,
               private readonly filterService: FilterService) {
     this.newTopicForm = this.fb.group({
       name: ['', Validators.required]
+    });
+    this.newVotingForm = this.fb.group({
+      votingName: ['', Validators.required],
+      topic: ['', Validators.required],
+      member1: ['', Validators.required],
+      member2: ['', Validators.required],
+      member3: ['', Validators.required]
+    }, {
+      validators: this.duplicateValuesValidator(['member1', 'member2', 'member3'])
     });
   }
 
@@ -159,6 +184,60 @@ export class AdministrationComponent implements OnInit {
     }
   }
 
+  onTopicChange(event: any) {
+    this.selectedTopic = event.value;
+    this.resetDropdown();
+  }
+
+  resetDropdown() {
+    if (this.topicDropdown) {
+      this.allowTopicDropdown = false;
+      this.topicDropdown.overlayVisible = false;
+      setTimeout(() => {
+        this.allowTopicDropdown = true;
+      }, 0);
+    }
+  }
+
+  resetVotingForm() {
+    this.newVotingForm.reset();
+  }
+
+  onSubmit(): void {
+    this.messageService.clear();
+    if (this.newVotingForm.valid) {
+      const {votingName, topic, member1, member2, member3} = this.newVotingForm.value;
+      this.authService.createNewVoting(votingName, topic, [member1, member2, member3]).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: 'Η ψηφοφορία δημιουργήθηκε επιτυχώς'
+          });
+          this.resetVotingForm();
+        },
+        error: (error) => {
+          console.error('Delegation failed', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Αποτυχία',
+            detail: error.error.error
+          });
+
+          Object.keys(error.error).forEach(key => {
+            if (key.startsWith('member')) {
+              const index = parseInt(key.replace('member', ''), 10);
+              const control = this.newVotingForm.get(`member${index + 1}`);
+              if (control) {
+                control.setErrors({backend: error.error[key]});
+              }
+            }
+          });
+        }
+      });
+    }
+  }
+
   addRole() {
     if (this.selectedRole && this.selectedUser) {
       this.authService.addRole(this.selectedRole, this.selectedUser.id).subscribe({
@@ -208,6 +287,35 @@ export class AdministrationComponent implements OnInit {
     if (this.dropdown && this.dropdown.overlayVisible && !this.dropdown.el.nativeElement.contains(target)) {
       this.onRoleChange();
     }
+    if (this.topicDropdown && this.topicDropdown.overlayVisible && !this.topicDropdown.el.nativeElement.contains(target)) {
+      this.resetDropdown();
+    }
+  }
+
+  duplicateValuesValidator(fields: string[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const values = fields.map(field => control.get(field)?.value.toLowerCase());
+      const duplicates = values.filter((value, index, arr) => value && arr.indexOf(value) !== index);
+
+      fields.forEach(field => {
+        const fieldControl = control.get(field);
+        if (fieldControl) {
+          const isDuplicate = duplicates.includes(fieldControl.value.toLowerCase());
+          if (isDuplicate) {
+            fieldControl.setErrors({...fieldControl.errors, duplicate: true});
+          } else {
+            if (fieldControl.errors) {
+              const {duplicate, ...remainingErrors} = fieldControl.errors;
+              fieldControl.setErrors(Object.keys(remainingErrors).length > 0 ? remainingErrors : null);
+            } else {
+              fieldControl.setErrors(null);
+            }
+          }
+        }
+      });
+
+      return duplicates.length > 0 ? {duplicateValues: true} : null;
+    };
   }
 
 }

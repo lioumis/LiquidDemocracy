@@ -4,6 +4,7 @@ import gr.upatras.ceid.ld.dto.*;
 import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
+import gr.upatras.ceid.ld.exception.VotingCreationException;
 import gr.upatras.ceid.ld.service.AuthorizationService;
 import gr.upatras.ceid.ld.service.VotingService;
 import org.springframework.http.HttpStatus;
@@ -263,7 +264,7 @@ public class VotingController {
     }
 
     @PostMapping("/initializeVoting")
-    public ResponseEntity<String> initializeVoting(@RequestBody VotingInitializationDto votingInitializationDto) {
+    public ResponseEntity<Map<String, String>> initializeVoting(@RequestBody VotingInitializationDto votingInitializationDto) {
         try {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -271,15 +272,28 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
 
             votingService.initializeVoting(authorizedUsername, votingInitializationDto);
+        } catch (VotingCreationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            e.getMetadata().forEach((index, message) -> errorResponse.put("member" + index, message));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Η ψηφοφορία δημιουργήθηκε επιτυχώς");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Η ψηφοφορία δημιουργήθηκε επιτυχώς");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/editVoting")

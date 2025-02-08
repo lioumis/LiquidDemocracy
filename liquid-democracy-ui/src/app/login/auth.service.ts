@@ -30,6 +30,7 @@ export class AuthService { //TODO: Split to business specific services
   private readonly FEEDBACK = '/feedback';
   private readonly HAS_ACCESS = '/hasAccessToVoting';
   private readonly REQUEST_ACCESS = '/requestAccessToVoting';
+  private readonly NEW_VOTING = '/initializeVoting';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -85,6 +86,13 @@ export class AuthService { //TODO: Split to business specific services
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const httpOptions = {headers}
     return this.http.post(this.API_REL_PATH + this.TOPICS + this.CREATE_TOPIC, {name}, httpOptions);
+  }
+
+  createNewVoting(name: string, topic: string, committee: string[]): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.NEW_VOTING, {name, topic, committee}, httpOptions);
   }
 
   addRole(role: string, userId: number): Observable<any> {

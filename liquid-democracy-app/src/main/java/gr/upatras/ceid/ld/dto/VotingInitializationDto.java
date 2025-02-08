@@ -4,7 +4,7 @@ import java.util.List;
 
 public record VotingInitializationDto(
         String name,
-        Long topic,
+        String topic,
         List<String> committee
 ) {
 }

@@ -25,15 +25,14 @@ public class VotingEntity {
     private String name;
 
     @Setter
-    @Column(nullable = false)
     private String information;
 
     @Setter
-    @Column(nullable = false)
+    @Column
     private LocalDateTime startDate;
 
     @Setter
-    @Column(nullable = false)
+    @Column
     private LocalDateTime endDate;
 
     @OneToMany(mappedBy = "voting")
@@ -54,7 +53,7 @@ public class VotingEntity {
     private List<DelegationEntity> delegations;
 
     @ManyToOne
-    @JoinColumn(name = "topic_id")
+    @JoinColumn(name = "topic_id", nullable = false)
     private TopicEntity topic;
 
     @OneToMany(mappedBy = "voting", cascade = CascadeType.ALL)
