@@ -54,6 +54,8 @@ export class VotingComponent implements OnInit {
 
   comments: Comment[] = [];
 
+  allFeedback: string[] = [];
+
   newComment: string = '';
 
   feedback: string = '';
@@ -140,6 +142,10 @@ export class VotingComponent implements OnInit {
 
           if (this.votingDetails?.feedback) {
             this.feedback = this.votingDetails?.feedback;
+          }
+
+          if (this.localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+            this.loadFeedback();
           }
 
           this.items = [
@@ -251,6 +257,24 @@ export class VotingComponent implements OnInit {
       this.authService.getDiscussion(this.votingId).subscribe({
         next: (response) => {
           this.comments = response;
+        },
+        error: (error) => {
+          console.error('Σφάλμα:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
+    }
+  }
+
+  loadFeedback() {
+    if (this.votingId && this.isExpired()) {
+      this.authService.getFeedback(this.votingId).subscribe({
+        next: (response: Feedback[]) => {
+          this.allFeedback = response.map(item => item.feedback);
         },
         error: (error) => {
           console.error('Σφάλμα:', error);
@@ -560,4 +584,8 @@ export interface ParticipationRequest {
   name: string;
   surname: string;
   username: string;
+}
+
+export interface Feedback {
+  feedback: string;
 }

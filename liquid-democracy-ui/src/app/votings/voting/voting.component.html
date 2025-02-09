@@ -306,22 +306,32 @@
         </div>
       </p-panel>
 
-      <p-panel header="Προτάσεις & Ανατροφοδότηση" class="feedback-panel">
-        <div class="feedback-content">
-          <p>Τι θα προτείνατε για να βελτιώσουμε τη διαδικασία ψηφοφορίας;</p>
-          <textarea
-            rows="5"
-            cols="30"
-            pInputTextarea
-            [(ngModel)]="feedback"
-            [disabled]="feedbackExists()"
-            [autoResize]="true"
-            placeholder="Υποβάλετε τα σχόλιά σας...">
+      @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+        <p-panel header="Προτάσεις & Ανατροφοδότηση" class="comments-panel">
+          <div class="comments">
+            <div class="comment" *ngFor="let feedback of allFeedback">
+              <p>{{ feedback }}</p>
+            </div>
+          </div>
+        </p-panel>
+      } @else {
+        <p-panel header="Προτάσεις & Ανατροφοδότηση" class="feedback-panel">
+          <div class="feedback-content">
+            <p>Τι θα προτείνατε για να βελτιώσουμε τη διαδικασία ψηφοφορίας;</p>
+            <textarea
+              rows="5"
+              cols="30"
+              pInputTextarea
+              [(ngModel)]="feedback"
+              [disabled]="feedbackExists()"
+              [autoResize]="true"
+              placeholder="Υποβάλετε τα σχόλιά σας...">
         </textarea>
-          <p-button type="button" [disabled]="checkFeedback()" class="submit-feedback-button" label="Αποστολή"
-                    (onClick)="submitFeedback()"></p-button>
-        </div>
-      </p-panel>
+            <p-button type="button" [disabled]="checkFeedback()" class="submit-feedback-button" label="Αποστολή"
+                      (onClick)="submitFeedback()"></p-button>
+          </div>
+        </p-panel>
+      }
     </div>
   }
 </div>

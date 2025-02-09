@@ -28,6 +28,7 @@ export class AuthService { //TODO: Split to business specific services
   private readonly REACT = '/react';
   private readonly VOTE = '/vote';
   private readonly FEEDBACK = '/feedback';
+  private readonly ALL_FEEDBACK = '/getFeedback';
   private readonly HAS_ACCESS = '/hasAccessToVoting';
   private readonly REQUEST_ACCESS = '/requestAccessToVoting';
   private readonly NEW_VOTING = '/initializeVoting';
@@ -178,6 +179,13 @@ export class AuthService { //TODO: Split to business specific services
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const params = new HttpParams().set('voting', id);
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.DISCUSSION, {params, headers});
+  }
+
+  getFeedback(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const params = new HttpParams().set('voting', id);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_FEEDBACK, {params, headers});
   }
 
   addComment(votingId: number, message: string): Observable<any> {
