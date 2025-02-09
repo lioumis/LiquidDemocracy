@@ -85,7 +85,7 @@ public class DelegationService {
             throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί");
         }
 
-        ParticipantEntity delegateParticipantEntity = participantRepository.findByUserAndVoting(delegator, voting)
+        ParticipantEntity delegateParticipantEntity = participantRepository.findByUserAndVoting(delegate, voting)
                 .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία"));
 
         if (!Boolean.TRUE.equals(delegateParticipantEntity.getStatus())) {

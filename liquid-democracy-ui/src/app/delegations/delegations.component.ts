@@ -1,7 +1,7 @@
 import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {MultiSelectModule} from "primeng/multiselect";
 import {PanelModule} from "primeng/panel";
-import {MenuItem, MessageService, PrimeTemplate} from "primeng/api";
+import {ConfirmationService, MenuItem, MessageService, PrimeTemplate} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Delegation, Voting} from "../dashboard/dashboard.component";
@@ -11,6 +11,7 @@ import {Button} from "primeng/button";
 import {ToastModule} from "primeng/toast";
 import {BreadcrumbModule} from "primeng/breadcrumb";
 import {Router} from "@angular/router";
+import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 @Component({
   selector: 'app-delegations',
@@ -25,9 +26,10 @@ import {Router} from "@angular/router";
     DropdownModule,
     ToastModule,
     Button,
-    BreadcrumbModule
+    BreadcrumbModule,
+    ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, MessageService, ConfirmationService],
   templateUrl: './delegations.component.html',
   styleUrl: './delegations.component.css'
 })
@@ -48,6 +50,8 @@ export class DelegationsComponent implements OnInit {
 
   allowDropdown: boolean = true;
 
+  showConfirmDialog: boolean = true;
+
   items: MenuItem[] = [
     {label: 'Αναθέσεις'}
   ];
@@ -56,6 +60,7 @@ export class DelegationsComponent implements OnInit {
 
   constructor(private readonly authService: AuthService,
               private readonly messageService: MessageService,
+              private readonly confirmationService: ConfirmationService,
               private readonly router: Router,
               private readonly fb: FormBuilder) {
     this.delegationForm = this.fb.group({
@@ -105,9 +110,13 @@ export class DelegationsComponent implements OnInit {
 
   onSubmit(): void {
     this.messageService.clear();
+    this.displayDialog();
+  }
+
+  createDelegation() {
     if (this.delegationForm.valid) {
       const {name, surname, voting} = this.delegationForm.value;
-      this.authService.createDelegation(name, surname, this.getVotingId(voting)).subscribe({ //TODO: Verification Pop-up!
+      this.authService.createDelegation(name, surname, this.getVotingId(voting)).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -122,7 +131,7 @@ export class DelegationsComponent implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Αποτυχία',
-            detail: error.error.error //TODO: This works here. Check other places.
+            detail: error.error.error
           });
         }
       });
@@ -154,6 +163,33 @@ export class DelegationsComponent implements OnInit {
       }
     });
     this.loading = false;
+  }
+
+  displayDialog() {
+    this.confirmationService.confirm({
+      acceptLabel: "Ναι",
+      rejectLabel: "Όχι",
+      message: 'Η ανάθεση ψήφου είναι μη αναστρέψιμη. Θέλετε να συνεχίσετε;',
+      header: 'Προσοχή!',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.createDelegation();
+        this.resetConfirmDialog();
+      },
+      reject: () => {
+        this.resetConfirmDialog();
+      }
+    });
+  }
+
+  resetConfirmDialog() {
+    this.showConfirmDialog = false;
+    setTimeout(() => {
+      this.showConfirmDialog = true;
+    }, 0);
   }
 
   @HostListener('document:click', ['$event'])

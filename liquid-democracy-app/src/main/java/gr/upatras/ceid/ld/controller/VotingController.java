@@ -62,7 +62,7 @@ public class VotingController {
 
     @GetMapping("/getVotings")
     public ResponseEntity<Object> getVotings() {
-        //TODO: Use the selected role. If part of the committee, display votings without dates
+        //TODO: Use the selected role. If part of the committee, display votings without dates or better, display only the votings that the user is part of.
         // Otherwise display only votings with dates.
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
