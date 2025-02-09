@@ -23,136 +23,223 @@
 
   @if (!isExpired()) {
     <div class="details">
-      <p-panel header="Επιλογές ({{getVotingTypeString(votingDetails?.votingType, votingDetails?.voteLimit)}})" class="vote-panel">
-        @if (votingDetails?.userVote) {
-          @if (votingDetails?.votingType === 1) {
-            <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-              @if (votingDetails?.delegated === false) {
-                <p>Η επιλογή σας (Άμεση)</p>
-              } @else if (votingDetails?.delegated === true) {
-                <p>Η επιλογή σας (Έμμεση)</p>
-              }
-              <div class="voting-option" *ngFor="let option of votingDetails?.results">
-                <p-radioButton
-                  [inputId]="option.option.title"
-                  [value]="option.option.title"
-                  formControlName="vote"/>
-                <div class="option-labels">
-                  <label [for]="option.option.title" class="option-title">
-                    {{ option.option.title }}
-                  </label>
-                  <span class="option-details">
+      <div class="left-column">
+        <p-panel header="Επιλογές ({{getVotingTypeString(votingDetails?.votingType, votingDetails?.voteLimit)}})"
+                 class="vote-panel">
+          @if (votingDetails?.userVote) {
+            @if (votingDetails?.votingType === 1) {
+              <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+                @if (votingDetails?.delegated === false) {
+                  <p>Η επιλογή σας (Άμεση)</p>
+                } @else if (votingDetails?.delegated === true) {
+                  <p>Η επιλογή σας (Έμμεση)</p>
+                }
+                <div class="voting-option" *ngFor="let option of votingDetails?.results">
+                  <p-radioButton
+                    [inputId]="option.option.title"
+                    [value]="option.option.title"
+                    formControlName="vote"/>
+                  <div class="option-labels">
+                    <label [for]="option.option.title" class="option-title">
+                      {{ option.option.title }}
+                    </label>
+                    <span class="option-details">
                   {{ option.option.details }}
                 </span>
+                  </div>
                 </div>
-              </div>
-              <p-button type="submit" [disabled]="true" class="button" label="Υποβολή"></p-button>
-            </form>
-          } @else if (votingDetails?.votingType === 2) {
-            <form class="flex flex-column gap-3" [formGroup]="multipleFormGroup" (ngSubmit)="onSubmitMultiple()">
-              @if (votingDetails?.delegated === false) {
-                <p>Η επιλογή σας (Άμεση)</p>
-              } @else if (votingDetails?.delegated === true) {
-                <p>Η επιλογή σας (Έμμεση)</p>
-              }
-              <div class="voting-option" *ngFor="let option of votingDetails?.results">
-                <p-checkbox
-                  [inputId]="option.option.title"
-                  [value]="option.option.title"
-                  formControlName="vote"/>
-                <div class="option-labels">
-                  <label [for]="option.option.title" class="option-title">
-                    {{ option.option.title }}
-                  </label>
-                  <span class="option-details">
+                <p-button type="submit" [disabled]="true" class="button" label="Υποβολή"></p-button>
+              </form>
+            } @else if (votingDetails?.votingType === 2) {
+              <form class="flex flex-column gap-3" [formGroup]="multipleFormGroup" (ngSubmit)="onSubmitMultiple()">
+                @if (votingDetails?.delegated === false) {
+                  <p>Η επιλογή σας (Άμεση)</p>
+                } @else if (votingDetails?.delegated === true) {
+                  <p>Η επιλογή σας (Έμμεση)</p>
+                }
+                <div class="voting-option" *ngFor="let option of votingDetails?.results">
+                  <p-checkbox
+                    [inputId]="option.option.title"
+                    [value]="option.option.title"
+                    formControlName="vote"/>
+                  <div class="option-labels">
+                    <label [for]="option.option.title" class="option-title">
+                      {{ option.option.title }}
+                    </label>
+                    <span class="option-details">
                   {{ option.option.details }}
                 </span>
+                  </div>
                 </div>
-              </div>
-              <p-button type="submit" [disabled]="true" class="button" label="Υποβολή"></p-button>
-            </form>
+                <p-button type="submit" [disabled]="true" class="button" label="Υποβολή"></p-button>
+              </form>
+            }
+          } @else {
+            @if (votingDetails?.votingType === 1) {
+              <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+                <div class="voting-option" *ngFor="let option of votingDetails?.results">
+                  <p-radioButton
+                    [inputId]="option.option.title"
+                    [value]="option.option.title"
+                    formControlName="vote"/>
+                  <div class="option-labels">
+                    <label [for]="option.option.title" class="option-title">
+                      {{ option.option.title }}
+                    </label>
+                    <span class="option-details">
+                  {{ option.option.details }}
+                </span>
+                  </div>
+                </div>
+                <p-button type="submit" [disabled]="formGroup.invalid" class="button" label="Υποβολή"></p-button>
+              </form>
+            } @else if (votingDetails?.votingType === 2) {
+              <form class="flex flex-column gap-3" [formGroup]="multipleFormGroup" (ngSubmit)="onSubmitMultiple()">
+                <div class="voting-option" *ngFor="let option of votingDetails?.results">
+                  <p-checkbox
+                    [inputId]="option.option.title"
+                    [value]="option.option.title"
+                    formControlName="vote"/>
+                  <div class="option-labels">
+                    <label [for]="option.option.title" class="option-title">
+                      {{ option.option.title }}
+                    </label>
+                    <span class="option-details">
+                  {{ option.option.details }}
+                </span>
+                  </div>
+                </div>
+                <p-button type="submit" [disabled]="multipleFormGroup.invalid" class="button"
+                          label="Υποβολή"></p-button>
+              </form>
+            }
           }
-        } @else {
-          @if (votingDetails?.votingType === 1) {
-            <form class="flex flex-column gap-3" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-              <div class="voting-option" *ngFor="let option of votingDetails?.results">
-                <p-radioButton
-                  [inputId]="option.option.title"
-                  [value]="option.option.title"
-                  formControlName="vote"/>
-                <div class="option-labels">
-                  <label [for]="option.option.title" class="option-title">
-                    {{ option.option.title }}
-                  </label>
-                  <span class="option-details">
-                  {{ option.option.details }}
-                </span>
-                </div>
-              </div>
-              <p-button type="submit" [disabled]="formGroup.invalid" class="button" label="Υποβολή"></p-button>
-            </form>
-          } @else if (votingDetails?.votingType === 2) {
-            <form class="flex flex-column gap-3" [formGroup]="multipleFormGroup" (ngSubmit)="onSubmitMultiple()">
-              <div class="voting-option" *ngFor="let option of votingDetails?.results">
-                <p-checkbox
-                  [inputId]="option.option.title"
-                  [value]="option.option.title"
-                  formControlName="vote"/>
-                <div class="option-labels">
-                  <label [for]="option.option.title" class="option-title">
-                    {{ option.option.title }}
-                  </label>
-                  <span class="option-details">
-                  {{ option.option.details }}
-                </span>
-                </div>
-              </div>
-              <p-button type="submit" [disabled]="multipleFormGroup.invalid" class="button" label="Υποβολή"></p-button>
-            </form>
-          }
-        }
-      </p-panel>
+        </p-panel>
 
-      <p-panel header="Συζήτηση" class="comments-panel">
-        <div class="comments">
-          <div class="comment" *ngFor="let comment of comments;">
-            <h4>{{ comment.name + " " + comment.surname }}</h4>
-            <p>{{ comment.message }}</p>
-            <div class="comment-actions">
-              <button
-                pButton
-                icon="pi pi-thumbs-up"
-                label="{{ comment.likes }}"
-                class="like-button"
-                [class.selected]="comment.userAction === true"
-                (click)="like(comment.id)"
-              ></button>
-              <button
-                pButton
-                icon="pi pi-thumbs-down"
-                label="{{ comment.dislikes }}"
-                class="dislike-button"
-                [class.selected]="comment.userAction === false"
-                (click)="dislike(comment.id)"
-              ></button>
+        @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+          <p-panel header="Αιτήματα Συμμετοχής" class="table-panel">
+            <p-table
+              #dt
+              [value]="requestDetails"
+              [rows]="5"
+              [loading]="loading"
+              [paginator]="true"
+              selectionMode="single"
+              [(selection)]="selectedRequest"
+              dataKey="username"
+              [globalFilterFields]="['name', 'surname', 'username']"
+              [tableStyle]="{ 'min-width': '10rem' }">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th pSortableColumn="name" class="center" style="width:33%">
+                    Όνομα
+                    <p-sortIcon field="name"/>
+                  </th>
+                  <th pSortableColumn="surname" class="center" style="width:33%">
+                    Επώνυμο
+                    <p-sortIcon field="surname"/>
+                  </th>
+                  <th pSortableColumn="username" class="center" style="width:33%">
+                    Όνομα χρήστη
+                    <p-sortIcon field="username"/>
+                  </th>
+                </tr>
+                <tr>
+                  <th>
+                    <p-columnFilter
+                      [showMenu]="false"
+                      type="text"
+                      field="name"
+                      placeholder="Όνομα"
+                      ariaLabel="Filter Name"/>
+                  </th>
+                  <th>
+                    <p-columnFilter
+                      [showMenu]="false"
+                      type="text"
+                      field="surname"
+                      placeholder="Επώνυμο"
+                      ariaLabel="Filter Surname"/>
+                  </th>
+                  <th>
+                    <p-columnFilter
+                      [showMenu]="false"
+                      type="text"
+                      field="username"
+                      placeholder="Όνομα χρήστη"
+                      ariaLabel="Filter username"/>
+                  </th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-request>
+                <tr [pSelectableRow]="request">
+                  <td>
+                    {{ request.name }}
+                  </td>
+                  <td>
+                    {{ request.surname }}
+                  </td>
+                  <td>
+                    {{ request.username }}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="4">Δεν βρέθηκαν αιτήματα</td>
+                </tr>
+              </ng-template>
+            </p-table>
+            <div class="table-button-container">
+              <p-button severity="danger" (onClick)="processRequest(false)" [disabled]="!selectedRequest" label="Απόρριψη"></p-button>
+              <p-button (onClick)="processRequest(true)" [disabled]="!selectedRequest" label="Αποδοχή"></p-button>
+            </div>
+          </p-panel>
+        }
+      </div>
+
+      <div class="right-column">
+        <p-panel header="Συζήτηση" class="comments-panel">
+          <div class="comments">
+            <div class="comment" *ngFor="let comment of comments;">
+              <h4>{{ comment.name + " " + comment.surname }}</h4>
+              <p>{{ comment.message }}</p>
+              <div class="comment-actions">
+                <button
+                  pButton
+                  icon="pi pi-thumbs-up"
+                  label="{{ comment.likes }}"
+                  class="like-button"
+                  [class.selected]="comment.userAction === true"
+                  (click)="like(comment.id)"
+                ></button>
+                <button
+                  pButton
+                  icon="pi pi-thumbs-down"
+                  label="{{ comment.dislikes }}"
+                  class="dislike-button"
+                  [class.selected]="comment.userAction === false"
+                  (click)="dislike(comment.id)"
+                ></button>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="new-comment">
-          <input
-            type="text"
-            class="comment-input"
-            placeholder="Προσθέστε ένα σχόλιο..."
-            [(ngModel)]="newComment"
-          />
-          <p-button
-            type="button"
-            [disabled]="checkComment()"
-            label="Αποστολή"
-            (onClick)="submitComment()"
-          ></p-button>
-        </div>
-      </p-panel>
+          <div class="new-comment">
+            <input
+              type="text"
+              class="comment-input"
+              placeholder="Προσθέστε ένα σχόλιο..."
+              [(ngModel)]="newComment"
+            />
+            <p-button
+              type="button"
+              [disabled]="checkComment()"
+              label="Αποστολή"
+              (onClick)="submitComment()"
+            ></p-button>
+          </div>
+        </p-panel>
+      </div>
 
     </div>
   } @else {

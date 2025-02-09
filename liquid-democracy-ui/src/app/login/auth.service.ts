@@ -31,6 +31,8 @@ export class AuthService { //TODO: Split to business specific services
   private readonly HAS_ACCESS = '/hasAccessToVoting';
   private readonly REQUEST_ACCESS = '/requestAccessToVoting';
   private readonly NEW_VOTING = '/initializeVoting';
+  private readonly PROCESS_REQUEST = '/processRequest';
+  private readonly REQUESTS = '/getRequests';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -102,6 +104,13 @@ export class AuthService { //TODO: Split to business specific services
     return this.http.post(this.API_REL_PATH + this.ADD_ROLE, {role, userId}, httpOptions);
   }
 
+  processRequest(requestId: number, approve: boolean): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.PROCESS_REQUEST, {requestId, approve}, httpOptions);
+  }
+
   reset(username: string, email: string, newPassword: string, securityAnswer: string): Observable<any> {
     return this.http.post(this.API_REL_PATH + this.RESET, {username, email, newPassword, securityAnswer});
   }
@@ -121,6 +130,13 @@ export class AuthService { //TODO: Split to business specific services
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.ALL_USER_DETAILS, {headers});
+  }
+
+  getParticipationRequests(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const params = new HttpParams().set('voting', id);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.REQUESTS, {params, headers});
   }
 
   hasAccessToVoting(id: number): Observable<any> {

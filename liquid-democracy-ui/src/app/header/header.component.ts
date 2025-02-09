@@ -75,9 +75,12 @@ export class HeaderComponent {
       let roles = roleString.split(',');
       if (!this.selectedRole) {
         this.selectedRole = roles[0];
-        this.localStorage.setItem('selectedRole', this.selectedRole);
       }
+      this.localStorage.setItem('selectedRole', this.selectedRole);
       return roles;
+    } else {
+      this.localStorage.removeItem('selectedRole');
+      this.selectedRole = '';
     }
     return [];
   }

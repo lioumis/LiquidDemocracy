@@ -13,6 +13,8 @@ import {InputTextareaModule} from "primeng/inputtextarea";
 import {ChartModule} from "primeng/chart";
 import {BreadcrumbModule} from "primeng/breadcrumb";
 import {CheckboxModule} from "primeng/checkbox";
+import {TableModule} from "primeng/table";
+import {MultiSelectModule} from "primeng/multiselect";
 
 @Component({
   selector: 'app-voting',
@@ -30,7 +32,9 @@ import {CheckboxModule} from "primeng/checkbox";
     InputTextareaModule,
     ChartModule,
     ButtonDirective,
-    BreadcrumbModule
+    BreadcrumbModule,
+    TableModule,
+    MultiSelectModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
@@ -62,9 +66,17 @@ export class VotingComponent implements OnInit {
 
   distributionOptions: any;
 
+  requestDetails: ParticipationRequest[] = [];
+
+  selectedRequest: ParticipationRequest | null = null;
+
+  loading: boolean = true;
+
   items: MenuItem[] | undefined;
 
   home: MenuItem = {routerLink: ['/dashboard']};
+
+  protected readonly localStorage = localStorage;
 
   constructor(private readonly route: ActivatedRoute,
               private readonly router: Router,
@@ -92,6 +104,10 @@ export class VotingComponent implements OnInit {
     this.votingId = Number(this.route.snapshot.paramMap.get('id'));
     this.loadVotingDetails();
     this.loadComments();
+
+    if (this.localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+      this.loadTable();
+    }
   }
 
   loadVotingDetails(): void {
@@ -457,6 +473,50 @@ export class VotingComponent implements OnInit {
     }
   }
 
+  loadTable() {
+    if (!this.votingId) {
+      return;
+    }
+    this.loading = true;
+    this.selectedRequest = null;
+    this.authService.getParticipationRequests(this.votingId).subscribe({
+      next: (response) => {
+        this.requestDetails = response;
+      },
+      error: (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    });
+    this.loading = false;
+  }
+
+  processRequest(action: boolean) {
+    if (this.selectedRequest) {
+      this.authService.processRequest(this.selectedRequest.id, action).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: action ? 'Το αίτημα έγινε δεκτό με επιτυχία' : 'Το αίτημα απορρίφθηκε με επιτυχία'
+          });
+          this.selectedRequest = null;
+          this.loadTable();
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Αποτυχία',
+            detail: error.error.error
+          });
+        }
+      });
+    }
+  }
 }
 
 export interface VotingDetails {
@@ -493,4 +553,11 @@ export interface Comment {
   likes: number;
   dislikes: number;
   userAction: boolean | null;
+}
+
+export interface ParticipationRequest {
+  id: number;
+  name: string;
+  surname: string;
+  username: string;
 }
