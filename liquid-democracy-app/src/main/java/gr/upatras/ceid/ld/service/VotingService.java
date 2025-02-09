@@ -3,6 +3,7 @@ package gr.upatras.ceid.ld.service;
 import gr.upatras.ceid.ld.dto.*;
 import gr.upatras.ceid.ld.entity.*;
 import gr.upatras.ceid.ld.enums.Action;
+import gr.upatras.ceid.ld.enums.Role;
 import gr.upatras.ceid.ld.enums.VotingType;
 import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
@@ -334,6 +335,10 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
+        if (voting.getElectoralCommittee().contains(user)) {
+            return new VotingAccessDto(true, true);
+        }
+
         Optional<ParticipantEntity> participationEntityOptional = participantRepository.findByUserAndVoting(user, voting);
 
         if (participationEntityOptional.isEmpty()) {
@@ -345,12 +350,22 @@ public class VotingService {
         return new VotingAccessDto(true, participation.getStatus());
     }
 
-    public List<VotingDto> getVotings(String username) throws ValidationException {
+    public List<VotingDto> getVotings(String username, Role selectedRole) throws ValidationException {
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
 
         List<VotingEntity> votingEntities = votingRepository.findAll();
-        return votingEntities.stream().map(v -> {
+
+        if (Role.ELECTORAL_COMMITTEE.equals(selectedRole)) {
+            return votingEntities.stream().filter(v -> v.getElectoralCommittee().contains(voter)).map(v -> {
+                boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
+                return new VotingDto(v.getName(), v.getTopic().getTitle(),
+                        toString(v.getStartDate()), toString(v.getEndDate()), hasVoted, v.getVotes().size(),
+                        v.getId().intValue());
+            }).toList();
+        }
+
+        return votingEntities.stream().filter(v -> v.getStartDate() != null).map(v -> {
             boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
             return new VotingDto(v.getName(), v.getTopic().getTitle(),
                     toString(v.getStartDate()), toString(v.getEndDate()), hasVoted, v.getVotes().size(),
@@ -365,7 +380,7 @@ public class VotingService {
                 v.getVotes().size(), v.getMessages().size(), v.getId().intValue())).toList();
     }
 
-    public VotingDetailsDto getVotingDetails(String username, Long votingId) throws ValidationException {
+    public VotingDetailsDto getVotingDetails(String username, Long votingId) throws ValidationException, AuthorizationException {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
@@ -373,8 +388,15 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
 
 
-        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
+        if (voting.getStartDate() != null && voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now())) {
             return getInactiveVotingStatistics(voting, voter);
+        }
+
+        if (voting.getStartDate() == null || voting.getEndDate() == null) {
+            if (voting.getElectoralCommittee().contains(voter)) {
+                return getVotingPreviewDetails(voting);
+            }
+            throw new AuthorizationException("Δεν ανήκετε στην εφορευτική επιτροπή αυτής της ψηφοφορίας");
         }
 
         return getActiveVotingDetails(voting, voter);
@@ -533,6 +555,23 @@ public class VotingService {
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
                 delegated, voting.getVotingType().getId(), voting.getVoteLimit(), results, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
+    }
+
+    private VotingDetailsDto getVotingPreviewDetails(VotingEntity voting) {
+        List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
+        List<VotingResultDto> votingResults = new ArrayList<>();
+
+        if (votingOptions != null) {
+            votingResults = votingOptions.stream().map(option ->
+                    new VotingResultDto(new VotingOptionDto(option.getName(), option.getDescription()), null)).toList();
+        }
+
+        Integer votingTypeId = voting.getVotingType() == null ? null : voting.getVotingType().getId();
+
+        return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
+                toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
+                null, votingTypeId, voting.getVoteLimit(), votingResults, null, null,
+                null, null);
     }
 
     private VotingDetailsDto getActiveVotingDetails(VotingEntity voting, UserEntity voter) {

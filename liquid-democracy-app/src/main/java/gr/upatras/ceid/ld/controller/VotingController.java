@@ -18,13 +18,18 @@ import java.util.*;
 @RestController
 @RequestMapping("/votings")
 public class VotingController {
+    private static final Set<Role> VOTING_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_ROLES_FOR_CREATION = new HashSet<>();
     private static final Set<Role> ALLOWED_ROLES_FOR_UPDATE = new HashSet<>();
 
     static {
+        VOTING_ROLES.add(Role.VOTER);
+        VOTING_ROLES.add(Role.REPRESENTATIVE);
+
         ALLOWED_ROLES.add(Role.VOTER);
         ALLOWED_ROLES.add(Role.REPRESENTATIVE);
+        ALLOWED_ROLES.add(Role.ELECTORAL_COMMITTEE);
 
         ALLOWED_ROLES_FOR_CREATION.add(Role.SYSTEM_ADMIN);
 
@@ -45,7 +50,7 @@ public class VotingController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
@@ -61,19 +66,22 @@ public class VotingController {
     }
 
     @GetMapping("/getVotings")
-    public ResponseEntity<Object> getVotings() {
-        //TODO: Use the selected role. If part of the committee, display votings without dates or better, display only the votings that the user is part of.
-        // Otherwise display only votings with dates.
+    public ResponseEntity<Object> getVotings(@RequestParam("selectedRole") String selectedRoleString) {
         try {
+            Role selectedRole = Role.fromName(selectedRoleString);
+            if (!ALLOWED_ROLES.contains(selectedRole)) {
+                throw new AuthorizationException("Ο επιλεγμένος ρόλος δεν μπορεί να πραγματοποιήσει αυτή την ενέργεια");
+            }
+
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, Set.of(selectedRole));
 
             if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
             }
 
-            List<VotingDto> votings = votingService.getVotings(authorizedUsername);
+            List<VotingDto> votings = votingService.getVotings(authorizedUsername, selectedRole);
             return ResponseEntity.status(HttpStatus.OK).body(votings);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -131,7 +139,7 @@ public class VotingController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
@@ -217,7 +225,7 @@ public class VotingController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");
@@ -411,7 +419,7 @@ public class VotingController {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action");

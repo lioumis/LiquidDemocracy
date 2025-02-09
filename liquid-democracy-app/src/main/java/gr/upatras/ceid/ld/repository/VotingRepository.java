@@ -14,7 +14,9 @@ public interface VotingRepository extends JpaRepository<VotingEntity, Long> {
                 FROM voting v
                 LEFT JOIN v.votes votes
                 LEFT JOIN v.messages messages
-                WHERE v.endDate > CURRENT_TIMESTAMP
+                WHERE v.startDate IS NOT NULL
+                AND v.endDate IS NOT NULL
+                AND v.endDate > CURRENT_TIMESTAMP
                 GROUP BY v.id
                 ORDER BY COUNT(votes) + COUNT(messages) DESC
             """)

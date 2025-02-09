@@ -143,10 +143,11 @@ export class AuthService { //TODO: Split to business specific services
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.SUGGESTED_VOTINGS, {headers});
   }
 
-  getVotings(): Observable<any> {
+  getVotings(selectedRole: string): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_VOTINGS, {headers});
+    const params = new HttpParams().set('selectedRole', selectedRole);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_VOTINGS, {params, headers});
   }
 
   getVotingDetails(id: number): Observable<any> {
@@ -242,6 +243,7 @@ export class AuthService { //TODO: Split to business specific services
     localStorage.removeItem('roles');
     localStorage.removeItem('surname');
     localStorage.removeItem('username');
+    localStorage.removeItem('selectedRole');
     this.router.navigate(['/login']);
   }
 }

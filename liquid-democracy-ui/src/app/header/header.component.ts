@@ -60,15 +60,24 @@ export class HeaderComponent {
 
   onRoleChange(event: any) {
     this.selectedRole = event.value;
+    this.localStorage.setItem('selectedRole', this.selectedRole);
     if (this.dropdown) {
       this.dropdown.overlayVisible = false;
+    }
+    if (this.selectedRole) {
+      this.router.navigate(['/dashboard']).then();
     }
   }
 
   protected getRoles() {
     let roleString = this.localStorage.getItem('roles');
     if (roleString) {
-      return roleString.split(',');
+      let roles = roleString.split(',');
+      if (!this.selectedRole) {
+        this.selectedRole = roles[0];
+        this.localStorage.setItem('selectedRole', this.selectedRole);
+      }
+      return roles;
     }
     return [];
   }

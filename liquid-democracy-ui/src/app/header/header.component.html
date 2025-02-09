@@ -30,10 +30,21 @@
   <p-sidebar #sidebar [(visible)]="visibleSidebar" [dismissible]="true" (onHide)="closeSidebar()" [style]="{'z-index':'1'}">
     <ul>
       <li><p-button [plain]="true" label="Κύρια Οθόνη" [text]="true" icon="pi pi-home" (onClick)="navigateTo('/dashboard')"></p-button></li>
-      <li><p-button [plain]="true" label="Ψηφοφορίες" [text]="true" icon="pi pi-check-square" (onClick)="navigateTo('/votings')"></p-button></li>
-      <li><p-button [plain]="true" label="Αναθέσεις" [text]="true" icon="pi pi-users" (onClick)="navigateTo('/delegations')"></p-button></li>
+
+      @if (this.selectedRole === "Ψηφοφόρος" || this.selectedRole === "Εφορευτική Επιτροπή" || this.selectedRole === "Αντιπρόσωπος" || this.selectedRole === "Διαχειριστής Συστήματος") {
+        <li><p-button [plain]="true" label="Ψηφοφορίες" [text]="true" icon="pi pi-check-square" (onClick)="navigateTo('/votings')"></p-button></li>
+      }
+
+      @if (this.selectedRole === "Ψηφοφόρος" || this.selectedRole === "Αντιπρόσωπος" || this.selectedRole === "Διαχειριστής Συστήματος") {
+        <li><p-button [plain]="true" label="Αναθέσεις" [text]="true" icon="pi pi-users" (onClick)="navigateTo('/delegations')"></p-button></li>
+      }
+
       <li><p-button [plain]="true" label="Ρυθμίσεις" [text]="true" icon="pi pi-cog" (onClick)="navigateTo('/settings')"></p-button></li>
-      <li><p-button [plain]="true" label="Διαχείριση" [text]="true" icon="pi pi-database" (onClick)="navigateTo('/administration')"></p-button></li>
+
+      @if (this.selectedRole === "Διαχειριστής Συστήματος") {
+        <li><p-button [plain]="true" label="Διαχείριση" [text]="true" icon="pi pi-database" (onClick)="navigateTo('/administration')"></p-button></li>
+      }
+
       <li><p-button [plain]="true" label="Αποσύνδεση" [text]="true" icon="pi pi-sign-out" (onClick)="logout()"></p-button></li>
     </ul>
   </p-sidebar>

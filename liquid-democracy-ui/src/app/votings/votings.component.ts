@@ -81,25 +81,27 @@ export class VotingsComponent implements OnInit {
       }
     });
 
-    this.authService.getVotings().subscribe({
-      next: (response) => {
-        this.votings = response.map((voting: Voting) => ({
-          ...voting,
-          startDate: voting.startDate ? new Date(voting.startDate) : null,
-          endDate: voting.endDate ? new Date(voting.endDate) : null,
-          hasVoted: voting.hasVoted ? 'Ναι' : 'Όχι',
-        }));
-      },
-      error: (error) => {
-        console.error('Σφάλμα:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Σφάλμα',
-          detail: error.error
-        });
-      }
-    });
-
+    let role = localStorage.getItem('selectedRole');
+    if (role) {
+      this.authService.getVotings(role).subscribe({
+        next: (response) => {
+          this.votings = response.map((voting: Voting) => ({
+            ...voting,
+            startDate: voting.startDate ? new Date(voting.startDate) : null,
+            endDate: voting.endDate ? new Date(voting.endDate) : null,
+            hasVoted: voting.hasVoted ? 'Ναι' : 'Όχι',
+          }));
+        },
+        error: (error) => {
+          console.error('Σφάλμα:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
+    }
     this.loading = false;
   }
 

@@ -19,6 +19,7 @@ export class AppComponent implements OnInit {
   title = 'app';
 
   ngOnInit(): void {
+    localStorage.removeItem('selectedRole');
     console.log('Is authenticated: ', this.authService.isAuthenticated()) //TODO: Remove all console.log() for delivery
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']).then();

@@ -125,76 +125,78 @@
       </p-table>
     </p-panel>
 
-    <p-panel header="Ψήφοι που σας έχουν ανατεθεί">
-      <p-table
-        #dt2
-        [value]="receivedDelegations"
-        dataKey="id"
-        [style]="{'overflow':'visible'}"
-        [rows]="5"
-        sortField="votes" [sortOrder]="-1"
-        [loading]="loading"
-        [paginator]="true"
-        [globalFilterFields]="['voting', 'votes']"
-        [tableStyle]="{ 'min-width': '50rem' }">
-        <ng-template pTemplate="header">
-          <tr>
-            <th pSortableColumn="voting" class="center" style="width:33%">
-              Ψηφοφορία
-              <p-sortIcon field="voting"/>
-            </th>
-            <th pSortableColumn="votes" class="center" style="width:33%">
-              Αριθμός Ψήφων
-              <p-sortIcon field="votes"/>
-            </th>
-          </tr>
-          <tr>
-            <th>
-              <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
-                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                  <p-multiSelect
-                    [ngModel]="value"
-                    [options]="allVotings"
-                    placeholder="Ψηφοφορία"
-                    (onChange)="filter($event.value)"
-                    [maxSelectedLabels]=1
-                    selectedItemsLabel="{0} ψηφοφορίες επιλέχθηκαν"
-                    optionLabel="">
-                    <ng-template let-option pTemplate="item">
-                      <div class="inline-block vertical-align-middle">
-                        {{ option }}
-                      </div>
-                    </ng-template>
-                  </p-multiSelect>
-                </ng-template>
-              </p-columnFilter>
-            </th>
-            <th>
-              <p-columnFilter
-                [showMenu]="false"
-                type="numeric"
-                field="votes"
-                placeholder="Αριθμός"
-                ariaLabel="Filter Votes"/>
-            </th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-receivedDelegation>
-          <tr>
-            <td>
-              {{ receivedDelegation.voting }}
-            </td>
-            <td class="center">
-              {{ receivedDelegation.votes }}
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="3">Δεν βρέθηκαν αναθέσεις ψήφου</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-panel>
+    @if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος") {
+      <p-panel header="Ψήφοι που σας έχουν ανατεθεί">
+        <p-table
+          #dt2
+          [value]="receivedDelegations"
+          dataKey="id"
+          [style]="{'overflow':'visible'}"
+          [rows]="5"
+          sortField="votes" [sortOrder]="-1"
+          [loading]="loading"
+          [paginator]="true"
+          [globalFilterFields]="['voting', 'votes']"
+          [tableStyle]="{ 'min-width': '50rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="voting" class="center" style="width:33%">
+                Ψηφοφορία
+                <p-sortIcon field="voting"/>
+              </th>
+              <th pSortableColumn="votes" class="center" style="width:33%">
+                Αριθμός Ψήφων
+                <p-sortIcon field="votes"/>
+              </th>
+            </tr>
+            <tr>
+              <th>
+                <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
+                  <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                    <p-multiSelect
+                      [ngModel]="value"
+                      [options]="allVotings"
+                      placeholder="Ψηφοφορία"
+                      (onChange)="filter($event.value)"
+                      [maxSelectedLabels]=1
+                      selectedItemsLabel="{0} ψηφοφορίες επιλέχθηκαν"
+                      optionLabel="">
+                      <ng-template let-option pTemplate="item">
+                        <div class="inline-block vertical-align-middle">
+                          {{ option }}
+                        </div>
+                      </ng-template>
+                    </p-multiSelect>
+                  </ng-template>
+                </p-columnFilter>
+              </th>
+              <th>
+                <p-columnFilter
+                  [showMenu]="false"
+                  type="numeric"
+                  field="votes"
+                  placeholder="Αριθμός"
+                  ariaLabel="Filter Votes"/>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-receivedDelegation>
+            <tr>
+              <td>
+                {{ receivedDelegation.voting }}
+              </td>
+              <td class="center">
+                {{ receivedDelegation.votes }}
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="3">Δεν βρέθηκαν αναθέσεις ψήφου</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-panel>
+    }
   </div>
 </div>

@@ -48,6 +48,8 @@ export class DashboardComponent implements OnInit {
 
   showConfirmDialog: boolean = true;
 
+  protected readonly localStorage = localStorage;
+
   constructor(private readonly authService: AuthService,
               private readonly router: Router,
               private readonly messageService: MessageService,
