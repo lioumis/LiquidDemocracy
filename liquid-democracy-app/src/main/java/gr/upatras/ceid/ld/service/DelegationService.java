@@ -74,22 +74,26 @@ public class DelegationService {
             throw new ValidationException("Ο επιλεγμένος αντιπρόσωπος έχει ήδη ψηφίσει για τη συγκεκριμένη ψηφοφορία");
         }
 
-        ParticipantEntity delegatorParticipantEntity = participantRepository.findByUserAndVoting(delegator, voting)
-                .orElseThrow(() -> new ValidationException("Δεν συμμετέχετε σε αυτή την ψηφοφορία"));
+        if (!voting.getElectoralCommittee().contains(delegator)) {
+            ParticipantEntity delegatorParticipantEntity = participantRepository.findByUserAndVoting(delegator, voting)
+                    .orElseThrow(() -> new ValidationException("Δεν συμμετέχετε σε αυτή την ψηφοφορία"));
 
-        if (delegatorParticipantEntity.getStatus() == null) {
-            throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία δεν έχει εξεταστεί ακόμα");
+            if (delegatorParticipantEntity.getStatus() == null) {
+                throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία δεν έχει εξεταστεί ακόμα");
+            }
+
+            if (Boolean.FALSE.equals(delegatorParticipantEntity.getStatus())) {
+                throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί");
+            }
         }
 
-        if (Boolean.FALSE.equals(delegatorParticipantEntity.getStatus())) {
-            throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί");
-        }
+        if (!voting.getElectoralCommittee().contains(delegate)) {
+            ParticipantEntity delegateParticipantEntity = participantRepository.findByUserAndVoting(delegate, voting)
+                    .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία"));
 
-        ParticipantEntity delegateParticipantEntity = participantRepository.findByUserAndVoting(delegate, voting)
-                .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία"));
-
-        if (!Boolean.TRUE.equals(delegateParticipantEntity.getStatus())) {
-            throw new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία");
+            if (!Boolean.TRUE.equals(delegateParticipantEntity.getStatus())) {
+                throw new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία");
+            }
         }
 
         checkForCircularDelegation(delegator, delegate, voting);

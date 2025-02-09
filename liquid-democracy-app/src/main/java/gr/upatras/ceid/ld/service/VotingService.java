@@ -73,15 +73,17 @@ public class VotingService {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
 
-        ParticipantEntity participantEntity = participantRepository.findByUserAndVoting(voter, voting)
-                .orElseThrow(() -> new ValidationException("Δεν υπάρχει αίτηση συμμετοχής στην ψηφοφορία"));
+        if (!voting.getElectoralCommittee().contains(voter)) {
+            ParticipantEntity participantEntity = participantRepository.findByUserAndVoting(voter, voting)
+                    .orElseThrow(() -> new ValidationException("Δεν υπάρχει αίτηση συμμετοχής στην ψηφοφορία"));
 
-        if (participantEntity.getStatus() == null) {
-            throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία δεν έχει εξεταστεί ακόμα");
-        }
+            if (participantEntity.getStatus() == null) {
+                throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία δεν έχει εξεταστεί ακόμα");
+            }
 
-        if (Boolean.FALSE.equals(participantEntity.getStatus())) {
-            throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί");
+            if (Boolean.FALSE.equals(participantEntity.getStatus())) {
+                throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί");
+            }
         }
 
         if (voteChoices == null || voteChoices.isEmpty()) {
