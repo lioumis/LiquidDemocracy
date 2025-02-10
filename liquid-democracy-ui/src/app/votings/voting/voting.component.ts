@@ -101,14 +101,26 @@ export class VotingComponent implements OnInit {
       this.router.navigate(['/login']).then();
     }
 
-    // TODO: Check if allowed participant. If not, send back.
-
     this.votingId = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.hasPermission();
+
     this.loadVotingDetails();
     this.loadComments();
+  }
 
-    if (this.localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
-      this.loadTable();
+  hasPermission() {
+    if (this.votingId) {
+      this.authService.hasAccessToVoting(this.votingId).subscribe({
+        next: (response) => {
+          if (!response.isPresent || !response.hasAccess) {
+            this.router.navigate(['/dashboard']).then();
+          }
+        },
+        error: () => {
+          this.router.navigate(['/dashboard']).then();
+        }
+      });
     }
   }
 
@@ -146,6 +158,7 @@ export class VotingComponent implements OnInit {
 
           if (this.localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
             this.loadFeedback();
+            this.loadTable();
           }
 
           this.items = [
@@ -420,6 +433,20 @@ export class VotingComponent implements OnInit {
     return false;
   }
 
+  hasStartDate() {
+    return !!this.votingDetails?.startDate;
+  }
+
+  hasStarted() {
+    let startDateString = this.votingDetails?.startDate;
+    if (startDateString) {
+      const currentDate = new Date();
+      const votingStartDate = new Date(`${startDateString}T23:59:59`);
+      return currentDate > votingStartDate
+    }
+    return false;
+  }
+
   onSubmit(): void {
     this.messageService.clear();
     if (this.formGroup.valid && this.votingId) {
@@ -498,7 +525,7 @@ export class VotingComponent implements OnInit {
   }
 
   loadTable() {
-    if (!this.votingId) {
+    if (!this.votingId || !this.hasStartDate() || this.hasStarted()) {
       return;
     }
     this.loading = true;

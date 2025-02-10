@@ -289,7 +289,14 @@ public class VotingService {
             throw new ValidationException("Υπάρχει ήδη αίτημα συμμετοχής για τη συγκεκριμένη ψηφοφορία");
         }
 
-        //TODO: Limit request to the start date?
+        if (voting.getStartDate() == null) {
+            throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι δυνατή ακόμα");
+        }
+
+        if (voting.getStartDate().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι πλέον δυνατή");
+        }
+
         if (voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
@@ -301,6 +308,14 @@ public class VotingService {
     public List<ParticipationRequestDto> getRequests(Long votingId) throws ValidationException {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+
+        if (voting.getStartDate() == null) {
+            throw new ValidationException("Η ψηφοφορία δεν έχει ημερομηνία έναρξης");
+        }
+
+        if (voting.getStartDate().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Η ψηφοφορία έχει ήδη ξεκινήσει");
+        }
 
         return participantRepository.findByVotingAndStatusIs(voting, null).stream().map(p ->
                 new ParticipationRequestDto(p.getId().intValue(), p.getUser().getName(), p.getUser().getSurname(),
@@ -336,6 +351,10 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
         if (voting.getElectoralCommittee().contains(user)) {
+            return new VotingAccessDto(true, true);
+        }
+
+        if (voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now())) {
             return new VotingAccessDto(true, true);
         }
 

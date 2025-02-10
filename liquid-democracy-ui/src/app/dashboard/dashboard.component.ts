@@ -232,7 +232,7 @@ export class DashboardComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
-          detail: error.error
+          detail: error.error.error
         });
       }
     });

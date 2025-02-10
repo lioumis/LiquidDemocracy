@@ -116,7 +116,7 @@
           }
         </p-panel>
 
-        @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+        @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή' && this.hasStartDate() && !this.hasStarted()) {
           <p-panel header="Αιτήματα Συμμετοχής" class="table-panel">
             <p-table
               #dt
