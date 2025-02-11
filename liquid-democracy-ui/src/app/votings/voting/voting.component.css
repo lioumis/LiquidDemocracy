@@ -301,3 +301,10 @@ textarea {
 :host ::ng-deep .p-calendar .p-datepicker {
   z-index: 1 !important;
 }
+
+.mechanism {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  justify-content: flex-start;
+}

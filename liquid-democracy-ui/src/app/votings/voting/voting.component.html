@@ -48,12 +48,31 @@
       <div class="left-column">
         @if (this.editMode) {
           <p-panel header="Επιλογές" class="vote-panel">
-            Dropdown
-            Option 1
-            Option 2
-            .
-            .
-            .
+            <div class="mechanism">
+              <strong>Μηχανισμός:</strong>
+              @if (allowMechanismDropdown) {
+                <p-dropdown
+                  #mechanismDropdown
+                  id="mechanism"
+                  [options]="mechanisms"
+                  [style]="{'width':'100%'}"
+                  [(ngModel)]="selectedMechanism"
+                  placeholder="Μηχανισμός"
+                  (onChange)="onMechanismChange($event)"/>
+              }
+
+              @if (selectedMechanism === 'Πολλαπλή Επιλογή') {
+                <strong>Μέγιστος Αριθμός Επιλογών:</strong>
+                <p-inputNumber
+                  [(ngModel)]="maxSelections"
+                  inputId="maxSelections"
+                  [min]="1"
+                  [max]="100"/>
+              }
+            </div>
+            <div class="options">
+
+            </div>
           </p-panel>
         } @else {
           <p-panel header="Επιλογές ({{getVotingTypeString(votingDetails?.votingType, votingDetails?.voteLimit)}})"

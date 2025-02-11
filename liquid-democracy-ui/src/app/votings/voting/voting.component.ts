@@ -1,4 +1,4 @@
-import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ToastModule} from "primeng/toast";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../login/auth.service";
@@ -16,6 +16,8 @@ import {CheckboxModule} from "primeng/checkbox";
 import {TableModule} from "primeng/table";
 import {MultiSelectModule} from "primeng/multiselect";
 import {CalendarModule} from "primeng/calendar";
+import {Dropdown, DropdownModule} from "primeng/dropdown";
+import {InputNumberModule} from "primeng/inputnumber";
 
 @Component({
   selector: 'app-voting',
@@ -36,13 +38,24 @@ import {CalendarModule} from "primeng/calendar";
     BreadcrumbModule,
     TableModule,
     MultiSelectModule,
-    CalendarModule
+    CalendarModule,
+    DropdownModule,
+    InputNumberModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
   styleUrl: './voting.component.css'
 })
 export class VotingComponent implements OnInit {
+  @ViewChild('mechanismDropdown') mechanismDropdown: Dropdown | undefined;
+
+  allowMechanismDropdown: boolean = true;
+
+  mechanisms: string[] = ['Μοναδική Επιλογή', 'Πολλαπλή Επιλογή'];
+
+  selectedMechanism: string = 'Μοναδική Επιλογή';
+
+  maxSelections: number = 1;
 
   formGroup: FormGroup;
 
@@ -159,6 +172,14 @@ export class VotingComponent implements OnInit {
           }
 
           this.information = response.information;
+
+          if (response.votingType === 1) {
+            this.selectedMechanism = "Μοναδική Επιλογή";
+          } else if (response.votingType === 2) {
+            this.selectedMechanism = "Πολλαπλή Επιλογή";
+          }
+
+          this.maxSelections = response.voteLimit ? response.voteLimit : 1;
 
           if (this.votingDetails?.votingType === 1) {
             if (this.votingDetails?.userVote) {
@@ -620,6 +641,21 @@ export class VotingComponent implements OnInit {
       this.endDate = this.minEndDate;
     } else {
       this.endDate = selectedDate;
+    }
+  }
+
+  onMechanismChange(event: any) {
+    this.selectedMechanism = event.value;
+    this.resetDropdown();
+  }
+
+  resetDropdown() {
+    if (this.mechanismDropdown) {
+      this.allowMechanismDropdown = false;
+      this.mechanismDropdown.overlayVisible = false;
+      setTimeout(() => {
+        this.allowMechanismDropdown = true;
+      }, 0);
     }
   }
 
