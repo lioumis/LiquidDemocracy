@@ -461,7 +461,8 @@ public class VotingService {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
 
-        if (message.getVoting().getEndDate().isBefore(LocalDateTime.now())) {
+
+        if (message.getVoting().getEndDate() != null && message.getVoting().getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
 

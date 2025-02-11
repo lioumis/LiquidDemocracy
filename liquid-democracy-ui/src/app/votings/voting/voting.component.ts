@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {ToastModule} from "primeng/toast";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../login/auth.service";
@@ -15,6 +15,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
 import {CheckboxModule} from "primeng/checkbox";
 import {TableModule} from "primeng/table";
 import {MultiSelectModule} from "primeng/multiselect";
+import {CalendarModule} from "primeng/calendar";
 
 @Component({
   selector: 'app-voting',
@@ -34,7 +35,8 @@ import {MultiSelectModule} from "primeng/multiselect";
     ButtonDirective,
     BreadcrumbModule,
     TableModule,
-    MultiSelectModule
+    MultiSelectModule,
+    CalendarModule
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
@@ -80,6 +82,14 @@ export class VotingComponent implements OnInit {
 
   protected readonly localStorage = localStorage;
 
+  editMode: boolean = false;
+  startDate: Date | null = null;
+  endDate: Date | null = null;
+  information: string | null = null;
+  minStartDate: Date;
+  maxStartDate: Date | null = null;
+  minEndDate: Date;
+
   constructor(private readonly route: ActivatedRoute,
               private readonly router: Router,
               private readonly authService: AuthService,
@@ -94,6 +104,10 @@ export class VotingComponent implements OnInit {
     this.feedbackForm = this.fb.group({
       feedback: ['', Validators.required]
     })
+    const today = new Date();
+    const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    this.minStartDate = normalizedToday;
+    this.minEndDate = new Date(normalizedToday.getTime() + 24 * 60 * 60 * 1000);
   }
 
   ngOnInit(): void {
@@ -130,6 +144,21 @@ export class VotingComponent implements OnInit {
         next: (response) => {
           this.votingDetails = response;
 
+          if (this.votingDetails?.startDate) {
+            const backendStartDate = new Date(this.votingDetails.startDate);
+            this.minStartDate = new Date(Math.max(backendStartDate.getTime(), this.minStartDate.getTime()));
+            this.startDate = new Date(this.votingDetails.startDate);
+            this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate() + 1);
+          }
+
+          if (this.votingDetails?.endDate) {
+            const backendEndDate = new Date(this.votingDetails.endDate);
+            if (backendEndDate >= this.minEndDate) {
+              this.endDate = backendEndDate;
+            }
+          }
+
+          this.information = response.information;
 
           if (this.votingDetails?.votingType === 1) {
             if (this.votingDetails?.userVote) {
@@ -157,6 +186,9 @@ export class VotingComponent implements OnInit {
           }
 
           if (this.localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+            if (!this.hasStarted()) {
+              this.editMode = true;
+            }
             this.loadFeedback();
             this.loadTable();
           }
@@ -568,6 +600,29 @@ export class VotingComponent implements OnInit {
       });
     }
   }
+
+  onStartDateSelect(event: Date): void {
+    const selectedDate = new Date(event.getFullYear(), event.getMonth(), event.getDate());
+    if (selectedDate < this.minStartDate) {
+      this.startDate = this.minStartDate;
+    } else {
+      this.startDate = selectedDate;
+    }
+    this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate() + 1);
+    if (this.endDate && this.endDate < this.minEndDate) {
+      this.endDate = null;
+    }
+  }
+
+  onEndDateSelect(event: Date): void {
+    const selectedDate = new Date(event.getFullYear(), event.getMonth(), event.getDate());
+    if (selectedDate < this.minEndDate) {
+      this.endDate = this.minEndDate;
+    } else {
+      this.endDate = selectedDate;
+    }
+  }
+
 }
 
 export interface VotingDetails {

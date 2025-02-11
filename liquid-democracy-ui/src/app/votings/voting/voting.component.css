@@ -291,3 +291,13 @@ textarea {
 .center {
   text-align: center;
 }
+
+.dates {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+:host ::ng-deep .p-calendar .p-datepicker {
+  z-index: 1 !important;
+}
