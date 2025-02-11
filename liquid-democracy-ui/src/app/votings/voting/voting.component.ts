@@ -18,6 +18,8 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {CalendarModule} from "primeng/calendar";
 import {Dropdown, DropdownModule} from "primeng/dropdown";
 import {InputNumberModule} from "primeng/inputnumber";
+import {InputTextModule} from "primeng/inputtext";
+import {Ripple} from "primeng/ripple";
 
 @Component({
   selector: 'app-voting',
@@ -40,7 +42,9 @@ import {InputNumberModule} from "primeng/inputnumber";
     MultiSelectModule,
     CalendarModule,
     DropdownModule,
-    InputNumberModule
+    InputNumberModule,
+    InputTextModule,
+    Ripple
   ],
   providers: [AuthService, MessageService],
   templateUrl: './voting.component.html',
@@ -54,6 +58,11 @@ export class VotingComponent implements OnInit {
   mechanisms: string[] = ['Μοναδική Επιλογή', 'Πολλαπλή Επιλογή'];
 
   selectedMechanism: string = 'Μοναδική Επιλογή';
+
+  votingOptions: VotingOption[] = [
+    {title: '', details: ''},
+    {title: '', details: ''}
+  ];
 
   maxSelections: number = 1;
 
@@ -180,6 +189,10 @@ export class VotingComponent implements OnInit {
           }
 
           this.maxSelections = response.voteLimit ? response.voteLimit : 1;
+
+          if (response.results && response.results.length > 0) {
+            this.votingOptions = response.results.map((item: any) => item.option);
+          }
 
           if (this.votingDetails?.votingType === 1) {
             if (this.votingDetails?.userVote) {

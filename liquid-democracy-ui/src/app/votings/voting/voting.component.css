@@ -308,3 +308,27 @@ textarea {
   gap: 30px;
   justify-content: flex-start;
 }
+
+.options {
+  display: flex;
+  gap: 56px;
+  padding-top: 30px;
+}
+
+.option-values {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.option-row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.text-box {
+  width: 20rem;
+}

@@ -71,7 +71,31 @@
               }
             </div>
             <div class="options">
-
+              <div>
+                <strong>Επιλογές:</strong>
+              </div>
+              <div class="option-values">
+                <div class="option-row" *ngFor="let option of votingOptions">
+                  <input class="text-box" type="text" pInputText [(ngModel)]="option.title" />
+                  <input class="text-box" type="text" pInputText [(ngModel)]="option.details" />
+                  <button
+                    type="button"
+                    pButton
+                    pRipple
+                    icon="pi pi-minus"
+                    [disabled]="votingOptions.length < 3"
+                    (click)="votingOptions.pop()">
+                  </button>
+<!--                  TODO: Remove the correct row-->
+                </div>
+                <button
+                  type="button"
+                  pButton
+                  pRipple
+                  icon="pi pi-plus"
+                  (click)="votingOptions.push({title: '', details: ''})">
+                </button>
+              </div>
             </div>
           </p-panel>
         } @else {
