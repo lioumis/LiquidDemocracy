@@ -198,7 +198,7 @@ public class VotingService {
             String usernameString = votingInitializationDto.committee().get(i);
             Optional<UserEntity> memberOptional = userRepository.findByUsername(usernameString);
             if (memberOptional.isEmpty()) {
-                errorMetaData.put(i, "Το μέλος δεν βρέθηκε");//TODO: Handle committee roles
+                errorMetaData.put(i, "Το μέλος δεν βρέθηκε");
             } else {
                 if (!committee.add(memberOptional.get())) {
                     throw new ValidationException("Παρακαλώ εισάγετε διαφορετικούς χρήστες");
@@ -209,6 +209,11 @@ public class VotingService {
         if (!errorMetaData.isEmpty()) {
             throw new VotingCreationException("Τουλάχιστον ένα από τα μέλη δεν βρέθηκε", errorMetaData);
         }
+
+        committee.forEach(member -> {
+            member.getRoles().add(Role.ELECTORAL_COMMITTEE);
+            userRepository.save(member);
+        });
 
         VotingEntity votingEntity = new VotingEntity(votingInitializationDto.name(), topic, committee);
 

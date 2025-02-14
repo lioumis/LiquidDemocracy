@@ -215,6 +215,7 @@ export class AdministrationComponent implements OnInit {
             detail: 'Η ψηφοφορία δημιουργήθηκε επιτυχώς'
           });
           this.resetVotingForm();
+          this.loadTable();
         },
         error: (error) => {
           console.error('Delegation failed', error);
@@ -247,7 +248,7 @@ export class AdministrationComponent implements OnInit {
             summary: 'Επιτυχία',
             detail: 'Ο ρόλος ανατέθηκε με επιτυχία'
           });
-          this.loadTable()
+          this.loadTable();
         },
         error: (error) => {
           this.messageService.add({
