@@ -647,6 +647,11 @@ export class VotingComponent implements OnInit {
         summary: 'Αποτυχία',
         detail: 'Ο μέγιστος αριθμός επιλογών είναι μεγαλύτερος από τον αριθμό επιλογών που έχουν δοθεί'
       });
+      return;
+    }
+
+    if (this.selectedMechanism === 'Μοναδική Επιλογή') {
+      this.maxSelections = null;
     }
 
     if (this.startDate && this.votingDetails?.startDate === '') {
