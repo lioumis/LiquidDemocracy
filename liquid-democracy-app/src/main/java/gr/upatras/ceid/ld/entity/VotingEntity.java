@@ -25,6 +25,7 @@ public class VotingEntity {
     private String name;
 
     @Setter
+    @Column(length = 500)
     private String information;
 
     @Setter

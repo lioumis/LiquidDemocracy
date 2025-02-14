@@ -9,12 +9,12 @@ import gr.upatras.ceid.ld.exception.AuthorizationException;
 import gr.upatras.ceid.ld.exception.ValidationException;
 import gr.upatras.ceid.ld.exception.VotingCreationException;
 import gr.upatras.ceid.ld.repository.*;
+import gr.upatras.ceid.ld.validator.VotingValidator;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -48,11 +48,13 @@ public class VotingService {
 
     private final ParticipantRepository participantRepository;
 
+    private final VotingValidator votingValidator;
+
     public VotingService(UserRepository userRepository, VotingRepository votingRepository,
                          VoteRepository voteRepository, DelegationRepository delegationRepository,
                          AuditLogRepository auditLogRepository, TopicRepository topicRepository,
                          MessageRepository messageRepository, MessageDetailsRepository messageDetailsRepository,
-                         FeedbackRepository feedbackRepository, ParticipantRepository participantRepository) {
+                         FeedbackRepository feedbackRepository, ParticipantRepository participantRepository, VotingValidator votingValidator) {
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
         this.voteRepository = voteRepository;
@@ -63,6 +65,7 @@ public class VotingService {
         this.messageDetailsRepository = messageDetailsRepository;
         this.feedbackRepository = feedbackRepository;
         this.participantRepository = participantRepository;
+        this.votingValidator = votingValidator;
     }
 
     @Transactional
@@ -73,47 +76,15 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        if (voting.getStartDate().isAfter(LocalDateTime.now())) {
-            throw new ValidationException("Η ψηφοφορία δεν έχει ξεκινήσει ακόμα.");
-        }
+        votingValidator.validateVotingDates(voting);
 
-        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Η ψηφοφορία έχει λήξει.");
-        }
+        votingValidator.validateParticipation(voting, voter);
 
-        if (!voting.getElectoralCommittee().contains(voter)) {
-            ParticipantEntity participantEntity = participantRepository.findByUserAndVoting(voter, voting)
-                    .orElseThrow(() -> new ValidationException("Δεν υπάρχει αίτηση συμμετοχής στην ψηφοφορία"));
+        votingValidator.validateChoice(voteChoices, voting);
 
-            if (participantEntity.getStatus() == null) {
-                throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία δεν έχει εξεταστεί ακόμα");
-            }
+        votingValidator.checkIfAlreadyVoted(voter, voting);
 
-            if (Boolean.FALSE.equals(participantEntity.getStatus())) {
-                throw new ValidationException("Η συμμετοχή σας σε αυτή την ψηφοφορία έχει απορριφθεί");
-            }
-        }
-
-        if (voteChoices == null || voteChoices.isEmpty()) {
-            throw new ValidationException("Δεν υπάρχει επιλογή");
-        }
-
-        if (voting.getVotingType().equals(VotingType.SINGLE) && voteChoices.size() > 1) {
-            throw new ValidationException("Η ψηφοφορία δεν επιτρέπει πολλές επιλογές");
-        }
-
-        if (voting.getVotingType().equals(VotingType.MULTIPLE) && voting.getVoteLimit() != null && voteChoices.size() > voting.getVoteLimit()) {
-            throw new ValidationException("Έχετε κάνει παραπάνω επιλογές από τις επιτρεπόμενες");
-        }
-
-        if (voteRepository.existsByOriginalVoterAndVoting(voter, voting)) {
-            throw new ValidationException("Έχετε ήδη ψηφίσει για αυτή την ψηφοφορία");
-        }
-
-        Optional<DelegationEntity> delegationOpt = delegationRepository.findByDelegatorAndVoting(voter, voting);
-        if (delegationOpt.isPresent()) {
-            throw new ValidationException("Έχετε ήδη αναθέσει την ψήφο σας σε άλλο χρήστη και δεν μπορείτε να ψηφίσετε άμεσα");
-        }
+        votingValidator.checkIfDelegationExists(voter, voting);
 
         List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
         Set<VotingOptionsEntity> selectedOptions = new HashSet<>();
@@ -168,21 +139,7 @@ public class VotingService {
 
     @Transactional
     public void initializeVoting(String username, VotingInitializationDto votingInitializationDto) throws ValidationException, VotingCreationException {
-        if (votingInitializationDto == null) {
-            throw new ValidationException("Εσφαλμένα δεδομένα");
-        }
-
-        if (votingInitializationDto.name() == null || votingInitializationDto.name().trim().isEmpty()) {
-            throw new ValidationException("Ο τίτλος της ψηφοφορίας είναι κενός");
-        }
-
-        if (votingInitializationDto.committee() == null || votingInitializationDto.committee().isEmpty()) {
-            throw new ValidationException("Η εφορευτική επιτροπή είναι κενή");
-        }
-
-        if (votingInitializationDto.committee().size() != 3) {
-            throw new ValidationException("Η εφορευτική επιτροπή πρέπει να αποτελείται από 3 άτομα");
-        }
+        votingValidator.validateVotingInitialization(votingInitializationDto);
 
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
@@ -190,28 +147,9 @@ public class VotingService {
         TopicEntity topic = topicRepository.findByTitle(votingInitializationDto.topic())
                 .orElseThrow(() -> new ValidationException("Η θεματική περιοχή δεν βρέθηκε"));
 
-        if (votingRepository.existsByNameIgnoreCase(votingInitializationDto.name())) {
-            throw new ValidationException("Υπάρχει ήδη ψηφοφορία με αυτό το όνομα");
-        }
+        votingValidator.checkIfNameExists(votingInitializationDto.name());
 
-        Map<Integer, String> errorMetaData = new HashMap<>();
-        Set<UserEntity> committee = new HashSet<>();
-
-        for (int i = 0; i < votingInitializationDto.committee().size(); i++) {
-            String usernameString = votingInitializationDto.committee().get(i);
-            Optional<UserEntity> memberOptional = userRepository.findByUsername(usernameString);
-            if (memberOptional.isEmpty()) {
-                errorMetaData.put(i, "Το μέλος δεν βρέθηκε");
-            } else {
-                if (!committee.add(memberOptional.get())) {
-                    throw new ValidationException("Παρακαλώ εισάγετε διαφορετικούς χρήστες");
-                }
-            }
-        }
-
-        if (!errorMetaData.isEmpty()) {
-            throw new VotingCreationException("Τουλάχιστον ένα από τα μέλη δεν βρέθηκε", errorMetaData);
-        }
+        Set<UserEntity> committee = votingValidator.checkCommittee(votingInitializationDto.committee());
 
         committee.forEach(member -> {
             member.getRoles().add(Role.ELECTORAL_COMMITTEE);
@@ -236,69 +174,43 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingCreationDto.id())
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        if (!voting.getElectoralCommittee().contains(user)) {
-            throw new AuthorizationException("Δεν ανήκετε στην εφορευτική επιτροπή της ψηφοφορίας");
-        }
+        votingValidator.checkAuthorizationToEdit(voting, user);
 
         boolean mandatory = false;
 
         if (votingCreationDto.startDate() != null) {
             mandatory = true;
-            LocalDateTime startDate = toLocalDateTime(votingCreationDto.startDate());//TODO: Change all to LocalDate.
-            if (startDate.isBefore(LocalDateTime.now().plusDays(1))) { //TODO: Today At EOD
-                throw new ValidationException("Η ημερομηνία έναρξης δεν μπορεί να οριστεί στο παρελθόν");
-            }
-
+            LocalDateTime startDate = votingValidator.validateStartDate(votingCreationDto.startDate(), voting.getStartDate());
             voting.setStartDate(startDate);
         }
 
         if (mandatory) {
-            validateMandatoryFields(votingCreationDto);
+            votingValidator.validateMandatoryFields(votingCreationDto);
         }
 
         if (votingCreationDto.endDate() != null) {
-            LocalDateTime endDate = toLocalDateTime(votingCreationDto.endDate());
-
-            if (endDate.isBefore(LocalDateTime.now().plusDays(1))) {
-                throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να οριστεί στο παρελθόν ή στην επόμενη μία ημέρα");
-            }
-
-            if (votingCreationDto.startDate() != null &&
-                    (endDate.isBefore(toLocalDateTime(votingCreationDto.startDate())) ||
-                            endDate.isEqual(toLocalDateTime(votingCreationDto.startDate())))) {
-                throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να ταυτίζεται με την ημερομηνία έναρξης ή να οριστεί πριν από αυτή");
-            }
-
+            LocalDateTime endDate = votingValidator.validateEndDate(votingCreationDto.endDate(), voting.getEndDate(), voting.getStartDate());
             voting.setEndDate(endDate);
         }
 
-        if (votingCreationDto.description() != null && !votingCreationDto.description().trim().isEmpty()) {
-            //TODO: Validate length
-            voting.setInformation(votingCreationDto.description());
-        }
+        String info = votingValidator.validateInformation(votingCreationDto.description());
+        voting.setInformation(info);
 
         if (votingCreationDto.mechanism() != null) {
-            try {
-                VotingType type = VotingType.fromName(votingCreationDto.mechanism());
-                voting.setVotingType(type);
-            } catch (IllegalArgumentException e) {
-                throw new ValidationException("Ο τύπος ψηφοφορίας είναι εσφαλμένος");
-            }
+            VotingType type = votingValidator.validateVotingMechanism(votingCreationDto.mechanism());
+            voting.setVotingType(type);
         }
 
         if (votingCreationDto.options() != null && !votingCreationDto.options().isEmpty()) {
-            //TODO: Validate each and if all valid, proceed to replace all
+            votingValidator.validateVotingOptions(votingCreationDto.options());
             voting.clearVotingOptions();
             votingCreationDto.options().forEach(option ->
                     voting.addVotingOption(option.title(), option.details()));
         }
 
-        //TODO: if single choice, empty the limit.
         if (votingCreationDto.voteLimit() != null) {
-            if (votingCreationDto.options() != null && votingCreationDto.voteLimit() > votingCreationDto.options().size()) {
-                throw new ValidationException("Ο μέγιστος αριθμός επιλογών είναι μεγαλύτερος από τον αριθμό επιλογών που έχουν δοθεί");
-            }
-            voting.setVoteLimit(votingCreationDto.voteLimit().intValue());
+            Integer limit = votingValidator.validateOptionsAndLimit(votingCreationDto.options(), voting.getVotingType(), votingCreationDto.voteLimit());
+            voting.setVoteLimit(limit);
         } else {
             voting.setVoteLimit(null);
         }
@@ -318,21 +230,9 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        if (participantRepository.existsByUserAndVoting(user, voting)) {
-            throw new ValidationException("Υπάρχει ήδη αίτημα συμμετοχής για τη συγκεκριμένη ψηφοφορία");
-        }
+        votingValidator.checkIfRequestExists(user, voting);
 
-        if (voting.getStartDate() == null) {
-            throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι δυνατή ακόμα");
-        }
-
-        if (voting.getStartDate().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι πλέον δυνατή");
-        }
-
-        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Η ψηφοφορία έχει λήξει");
-        }
+        votingValidator.validateVotingDatesForRequest(voting.getStartDate(), voting.getEndDate());
 
         ParticipantEntity participantEntity = new ParticipantEntity(user, voting);
         participantRepository.save(participantEntity);
@@ -342,13 +242,7 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        if (voting.getStartDate() == null) {
-            throw new ValidationException("Η ψηφοφορία δεν έχει ημερομηνία έναρξης");
-        }
-
-        if (voting.getStartDate().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Η ψηφοφορία έχει ήδη ξεκινήσει");
-        }
+        votingValidator.validateVotingDatesForGettingRequests(voting.getStartDate(), voting.getEndDate());
 
         return participantRepository.findByVotingAndStatusIs(voting, null).stream().map(p ->
                 new ParticipationRequestDto(p.getId().intValue(), p.getUser().getName(), p.getUser().getSurname(),
@@ -651,41 +545,11 @@ public class VotingService {
                 null, null);
     }
 
-    private void validateMandatoryFields(VotingCreationDto votingCreationDto) throws ValidationException {
-        if (votingCreationDto.endDate() == null) {
-            throw new ValidationException("Η ημερομηνία λήξης είναι κενή");
-        }
-
-        if (votingCreationDto.description() == null || votingCreationDto.description().trim().isEmpty()) {
-            throw new ValidationException("Οι πληροφορίες είναι κενές");
-        }
-
-        if (votingCreationDto.mechanism() == null) {
-            throw new ValidationException("Ο τύπος ψηφοφορίας είναι κενός");
-        }
-
-        if (votingCreationDto.options() == null || votingCreationDto.options().isEmpty()) {
-            throw new ValidationException("Δεν έχουν οριστεί επιλογές");
-        }
-
-        if (VotingType.MULTIPLE.equals(VotingType.fromName(votingCreationDto.mechanism())) &&
-                votingCreationDto.voteLimit() != null &&
-                votingCreationDto.voteLimit() > votingCreationDto.options().size()) {
-            throw new ValidationException("Ο μέγιστος αριθμός επιλογών είναι μεγαλύτερος από τον αριθμό επιλογών που έχουν δοθεί");
-        }
-    }
-
     private String toString(LocalDateTime localDateTime) {
         if (localDateTime == null) {
             return "";
         }
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
         return localDateTime.format(formatter);
-    }
-
-    private LocalDateTime toLocalDateTime(String string) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
-        LocalDate localDate = LocalDate.parse(string, formatter);
-        return localDate.atStartOfDay();
     }
 }

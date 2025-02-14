@@ -102,16 +102,7 @@ public class UserService implements UserDetailsService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
 
-        Role role;
-        try {
-            role = Role.fromName(roleString);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Ο ρόλος δεν βρέθηκε");
-        }
-
-        if (user.getRoles().contains(role)) {
-            throw new ValidationException("Ο χρήστης έχει ήδη το συγκεκριμένο ρόλο");
-        }
+        Role role = userValidator.validateRole(user, roleString);
 
         user.getRoles().add(role);
         userRepository.save(user);
@@ -126,9 +117,7 @@ public class UserService implements UserDetailsService {
 
         UserEntity user = findUser(username, email);
 
-        if (!passwordEncoder.matches(securityAnswer, user.getSecurityAnswerHash())) {
-            throw new ValidationException("Λανθασμένη απάντηση");
-        }
+        userValidator.checkSecurityAnswer(securityAnswer, user.getSecurityAnswerHash());
 
         String encodedPassword = passwordEncoder.encode(newRawPassword);
         user.setPasswordHash(encodedPassword);
@@ -144,9 +133,7 @@ public class UserService implements UserDetailsService {
 
         UserEntity user = findUser(username);
 
-        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
-            throw new ValidationException("Ο παλιός κωδικός πρόσβασης είναι εσφαλμένος");
-        }
+        userValidator.checkOldPassword(oldPassword, user.getPasswordHash());
 
         String encodedPassword = passwordEncoder.encode(newRawPassword);
         user.setPasswordHash(encodedPassword);
