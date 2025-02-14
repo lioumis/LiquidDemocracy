@@ -31,13 +31,13 @@ export class RegistrationComponent {
     private readonly messageService: MessageService
   ) {
     this.registrationForm = this.fb.group({
-        username: ['', Validators.required],
-        email: ['', Validators.required],
-        name: ['', Validators.required],
-        surname: ['', Validators.required],
+        username: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
+        email: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
+        name: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
+        surname: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
         password: ['', Validators.required],
         passwordRepeat: ['', Validators.required],
-        securityQuestion: ['', Validators.required],
+        securityQuestion: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
         securityAnswer: ['', Validators.required]
       },
       {

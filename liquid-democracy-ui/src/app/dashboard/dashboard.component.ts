@@ -61,24 +61,6 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(['/login']).then();
     }
 
-    this.authService.getUserDetails().subscribe({
-      next: (response) => {
-        localStorage.setItem('username', response.username);
-        localStorage.setItem('name', response.name);
-        localStorage.setItem('surname', response.surname);
-        localStorage.setItem('email', response.email);
-        localStorage.setItem('roles', response.roles);
-      },
-      error: (error) => {
-        console.error('Σφάλμα:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Σφάλμα',
-          detail: error.error
-        });
-      }
-    });
-
     if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
       localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
       this.authService.getSuggestedVotings().subscribe({

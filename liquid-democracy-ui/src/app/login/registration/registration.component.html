@@ -10,9 +10,14 @@
         id="username"
         formControlName="username"
       />
-      @if (registrationForm.get('username')?.invalid && registrationForm.get('username')?.touched) {
+      @if (registrationForm.get('username')?.invalid && registrationForm.get('username')?.errors?.['required'] && registrationForm.get('username')?.touched) {
         <div>
           <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+      @if (registrationForm.get('username')?.invalid && registrationForm.get('username')?.errors?.['maxlength']) {
+        <div>
+          <small class="error">Υπερβολικά μεγάλο μήκος</small>
         </div>
       }
     </div>
@@ -24,9 +29,14 @@
         id="email"
         formControlName="email"
       />
-      @if (registrationForm.get('email')?.invalid && registrationForm.get('email')?.touched) {
+      @if (registrationForm.get('email')?.invalid && registrationForm.get('email')?.errors?.['required'] && registrationForm.get('email')?.touched) {
         <div>
           <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+      @if (registrationForm.get('email')?.invalid && registrationForm.get('email')?.errors?.['maxlength']) {
+        <div>
+          <small class="error">Υπερβολικά μεγάλο μήκος</small>
         </div>
       }
     </div>
@@ -38,9 +48,14 @@
         id="name"
         formControlName="name"
       />
-      @if (registrationForm.get('name')?.invalid && registrationForm.get('name')?.touched) {
+      @if (registrationForm.get('name')?.invalid && registrationForm.get('name')?.errors?.['required'] && registrationForm.get('name')?.touched) {
         <div>
           <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+      @if (registrationForm.get('name')?.invalid && registrationForm.get('name')?.errors?.['maxlength']) {
+        <div>
+          <small class="error">Υπερβολικά μεγάλο μήκος</small>
         </div>
       }
     </div>
@@ -52,9 +67,14 @@
         id="surname"
         formControlName="surname"
       />
-      @if (registrationForm.get('surname')?.invalid && registrationForm.get('surname')?.touched) {
+      @if (registrationForm.get('surname')?.invalid && registrationForm.get('surname')?.errors?.['required'] && registrationForm.get('surname')?.touched) {
         <div>
           <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+      @if (registrationForm.get('surname')?.invalid && registrationForm.get('surname')?.errors?.['maxlength']) {
+        <div>
+          <small class="error">Υπερβολικά μεγάλο μήκος</small>
         </div>
       }
     </div>
@@ -99,9 +119,14 @@
         id="securityQuestion"
         formControlName="securityQuestion"
       />
-      @if (registrationForm.get('securityQuestion')?.invalid && registrationForm.get('securityQuestion')?.touched) {
+      @if (registrationForm.get('securityQuestion')?.invalid && registrationForm.get('securityQuestion')?.errors?.['required'] && registrationForm.get('securityQuestion')?.touched) {
         <div>
           <small class="error">Υποχρεωτικό πεδίο</small>
+        </div>
+      }
+      @if (registrationForm.get('securityQuestion')?.invalid && registrationForm.get('securityQuestion')?.errors?.['maxlength']) {
+        <div>
+          <small class="error">Υπερβολικά μεγάλο μήκος</small>
         </div>
       }
     </div>

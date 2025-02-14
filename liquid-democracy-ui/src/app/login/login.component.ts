@@ -52,7 +52,7 @@ export class LoginComponent implements OnInit {
         next: (response) => {
           localStorage.setItem('token', response.token);
           console.log('Token response', response.token);
-          this.router.navigate(['/dashboard']).then();
+          this.getDetailsAndLogin();
         },
         error: (error) => {
           console.error('Login failed', error);
@@ -66,5 +66,27 @@ export class LoginComponent implements OnInit {
         }
       });
     }
+  }
+
+  getDetailsAndLogin() {
+    this.authService.getUserDetails().subscribe({
+      next: (response) => {
+        localStorage.setItem('username', response.username);
+        localStorage.setItem('name', response.name);
+        localStorage.setItem('surname', response.surname);
+        localStorage.setItem('email', response.email);
+        localStorage.setItem('roles', response.roles);
+        localStorage.setItem('selectedRole', response.roles[0]);
+        this.router.navigate(['/dashboard']).then();
+      },
+      error: (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    });
   }
 }
