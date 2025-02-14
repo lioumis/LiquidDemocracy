@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {ToastModule} from "primeng/toast";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../login/auth.service";
-import {MenuItem, MessageService} from "primeng/api";
+import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import {PanelModule} from "primeng/panel";
 import {DataViewModule} from "primeng/dataview";
 import {Button, ButtonDirective} from "primeng/button";
@@ -20,6 +20,7 @@ import {Dropdown, DropdownModule} from "primeng/dropdown";
 import {InputNumberModule} from "primeng/inputnumber";
 import {InputTextModule} from "primeng/inputtext";
 import {Ripple} from "primeng/ripple";
+import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 @Component({
   selector: 'app-voting',
@@ -44,9 +45,10 @@ import {Ripple} from "primeng/ripple";
     DropdownModule,
     InputNumberModule,
     InputTextModule,
-    Ripple
+    Ripple,
+    ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, MessageService, ConfirmationService],
   templateUrl: './voting.component.html',
   styleUrl: './voting.component.css'
 })
@@ -55,16 +57,18 @@ export class VotingComponent implements OnInit {
 
   allowMechanismDropdown: boolean = true;
 
+  showConfirmDialog: boolean = true;
+
   mechanisms: string[] = ['Μοναδική Επιλογή', 'Πολλαπλή Επιλογή'];
 
-  selectedMechanism: string = 'Μοναδική Επιλογή';
+  selectedMechanism: string | null = null;
 
   votingOptions: VotingOption[] = [
     {title: '', details: ''},
     {title: '', details: ''}
   ];
 
-  maxSelections: number = 1;
+  maxSelections: number | null = null;
 
   formGroup: FormGroup;
 
@@ -115,6 +119,7 @@ export class VotingComponent implements OnInit {
   constructor(private readonly route: ActivatedRoute,
               private readonly router: Router,
               private readonly authService: AuthService,
+              private readonly confirmationService: ConfirmationService,
               private readonly messageService: MessageService,
               private readonly fb: FormBuilder) {
     this.formGroup = this.fb.group({
@@ -188,10 +193,10 @@ export class VotingComponent implements OnInit {
             this.selectedMechanism = "Πολλαπλή Επιλογή";
           }
 
-          this.maxSelections = response.voteLimit ? response.voteLimit : 1;
+          this.maxSelections = response.voteLimit;
 
           if (response.results && response.results.length > 0) {
-            this.votingOptions = response.results.map((item: any) => item.option);
+            this.votingOptions = response.results.map((item: any) => JSON.parse(JSON.stringify(item.option)));
           }
 
           if (this.votingDetails?.votingType === 1) {
@@ -635,6 +640,45 @@ export class VotingComponent implements OnInit {
     }
   }
 
+  saveVoting() {
+    if (this.selectedMechanism === 'Πολλαπλή Επιλογή' && this.maxSelections !== null && this.maxSelections > this.votingOptions?.length) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Αποτυχία',
+        detail: 'Ο μέγιστος αριθμός επιλογών είναι μεγαλύτερος από τον αριθμό επιλογών που έχουν δοθεί'
+      });
+    }
+
+    if (this.startDate && this.votingDetails?.startDate === '') {
+      this.displayDialog();
+    } else {
+      this.saveChanges();
+    }
+  }
+
+  saveChanges() {
+    if (!this.votingId) {
+      return;
+    }
+    this.authService.editVoting(this.votingId, this.startDate, this.endDate, this.information, this.selectedMechanism, this.votingOptions, this.maxSelections).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Επιτυχία',
+          detail: 'Οι αλλαγές αποθηκεύτηκαν'
+        });
+        this.loadVotingDetails();
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error.error
+        });
+      }
+    });
+  }
+
   onStartDateSelect(event: Date): void {
     const selectedDate = new Date(event.getFullYear(), event.getMonth(), event.getDate());
     if (selectedDate < this.minStartDate) {
@@ -670,6 +714,102 @@ export class VotingComponent implements OnInit {
         this.allowMechanismDropdown = true;
       }, 0);
     }
+  }
+
+  canSaveVoting(): boolean {
+    if (!this.changesExist()) {
+      return false;
+    }
+
+    for (const element of this.votingOptions) {
+      let option = element;
+      if (option.title === null || option.title.trim() === '') {
+        return false;
+      }
+      if (option.details === null || option.details.trim() === '') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private changesExist() {
+    let originalStartDate = this.votingDetails?.startDate ? new Date(this.votingDetails?.startDate) : null;
+    if ((this.startDate?.getTime() || 0) !== (originalStartDate?.getTime() || 0)) {
+      return true;
+    }
+
+    let originalEndDate = this.votingDetails?.endDate ? new Date(this.votingDetails?.endDate) : null;
+    if ((this.endDate?.getTime() || 0) !== (originalEndDate?.getTime() || 0)) {
+      return true;
+    }
+
+    if (this.information !== this.votingDetails?.information) {
+      return true;
+    }
+
+    if (this.selectedMechanism !== this.translateMechanism(this.votingDetails?.votingType)) {
+      return true;
+    }
+
+    if (this.selectedMechanism === 'Πολλαπλή Επιλογή' && this.maxSelections !== this.votingDetails?.voteLimit) {
+      return true;
+    }
+
+    return !this.areOptionsSame(this.votingOptions, this.votingDetails.results.map((item: any) => item.option));
+  }
+
+  private areOptionsSame(a: VotingOption[], b: VotingOption[]): boolean {
+    if (b === null) {
+      return false;
+    }
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i].title !== b[i].title || a[i].details !== b[i].details) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  translateMechanism(mechanism: number) {
+    if (mechanism === 1) {
+      return 'Μοναδική Επιλογή';
+    }
+
+    if (mechanism === 2) {
+      return 'Πολλαπλή Επιλογή';
+    }
+
+    return null;
+  }
+
+  displayDialog() {
+    this.confirmationService.confirm({
+      acceptLabel: "Ναι",
+      rejectLabel: "Όχι",
+      message: 'Αν προστεθεί ημερομηνία έναρξης, η ψηφοφορία θα ενεργοποιηθεί και θα εμφανίζεται στους ψηφοφόρους.<br>Οι διαθέσιμες αλλαγές μετά από αυτή την ενέργεια θα είναι περιορισμένες. Συνέχεια;',
+      header: 'Προσοχή!',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.saveChanges()
+        this.resetConfirmDialog();
+      },
+      reject: () => {
+        this.resetConfirmDialog();
+      }
+    });
+  }
+
+  resetConfirmDialog() {
+    this.showConfirmDialog = false;
+    setTimeout(() => {
+      this.showConfirmDialog = true;
+    }, 0);
   }
 
 }

@@ -1,5 +1,9 @@
 <p-toast></p-toast>
 
+@if (showConfirmDialog) {
+  <p-confirmDialog></p-confirmDialog>
+}
+
 <p-breadcrumb
   class="max-w-full"
   [model]="items"
@@ -75,7 +79,7 @@
                 <strong>Επιλογές:</strong>
               </div>
               <div class="option-values">
-                <div class="option-row" *ngFor="let option of votingOptions">
+                <div class="option-row" *ngFor="let option of votingOptions; let i = index">
                   <input class="text-box" type="text" pInputText [(ngModel)]="option.title" />
                   <input class="text-box" type="text" pInputText [(ngModel)]="option.details" />
                   <button
@@ -83,10 +87,10 @@
                     pButton
                     pRipple
                     icon="pi pi-minus"
+                    severity="danger"
                     [disabled]="votingOptions.length < 3"
-                    (click)="votingOptions.pop()">
+                    (click)="votingOptions.splice(i, 1)">
                   </button>
-<!--                  TODO: Remove the correct row-->
                 </div>
                 <button
                   type="button"
@@ -271,6 +275,17 @@
               <p-button (onClick)="processRequest(true)" [disabled]="!selectedRequest" label="Αποδοχή"></p-button>
             </div>
           </p-panel>
+        }
+
+        @if (this.editMode) {
+          <div class="save-button-container">
+            <p-button
+              label="Αποθήκευση"
+              icon="pi pi-save"
+              (onClick)="saveVoting()"
+              [disabled]="!canSaveVoting()">
+            </p-button>
+          </div>
         }
       </div>
 

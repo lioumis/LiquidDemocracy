@@ -70,6 +70,10 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
+        if (voting.getStartDate().isAfter(LocalDateTime.now())) {
+            throw new ValidationException("Η ψηφοφορία δεν έχει ξεκινήσει ακόμα.");
+        }
+
         if (voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
@@ -228,14 +232,36 @@ public class VotingService {
             throw new AuthorizationException("Δεν ανήκετε στην εφορευτική επιτροπή της ψηφοφορίας");
         }
 
+        boolean mandatory = false;
+
         if (votingCreationDto.startDate() != null) {
-            //TODO: Validate format & business
-            voting.setStartDate(toLocalDateTime(votingCreationDto.startDate()));
+            mandatory = true;
+            LocalDateTime startDate = toLocalDateTime(votingCreationDto.startDate());//TODO: Change all to LocalDate.
+            if (startDate.isBefore(LocalDateTime.now().plusDays(1))) { //TODO: Today At EOD
+                throw new ValidationException("Η ημερομηνία έναρξης δεν μπορεί να οριστεί στο παρελθόν");
+            }
+
+            voting.setStartDate(startDate);
+        }
+
+        if (mandatory) {
+            validateMandatoryFields(votingCreationDto);
         }
 
         if (votingCreationDto.endDate() != null) {
-            //TODO: Validate format & business
-            voting.setEndDate(toLocalDateTime(votingCreationDto.endDate()));
+            LocalDateTime endDate = toLocalDateTime(votingCreationDto.endDate());
+
+            if (endDate.isBefore(LocalDateTime.now().plusDays(1))) {
+                throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να οριστεί στο παρελθόν ή στην επόμενη μία ημέρα");
+            }
+
+            if (votingCreationDto.startDate() != null &&
+                    (endDate.isBefore(toLocalDateTime(votingCreationDto.startDate())) ||
+                            endDate.isEqual(toLocalDateTime(votingCreationDto.startDate())))) {
+                throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να ταυτίζεται με την ημερομηνία έναρξης ή να οριστεί πριν από αυτή");
+            }
+
+            voting.setEndDate(endDate);
         }
 
         if (votingCreationDto.description() != null && !votingCreationDto.description().trim().isEmpty()) {
@@ -245,7 +271,7 @@ public class VotingService {
 
         if (votingCreationDto.mechanism() != null) {
             try {
-                VotingType type = VotingType.valueOf(votingCreationDto.mechanism());
+                VotingType type = VotingType.fromName(votingCreationDto.mechanism());
                 voting.setVotingType(type);
             } catch (IllegalArgumentException e) {
                 throw new ValidationException("Ο τύπος ψηφοφορίας είναι εσφαλμένος");
@@ -259,15 +285,14 @@ public class VotingService {
                     voting.addVotingOption(option.title(), option.details()));
         }
 
-        if (votingCreationDto.comment() != null && !votingCreationDto.comment().trim().isEmpty()) {
-            //TODO: Validate length
-            //TODO: Clear the old one or just add?
-            voting.addMessage(votingCreationDto.comment(), user);
-        }
-
+        //TODO: if single choice, empty the limit.
         if (votingCreationDto.voteLimit() != null) {
-            //TODO: Validate if smaller than the number of options & if the voting is of multiple choice type
+            if (votingCreationDto.options() != null && votingCreationDto.voteLimit() > votingCreationDto.options().size()) {
+                throw new ValidationException("Ο μέγιστος αριθμός επιλογών είναι μεγαλύτερος από τον αριθμό επιλογών που έχουν δοθεί");
+            }
             voting.setVoteLimit(votingCreationDto.voteLimit().intValue());
+        } else {
+            voting.setVoteLimit(null);
         }
 
         votingRepository.save(voting);
@@ -616,6 +641,30 @@ public class VotingService {
                 toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
                 null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, null, null,
                 null, null);
+    }
+
+    private void validateMandatoryFields(VotingCreationDto votingCreationDto) throws ValidationException {
+        if (votingCreationDto.endDate() == null) {
+            throw new ValidationException("Η ημερομηνία λήξης είναι κενή");
+        }
+
+        if (votingCreationDto.description() == null || votingCreationDto.description().trim().isEmpty()) {
+            throw new ValidationException("Οι πληροφορίες είναι κενές");
+        }
+
+        if (votingCreationDto.mechanism() == null) {
+            throw new ValidationException("Ο τύπος ψηφοφορίας είναι κενός");
+        }
+
+        if (votingCreationDto.options() == null || votingCreationDto.options().isEmpty()) {
+            throw new ValidationException("Δεν έχουν οριστεί επιλογές");
+        }
+
+        if (VotingType.MULTIPLE.equals(VotingType.fromName(votingCreationDto.mechanism())) &&
+                votingCreationDto.voteLimit() != null &&
+                votingCreationDto.voteLimit() > votingCreationDto.options().size()) {
+            throw new ValidationException("Ο μέγιστος αριθμός επιλογών είναι μεγαλύτερος από τον αριθμό επιλογών που έχουν δοθεί");
+        }
     }
 
     private String toString(LocalDateTime localDateTime) {

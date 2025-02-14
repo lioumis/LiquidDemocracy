@@ -2,6 +2,8 @@ import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
+import {VotingOption} from "../votings/voting/voting.component";
+import {formatDate} from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +36,7 @@ export class AuthService { //TODO: Split to business specific services
   private readonly NEW_VOTING = '/initializeVoting';
   private readonly PROCESS_REQUEST = '/processRequest';
   private readonly REQUESTS = '/getRequests';
+  private readonly EDIT = '/editVoting';
 
   private readonly TOPICS = '/topics';
   private readonly ALL_TOPICS = '/getTopics';
@@ -214,6 +217,25 @@ export class AuthService { //TODO: Split to business specific services
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const httpOptions = {headers}
     return this.http.post(this.API_REL_PATH + this.VOTINGS + this.VOTE, {votes, votingId}, httpOptions);
+  }
+
+  editVoting(id: number, startDateValue: Date | null, endDateValue: Date | null, description: string | null, mechanism: string | null,
+             options: VotingOption[], voteLimit: number | null): Observable<any> {
+    const startDate = startDateValue ? formatDate(startDateValue, 'yyyy-MM-dd', 'en-US') : null;
+    const endDate = endDateValue ? formatDate(endDateValue, 'yyyy-MM-dd', 'en-US') : null;
+
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.EDIT, {
+      id,
+      startDate,
+      endDate,
+      description,
+      mechanism,
+      options,
+      voteLimit
+    }, httpOptions);
   }
 
   getTopics(): Observable<any> {

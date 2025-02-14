@@ -9,7 +9,6 @@ public record VotingCreationDto(
         String description,
         String mechanism,
         List<VotingOptionDto> options,
-        Long voteLimit,
-        String comment
+        Long voteLimit
 ) {
 }

@@ -332,3 +332,7 @@ textarea {
 .text-box {
   width: 20rem;
 }
+
+:host ::ng-deep .p-dialog-mask {
+  z-index: 2000 !important;
+}

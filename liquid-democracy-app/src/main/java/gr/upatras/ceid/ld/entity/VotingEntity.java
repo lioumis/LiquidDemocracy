@@ -46,7 +46,7 @@ public class VotingEntity {
     @Column
     private Integer voteLimit;
 
-    @OneToMany(mappedBy = "voting", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(mappedBy = "voting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VotingOptionsEntity> votingOptions;
 
     @OneToMany(mappedBy = "voting")
@@ -56,7 +56,7 @@ public class VotingEntity {
     @JoinColumn(name = "topic_id", nullable = false)
     private TopicEntity topic;
 
-    @OneToMany(mappedBy = "voting", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "voting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages;
 
     @ManyToMany
@@ -81,7 +81,9 @@ public class VotingEntity {
     }
 
     public void clearVotingOptions() {
-        this.votingOptions = null;
+        if (this.votingOptions != null) {
+            this.votingOptions.clear();
+        }
     }
 
     public void addMessage(String message, UserEntity user) {

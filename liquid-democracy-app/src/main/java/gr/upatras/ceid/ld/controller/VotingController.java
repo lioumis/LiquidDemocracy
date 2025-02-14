@@ -307,7 +307,7 @@ public class VotingController {
     }
 
     @PostMapping("/editVoting")
-    public ResponseEntity<String> editVoting(@RequestBody VotingCreationDto votingCreationDto) {
+    public ResponseEntity<Map<String, String>> editVoting(@RequestBody VotingCreationDto votingCreationDto) {
         try {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -316,14 +316,22 @@ public class VotingController {
 
             votingService.editVoting(authorizedUsername, votingCreationDto);
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Η ψηφοφορία τροποποιήθηκε επιτυχώς");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Η ψηφοφορία τροποποιήθηκε επιτυχώς");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/getDiscussion")
