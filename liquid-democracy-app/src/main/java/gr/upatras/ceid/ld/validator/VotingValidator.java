@@ -15,7 +15,6 @@ import gr.upatras.ceid.ld.repository.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -42,11 +41,11 @@ public class VotingValidator {
     }
 
     public void validateVotingDates(VotingEntity voting) throws ValidationException {
-        if (voting.getStartDate().isAfter(LocalDateTime.now())) {
+        if (voting.getStartDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία δεν έχει ξεκινήσει ακόμα.");
         }
 
-        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
+        if (voting.getEndDate().isBefore(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
     }
@@ -150,9 +149,9 @@ public class VotingValidator {
         }
     }
 
-    public LocalDateTime validateStartDate(String startDateString, LocalDateTime existingStartDate) throws ValidationException {
-        LocalDateTime startDate = toLocalDateTime(startDateString); //TODO: Change all to LocalDate.
-        if (startDate.isBefore(LocalDateTime.now().plusDays(1))) { //TODO: Today At EOD
+    public LocalDate validateStartDate(String startDateString, LocalDate existingStartDate) throws ValidationException {
+        LocalDate startDate = toLocalDate(startDateString);
+        if (startDate.isBefore(LocalDate.now().plusDays(1))) {
             throw new ValidationException("Η ημερομηνία έναρξης δεν μπορεί να οριστεί στο παρελθόν");
         }
         if (existingStartDate != null && existingStartDate.isBefore(startDate)) {
@@ -161,10 +160,10 @@ public class VotingValidator {
         return startDate;
     }
 
-    public LocalDateTime validateEndDate(String endDateString, LocalDateTime existingEndDate, LocalDateTime startDate) throws ValidationException {
-        LocalDateTime endDate = toLocalDateTime(endDateString);
+    public LocalDate validateEndDate(String endDateString, LocalDate existingEndDate, LocalDate startDate) throws ValidationException {
+        LocalDate endDate = toLocalDate(endDateString);
 
-        if (endDate.isBefore(LocalDateTime.now().plusDays(1))) {
+        if (endDate.isBefore(LocalDate.now().plusDays(1))) {
             throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να οριστεί στο παρελθόν ή στην επόμενη μία ημέρα");
         }
 
@@ -257,38 +256,37 @@ public class VotingValidator {
         }
     }
 
-    public void validateVotingDatesForRequest(LocalDateTime start, LocalDateTime end) throws ValidationException {
+    public void validateVotingDatesForRequest(LocalDate start, LocalDate end) throws ValidationException {
         if (start == null) {
             throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι δυνατή ακόμα");
         }
 
-        if (start.isBefore(LocalDateTime.now())) {
+        if (start.isBefore(LocalDate.now())) {
             throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι πλέον δυνατή");
         }
 
-        if (end.isBefore(LocalDateTime.now())) {
+        if (end.isBefore(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }
 
-    public void validateVotingDatesForGettingRequests(LocalDateTime start, LocalDateTime end) throws ValidationException {
+    public void validateVotingDatesForGettingRequests(LocalDate start, LocalDate end) throws ValidationException {
         if (start == null) {
             throw new ValidationException("Η ψηφοφορία δεν έχει ημερομηνία έναρξης");
         }
 
-        if (start.isBefore(LocalDateTime.now())) {
+        if (start.isBefore(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει ήδη ξεκινήσει");
         }
 
-        if (end != null && end.isBefore(LocalDateTime.now())) {
+        if (end != null && end.isBefore(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }
 
-    private LocalDateTime toLocalDateTime(String string) {
+    private LocalDate toLocalDate(String string) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
-        LocalDate localDate = LocalDate.parse(string, formatter);
-        return localDate.atStartOfDay();
+        return LocalDate.parse(string, formatter);
     }
 
 }

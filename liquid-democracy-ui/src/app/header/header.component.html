@@ -31,11 +31,11 @@
     <ul>
       <li><p-button [plain]="true" label="Κύρια Οθόνη" [text]="true" icon="pi pi-home" (onClick)="navigateTo('/dashboard')"></p-button></li>
 
-      @if (this.selectedRole === "Ψηφοφόρος" || this.selectedRole === "Εφορευτική Επιτροπή" || this.selectedRole === "Αντιπρόσωπος" || this.selectedRole === "Διαχειριστής Συστήματος") {
+      @if (this.selectedRole === "Ψηφοφόρος" || this.selectedRole === "Εφορευτική Επιτροπή" || this.selectedRole === "Αντιπρόσωπος") {
         <li><p-button [plain]="true" label="Ψηφοφορίες" [text]="true" icon="pi pi-check-square" (onClick)="navigateTo('/votings')"></p-button></li>
       }
 
-      @if (this.selectedRole === "Ψηφοφόρος" || this.selectedRole === "Αντιπρόσωπος" || this.selectedRole === "Διαχειριστής Συστήματος") {
+      @if (this.selectedRole === "Ψηφοφόρος" || this.selectedRole === "Αντιπρόσωπος") {
         <li><p-button [plain]="true" label="Αναθέσεις" [text]="true" icon="pi pi-users" (onClick)="navigateTo('/delegations')"></p-button></li>
       }
 

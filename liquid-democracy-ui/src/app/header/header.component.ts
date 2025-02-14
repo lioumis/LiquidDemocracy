@@ -65,7 +65,7 @@ export class HeaderComponent {
       this.dropdown.overlayVisible = false;
     }
     if (this.selectedRole) {
-      this.router.navigate(['/dashboard']).then();
+      this.router.navigate(['/settings']).then(() => this.router.navigate(['/dashboard']).then());
     }
   }
 

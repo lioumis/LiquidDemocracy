@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,11 +30,11 @@ public class VotingEntity {
 
     @Setter
     @Column
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Setter
     @Column
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @OneToMany(mappedBy = "voting")
     private List<VoteEntity> votes;

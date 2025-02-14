@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -180,7 +180,7 @@ public class VotingService {
 
         if (votingCreationDto.startDate() != null) {
             mandatory = true;
-            LocalDateTime startDate = votingValidator.validateStartDate(votingCreationDto.startDate(), voting.getStartDate());
+            LocalDate startDate = votingValidator.validateStartDate(votingCreationDto.startDate(), voting.getStartDate());
             voting.setStartDate(startDate);
         }
 
@@ -189,7 +189,7 @@ public class VotingService {
         }
 
         if (votingCreationDto.endDate() != null) {
-            LocalDateTime endDate = votingValidator.validateEndDate(votingCreationDto.endDate(), voting.getEndDate(), voting.getStartDate());
+            LocalDate endDate = votingValidator.validateEndDate(votingCreationDto.endDate(), voting.getEndDate(), voting.getStartDate());
             voting.setEndDate(endDate);
         }
 
@@ -281,7 +281,7 @@ public class VotingService {
             return new VotingAccessDto(true, true);
         }
 
-        if (voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now())) {
+        if (voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDate.now())) {
             return new VotingAccessDto(true, true);
         }
 
@@ -334,7 +334,7 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
 
-        if (voting.getStartDate() != null && voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now())) {
+        if (voting.getStartDate() != null && voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDate.now())) {
             return getInactiveVotingStatistics(voting, voter);
         }
 
@@ -389,7 +389,7 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
 
-        if (message.getVoting().getEndDate() != null && message.getVoting().getEndDate().isBefore(LocalDateTime.now())) {
+        if (message.getVoting().getEndDate() != null && message.getVoting().getEndDate().isBefore(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
 
@@ -439,7 +439,7 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        if (!voting.getEndDate().isBefore(LocalDateTime.now())) {
+        if (!voting.getEndDate().isBefore(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία είναι ακόμα ενεργή");
         }
 
@@ -545,11 +545,11 @@ public class VotingService {
                 null, null);
     }
 
-    private String toString(LocalDateTime localDateTime) {
-        if (localDateTime == null) {
+    private String toString(LocalDate localDate) {
+        if (localDate == null) {
             return "";
         }
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
-        return localDateTime.format(formatter);
+        return localDate.format(formatter);
     }
 }

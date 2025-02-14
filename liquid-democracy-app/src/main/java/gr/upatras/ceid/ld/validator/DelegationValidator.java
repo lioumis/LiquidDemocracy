@@ -11,7 +11,7 @@ import gr.upatras.ceid.ld.repository.ParticipantRepository;
 import gr.upatras.ceid.ld.repository.VoteRepository;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,7 +43,7 @@ public class DelegationValidator {
     }
 
     public void validateVotingIsActive(VotingEntity voting) throws ValidationException {
-        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
+        if (voting.getEndDate().isBefore(LocalDate.now())) {
             throw new ValidationException("Η επιλεγμένη ψηφοφορία έχει λήξει.");
         }
     }

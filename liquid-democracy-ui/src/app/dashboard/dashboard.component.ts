@@ -79,61 +79,66 @@ export class DashboardComponent implements OnInit {
       }
     });
 
-    this.authService.getSuggestedVotings().subscribe({
-      next: (response) => {
-        this.votings = response;
-      },
-      error: (error) => {
-        console.error('Σφάλμα:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Σφάλμα',
-          detail: error.error
-        });
-      }
-    });
+    if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
+      localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
+      this.authService.getSuggestedVotings().subscribe({
+        next: (response) => {
+          this.votings = response;
+        },
+        error: (error) => {
+          console.error('Σφάλμα:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
 
-    this.authService.getAllVotings().subscribe({
-      next: (response: Voting[]) => {
-        this.allVotings = response.map((voting) => voting.name);
-      },
-      error: (error) => {
-        console.error('Σφάλμα:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Σφάλμα',
-          detail: error.error
-        });
-      }
-    });
+      this.authService.getAllVotings().subscribe({
+        next: (response: Voting[]) => {
+          this.allVotings = response.map((voting) => voting.name);
+        },
+        error: (error) => {
+          console.error('Σφάλμα:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
 
-    this.authService.getDelegations().subscribe({
-      next: (response) => {
-        this.delegations = response;
-      },
-      error: (error) => {
-        console.error('Σφάλμα:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Σφάλμα',
-          detail: error.error
-        });
-      }
-    });
+      this.authService.getDelegations().subscribe({
+        next: (response) => {
+          this.delegations = response;
+        },
+        error: (error) => {
+          console.error('Σφάλμα:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
+    }
 
-    this.authService.getReceivedDelegations().subscribe({
-      next: (response) => {
-        this.receivedDelegations = response;
-      },
-      error: (error) => {
-        console.error('Σφάλμα:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Σφάλμα',
-          detail: error.error
-        });
-      }
-    });
+    if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος") {
+      this.authService.getReceivedDelegations().subscribe({
+        next: (response) => {
+          this.receivedDelegations = response;
+        },
+        error: (error) => {
+          console.error('Σφάλμα:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
+    }
 
     this.responsiveOptions = [
       {
