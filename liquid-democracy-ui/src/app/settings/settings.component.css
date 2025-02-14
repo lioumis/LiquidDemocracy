@@ -82,3 +82,7 @@ input {
   display: flex;
   justify-content: flex-end;
 }
+
+:host ::ng-deep .p-toast {
+  z-index: 2000 !important;
+}

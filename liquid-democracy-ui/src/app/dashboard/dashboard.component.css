@@ -79,6 +79,10 @@ p-multiselect-panel {
   z-index: 2000 !important;
 }
 
+:host ::ng-deep .p-toast {
+  z-index: 2000 !important;
+}
+
 .center {
   text-align: center;
 }

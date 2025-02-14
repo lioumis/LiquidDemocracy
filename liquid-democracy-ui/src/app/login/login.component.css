@@ -89,3 +89,7 @@ button:disabled {
   justify-content: space-between;
   width: 100%;
 }
+
+:host ::ng-deep .p-toast {
+  z-index: 2000 !important;
+}
