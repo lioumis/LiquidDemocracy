@@ -18,6 +18,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/votings")
 public class VotingController {
+    private static final String AUTHORIZATION_ERROR_MESSAGE = "Δεν έχετε άδεια να εκτελέσετε αυτήν την ενέργεια";
+    private static final String ERROR_KEYWORD = "error";
+    private static final String MESSAGE_KEYWORD = "message";
     private static final Set<Role> VOTING_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_ROLES_FOR_CREATION = new HashSet<>();
@@ -53,7 +56,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<SuggestedVotingDto> suggestedVotings = votingService.getSuggestedVotings();
@@ -78,7 +81,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, Set.of(selectedRole));
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<VotingDto> votings = votingService.getVotings(authorizedUsername, selectedRole);
@@ -100,7 +103,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             VotingDetailsDto votingDetails = votingService.getVotingDetails(authorizedUsername, votingId);
@@ -122,7 +125,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<VotingTitleDto> votingTitles = votingService.getVotingTitles();
@@ -142,26 +145,26 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             votingService.castVote(authorizedUsername, voteDto.votingId().longValue(), voteDto.votes());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Vote cast successfully!");
+        response.put(MESSAGE_KEYWORD, "Η ψήφος καταχωρήθηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -173,7 +176,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<ParticipationRequestDto> participationRequests = votingService.getRequests(votingId);
@@ -193,29 +196,29 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             votingService.processRequest(authorizedUsername, requestProcessDto.requestId(), requestProcessDto.approve());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
         if (requestProcessDto.approve()) {
-            response.put("message", "Το αίτημα εγκρίθηκε επιτυχώς");
+            response.put(MESSAGE_KEYWORD, "Το αίτημα εγκρίθηκε επιτυχώς");
         } else {
-            response.put("message", "Το αίτημα απορρίφθηκε επιτυχώς");
+            response.put(MESSAGE_KEYWORD, "Το αίτημα απορρίφθηκε επιτυχώς");
         }
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -228,26 +231,26 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             votingService.requestAccess(authorizedUsername, accessRequestDto.votingId());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Το αίτημα συμμετοχής καταχωρήθηκε επιτυχώς");
+        response.put(MESSAGE_KEYWORD, "Το αίτημα συμμετοχής καταχωρήθηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -259,7 +262,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             VotingAccessDto votingAccess = votingService.hasAccess(authorizedUsername, votingId);
@@ -281,28 +284,32 @@ public class VotingController {
             String usernameFromToken = authentication.getName();
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_CREATION);
 
+            if (authorizedUsername == null) {
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
+            }
+
             votingService.initializeVoting(authorizedUsername, votingInitializationDto);
         } catch (VotingCreationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             e.getMetadata().forEach((index, message) -> errorResponse.put("member" + index, message));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Η ψηφοφορία δημιουργήθηκε επιτυχώς");
+        response.put(MESSAGE_KEYWORD, "Η ψηφοφορία δημιουργήθηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -317,20 +324,20 @@ public class VotingController {
             votingService.editVoting(authorizedUsername, votingCreationDto);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Η ψηφοφορία τροποποιήθηκε επιτυχώς");
+        response.put(MESSAGE_KEYWORD, "Η ψηφοφορία τροποποιήθηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -342,7 +349,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<DiscussionDto> votings = votingService.getDiscussions(authorizedUsername, votingId);
@@ -365,26 +372,26 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             votingService.reactToMessage(reactionDto.messageId(), authorizedUsername, reactionDto.action());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Η αντίδραση αποθηκεύτηκε επιτυχώς");
+        response.put(MESSAGE_KEYWORD, "Η αντίδραση αποθηκεύτηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -397,27 +404,27 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             //TODO: Length & special chars? validation
             votingService.addComment(authorizedUsername, commentDto.votingId(), commentDto.message());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Το σχόλιο αποθηκεύτηκε επιτυχώς");
+        response.put(MESSAGE_KEYWORD, "Το σχόλιο αποθηκεύτηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -430,27 +437,27 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             //TODO: Length & special chars? validation
             votingService.addFeedback(authorizedUsername, commentDto.votingId(), commentDto.message());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Η ανατροφοδότηση αποθηκεύτηκε επιτυχώς");
+        response.put(MESSAGE_KEYWORD, "Η ανατροφοδότηση αποθηκεύτηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -462,7 +469,7 @@ public class VotingController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<FeedbackDto> feedbackDtoList = votingService.getFeedback(votingId);

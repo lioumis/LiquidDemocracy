@@ -16,6 +16,9 @@ import java.util.*;
 
 @RestController
 public class UserController {
+    private static final String AUTHORIZATION_ERROR_MESSAGE = "Δεν έχετε άδεια να εκτελέσετε αυτήν την ενέργεια";
+    private static final String ERROR_KEYWORD = "error";
+    private static final String MESSAGE_KEYWORD = "message";
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> MANAGEMENT_ROLES = new HashSet<>();
 
@@ -40,15 +43,15 @@ public class UserController {
                     registrationDto.surname(), registrationDto.password(), registrationDto.securityQuestion(),
                     registrationDto.securityAnswer());
             Map<String, String> response = new HashMap<>();
-            response.put("message", "User registered successfully");
+            response.put(MESSAGE_KEYWORD, "Ο χρήστης καταχωρήθηκε επιτυχώς");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -58,15 +61,15 @@ public class UserController {
         try {
             String securityQuestion = userService.getSecurityQuestion(username, email);
             Map<String, String> response = new HashMap<>();
-            response.put("message", securityQuestion);
+            response.put(MESSAGE_KEYWORD, securityQuestion);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -113,24 +116,24 @@ public class UserController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             userService.addRole(roleDto.userId(), roleDto.role());
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Ο ρόλος ανατέθηκε επιτυχώς");
+            response.put(MESSAGE_KEYWORD, "Ο ρόλος ανατέθηκε επιτυχώς");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -140,15 +143,15 @@ public class UserController {
         try {
             userService.resetPassword(resetDto.username(), resetDto.email(), resetDto.securityAnswer(), resetDto.newPassword());
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Password was reset successfully");
+            response.put(MESSAGE_KEYWORD, "Η επαναφορά του κωδικού πρόσβασης ολοκληρώθηκε");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -161,24 +164,24 @@ public class UserController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             userService.changePassword(authorizedUsername, changePasswordDto.oldPassword(), changePasswordDto.newPassword());
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Ο κωδικός πρόσβασης άλλαξε με επιτυχία");
+            response.put(MESSAGE_KEYWORD, "Ο κωδικός πρόσβασης άλλαξε με επιτυχία");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

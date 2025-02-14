@@ -15,6 +15,8 @@ import java.util.*;
 
 @Service
 public class DelegationService {
+    private static final String USER_NOT_FOUND = "Ο χρήστης δεν βρέθηκε";
+
     private final DelegationRepository delegationRepository;
 
     private final AuditLogRepository auditLogRepository;
@@ -41,7 +43,7 @@ public class DelegationService {
     @Transactional
     public void delegateVote(String delegatorUsername, String delegateName, String delegateSurname, Long votingId) throws ValidationException {
         UserEntity delegator = userRepository.findByUsername(delegatorUsername)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         UserEntity delegate = userRepository.findByNameAndSurnameIgnoreCase(delegateName, delegateSurname)
                 .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος δεν βρέθηκε"));
@@ -108,7 +110,7 @@ public class DelegationService {
 
     public List<DelegationDto> getDelegations(String username) throws ValidationException {
         UserEntity delegator = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         List<DelegationEntity> delegations = delegationRepository.findByDelegator(delegator);
         return delegations.stream().map(delegation -> {
@@ -119,7 +121,7 @@ public class DelegationService {
 
     public List<ReceivedDelegationDto> getReceivedDelegations(String username) throws ValidationException {
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         List<DelegationEntity> directDelegations = delegationRepository.findByDelegate(user);
 

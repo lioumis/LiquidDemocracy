@@ -112,7 +112,7 @@ export class VotingsComponent implements OnInit {
       this.router.navigate(['/voting', voting.id]).then();
     }
 
-    this.authService.hasAccessToVoting(voting.id).subscribe({ //TODO: Only for voters?
+    this.authService.hasAccessToVoting(voting.id).subscribe({
       next: (response) => {
         if (response.isPresent) {
           if (response.hasAccess === null) {

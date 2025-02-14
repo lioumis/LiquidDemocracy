@@ -22,6 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class VotingService {
+    private static final String USER_NOT_FOUND = "Ο χρήστης δεν βρέθηκε";
+    private static final String VOTER_NOT_FOUND = "Ο ψηφοφόρος δεν βρέθηκε";
+    private static final String VOTING_NOT_FOUND = "Η ψηφοφορία δεν βρέθηκε";
 
     public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd"; //TODO: Transfer to a DateHelper
 
@@ -65,10 +68,10 @@ public class VotingService {
     @Transactional
     public void castVote(String username, Long votingId, List<String> voteChoices) throws ValidationException {
         UserEntity voter = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (voting.getStartDate().isAfter(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία δεν έχει ξεκινήσει ακόμα.");
@@ -104,12 +107,12 @@ public class VotingService {
         }
 
         if (voteRepository.existsByOriginalVoterAndVoting(voter, voting)) {
-            throw new ValidationException("Έχετε ήδη ψηφίσει για αυτή την ψηφοφορία.");
+            throw new ValidationException("Έχετε ήδη ψηφίσει για αυτή την ψηφοφορία");
         }
 
         Optional<DelegationEntity> delegationOpt = delegationRepository.findByDelegatorAndVoting(voter, voting);
         if (delegationOpt.isPresent()) {
-            throw new ValidationException("Έχετε ήδη αναθέσει την ψήφο σας σε άλλο χρήστη και δεν μπορείτε να ψηφίσετε άμεσα.");
+            throw new ValidationException("Έχετε ήδη αναθέσει την ψήφο σας σε άλλο χρήστη και δεν μπορείτε να ψηφίσετε άμεσα");
         }
 
         List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
@@ -182,7 +185,7 @@ public class VotingService {
         }
 
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         TopicEntity topic = topicRepository.findByTitle(votingInitializationDto.topic())
                 .orElseThrow(() -> new ValidationException("Η θεματική περιοχή δεν βρέθηκε"));
@@ -228,10 +231,10 @@ public class VotingService {
     @Transactional
     public void editVoting(String username, VotingCreationDto votingCreationDto) throws ValidationException, AuthorizationException {
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         VotingEntity voting = votingRepository.findById(votingCreationDto.id())
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (!voting.getElectoralCommittee().contains(user)) {
             throw new AuthorizationException("Δεν ανήκετε στην εφορευτική επιτροπή της ψηφοφορίας");
@@ -310,10 +313,10 @@ public class VotingService {
 
     public void requestAccess(String username, Long votingId) throws ValidationException {
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (participantRepository.existsByUserAndVoting(user, voting)) {
             throw new ValidationException("Υπάρχει ήδη αίτημα συμμετοχής για τη συγκεκριμένη ψηφοφορία");
@@ -337,7 +340,7 @@ public class VotingService {
 
     public List<ParticipationRequestDto> getRequests(Long votingId) throws ValidationException {
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (voting.getStartDate() == null) {
             throw new ValidationException("Η ψηφοφορία δεν έχει ημερομηνία έναρξης");
@@ -354,7 +357,7 @@ public class VotingService {
 
     public void processRequest(String username, Long requestId, boolean approve) throws ValidationException, AuthorizationException {
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         ParticipantEntity participant = participantRepository.findById(requestId)
                 .orElseThrow(() -> new ValidationException("Το αίτημα δεν βρέθηκε"));
@@ -375,10 +378,10 @@ public class VotingService {
 
     public VotingAccessDto hasAccess(String username, Long votingId) throws ValidationException {
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (voting.getElectoralCommittee().contains(user)) {
             return new VotingAccessDto(true, true);
@@ -401,7 +404,7 @@ public class VotingService {
 
     public List<VotingDto> getVotings(String username, Role selectedRole) throws ValidationException {
         UserEntity voter = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
         List<VotingEntity> votingEntities = votingRepository.findAll();
 
@@ -431,10 +434,10 @@ public class VotingService {
 
     public VotingDetailsDto getVotingDetails(String username, Long votingId) throws ValidationException, AuthorizationException {
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         UserEntity voter = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο ψηφοφόρος δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
 
         if (voting.getStartDate() != null && voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now())) {
@@ -458,10 +461,10 @@ public class VotingService {
 
     public List<DiscussionDto> getDiscussions(String username, Long votingId) throws ValidationException {
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         UserEntity voter = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         List<MessageEntity> messages = messageRepository.findByVoting(voting);
         return messages.stream().map(message -> {
@@ -489,7 +492,7 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException("Το μήνυμα δεν βρέθηκε"));
 
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
 
         if (message.getVoting().getEndDate() != null && message.getVoting().getEndDate().isBefore(LocalDateTime.now())) {
@@ -514,10 +517,10 @@ public class VotingService {
 
     public void addComment(String username, Long votingId, String message) throws ValidationException {
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         voting.addMessage(message, user);
         votingRepository.save(voting);
@@ -525,10 +528,10 @@ public class VotingService {
 
     public void addFeedback(String username, Long votingId, String message) throws ValidationException {
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         if (feedbackRepository.existsByVotingAndUser(voting, user)) {
             throw new ValidationException("Υπάρχει ήδη ανατροφοδότηση");
@@ -540,7 +543,7 @@ public class VotingService {
 
     public List<FeedbackDto> getFeedback(Long votingId) throws ValidationException {
         VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (!voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία είναι ακόμα ενεργή");

@@ -17,6 +17,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/topics")
 public class TopicController {
+    private static final String AUTHORIZATION_ERROR_MESSAGE = "Δεν έχετε άδεια να εκτελέσετε αυτήν την ενέργεια";
+    private static final String ERROR_KEYWORD = "error";
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> TOPIC_CREATION_ROLES = new HashSet<>();
 
@@ -43,7 +45,7 @@ public class TopicController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<TopicDto> topics = topicService.getTopics();
@@ -61,7 +63,7 @@ public class TopicController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, TOPIC_CREATION_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             topicService.createTopic(topicDto.name());
@@ -70,15 +72,15 @@ public class TopicController {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

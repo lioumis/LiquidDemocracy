@@ -19,6 +19,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/delegations")
 public class DelegationController {
+    private static final String AUTHORIZATION_ERROR_MESSAGE = "Δεν έχετε άδεια να εκτελέσετε αυτήν την ενέργεια";
+    private static final String ERROR_KEYWORD = "error";
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_FOR_DELEGATION = new HashSet<>();
 
@@ -46,22 +48,22 @@ public class DelegationController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (!delegationRequestDto.delegator().equals(authorizedUsername)) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             delegationService.delegateVote(delegationRequestDto.delegator(), delegationRequestDto.delegateName(),
                     delegationRequestDto.delegateSurname(), delegationRequestDto.votingId());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (AuthorizationException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
@@ -78,7 +80,7 @@ public class DelegationController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<DelegationDto> delegations = delegationService.getDelegations(authorizedUsername);
@@ -98,7 +100,7 @@ public class DelegationController {
             String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_FOR_DELEGATION);
 
             if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action"); //TODO: Change to Greek
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
             List<ReceivedDelegationDto> delegations = delegationService.getReceivedDelegations(authorizedUsername);

@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
-
     private static final String USER_NOT_FOUND_MESSAGE = "Ο χρήστης δεν βρέθηκε";
 
     private final UserRepository userRepository;
@@ -59,12 +58,12 @@ public class UserService implements UserDetailsService {
 
         Optional<UserEntity> byUsername = userRepository.findByUsername(username);
         if (byUsername.isPresent()) {
-            throw new ValidationException("A user with this username already exists!");
+            throw new ValidationException("Υπάρχει ήδη χρήστης με αυτό το όνομα χρήστη");
         }
 
         Optional<UserEntity> byEmail = userRepository.findByEmail(email);
         if (byEmail.isPresent()) {
-            throw new ValidationException("A user with this email already exists!");
+            throw new ValidationException("Υπάρχει ήδη χρήστης με αυτή τη διεύθυνση Email");
         }
 
         String encodedPassword = passwordEncoder.encode(rawPassword);
@@ -128,7 +127,7 @@ public class UserService implements UserDetailsService {
         UserEntity user = findUser(username, email);
 
         if (!passwordEncoder.matches(securityAnswer, user.getSecurityAnswerHash())) {
-            throw new ValidationException("Incorrect answer");
+            throw new ValidationException("Λανθασμένη απάντηση");
         }
 
         String encodedPassword = passwordEncoder.encode(newRawPassword);
@@ -146,7 +145,7 @@ public class UserService implements UserDetailsService {
         UserEntity user = findUser(username);
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
-            throw new ValidationException("Ο παλιός κωδικός πρόσβασης είναι λάθος");
+            throw new ValidationException("Ο παλιός κωδικός πρόσβασης είναι εσφαλμένος");
         }
 
         String encodedPassword = passwordEncoder.encode(newRawPassword);
