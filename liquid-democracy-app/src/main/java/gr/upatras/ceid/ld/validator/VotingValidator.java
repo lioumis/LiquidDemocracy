@@ -280,7 +280,7 @@ public class VotingValidator {
             throw new ValidationException("Η ψηφοφορία έχει ήδη ξεκινήσει");
         }
 
-        if (end.isBefore(LocalDateTime.now())) {
+        if (end != null && end.isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }
