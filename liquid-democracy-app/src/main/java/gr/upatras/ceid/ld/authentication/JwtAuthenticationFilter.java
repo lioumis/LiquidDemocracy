@@ -1,6 +1,6 @@
 package gr.upatras.ceid.ld.authentication;
 
-import gr.upatras.ceid.ld.service.UserService;
+import gr.upatras.ceid.ld.user.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

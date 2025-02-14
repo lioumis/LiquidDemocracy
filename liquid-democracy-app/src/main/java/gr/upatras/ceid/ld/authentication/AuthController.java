@@ -1,7 +1,7 @@
 package gr.upatras.ceid.ld.authentication;
 
-import gr.upatras.ceid.ld.entity.UserEntity;
-import gr.upatras.ceid.ld.repository.UserRepository;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
+import gr.upatras.ceid.ld.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

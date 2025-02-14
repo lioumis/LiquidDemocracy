@@ -1,0 +1,6 @@
+package gr.upatras.ceid.ld.voting.dto;
+
+public record AccessRequestDto(
+        Long votingId
+) {
+}
