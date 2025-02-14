@@ -20,10 +20,13 @@ import java.util.*;
 @RequestMapping("/delegations")
 public class DelegationController {
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
+    private static final Set<Role> ALLOWED_FOR_DELEGATION = new HashSet<>();
 
     static {
         ALLOWED_ROLES.add(Role.VOTER);
-        ALLOWED_ROLES.add(Role.REPRESENTATIVE); //TODO: Secure the services. Only for delegators?
+        ALLOWED_ROLES.add(Role.REPRESENTATIVE);
+
+        ALLOWED_FOR_DELEGATION.add(Role.REPRESENTATIVE);
     }
 
     private final DelegationService delegationService;
@@ -67,29 +70,6 @@ public class DelegationController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping("/removeDelegation") //TODO: Should not be possible. Clarify and remove
-    public ResponseEntity<String> removeDelegation(@RequestParam("votingId") Long votingId) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
-
-            if (authorizedUsername == null) {
-                throw new AuthorizationException("You do not have permission to perform this action");
-            }
-
-            delegationService.removeDelegation(authorizedUsername, votingId);
-        } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (AuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body("Vote delegation removed successfully!");
-    }
-
     @GetMapping("/getDelegations")
     public ResponseEntity<Object> getDelegations() {
         try {
@@ -115,7 +95,7 @@ public class DelegationController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_FOR_DELEGATION);
 
             if (authorizedUsername == null) {
                 throw new AuthorizationException("You do not have permission to perform this action"); //TODO: Change to Greek

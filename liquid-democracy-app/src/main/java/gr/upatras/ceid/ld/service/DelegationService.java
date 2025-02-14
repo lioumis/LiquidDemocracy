@@ -149,22 +149,6 @@ public class DelegationService {
                 .toList();
     }
 
-    @Transactional
-    public void removeDelegation(String username, Long votingId) throws ValidationException {
-        UserEntity delegator = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ValidationException("Ο χρήστης δεν βρέθηκε"));
-        VotingEntity voting = votingRepository.findById(votingId)
-                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
-
-        DelegationEntity delegation = delegationRepository.findByDelegatorAndVoting(delegator, voting)
-                .orElseThrow(() -> new ValidationException("Δεν βρέθηκε ανάθεση για την ψηφοφορία από εσάς"));
-        delegationRepository.delete(delegation);
-
-        AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION_REMOVAL,
-                "Ο χρήστης " + username + " αφαίρεσε την ανάθεση της ψήφου του για το θέμα " + votingId + ".");
-        auditLogRepository.save(auditLog);
-    }
-
     private void checkForCircularDelegation(UserEntity delegator, UserEntity delegate, VotingEntity voting) throws ValidationException {
         Optional<DelegationEntity> byDelegate = delegationRepository.findByDelegatorAndVoting(delegate, voting);
 
