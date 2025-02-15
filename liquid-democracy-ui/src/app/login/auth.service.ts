@@ -2,13 +2,11 @@ import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
-import {VotingOption} from "../votings/voting/voting.component";
-import {formatDate} from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService { //TODO: Split to business specific services
+export class AuthService {
   private readonly API_REL_PATH = '..';
 
   private readonly AUTHENTICATION = '/authenticate';
@@ -18,34 +16,6 @@ export class AuthService { //TODO: Split to business specific services
   private readonly USER_DETAILS = '/getUserDetails';
   private readonly ALL_USER_DETAILS = '/getAllUserDetails';
   private readonly CHANGE_PASSWORD = '/changePassword';
-  private readonly ADD_ROLE = '/addRole';
-
-  private readonly VOTINGS = '/votings';
-  private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
-  private readonly ALL_VOTINGS = '/getVotings';
-  private readonly VOTING_DETAILS = '/getVotingDetails';
-  private readonly ALL_VOTING_TITLES = '/getVotingTitles';
-  private readonly DISCUSSION = '/getDiscussion';
-  private readonly COMMENT = '/comment';
-  private readonly REACT = '/react';
-  private readonly VOTE = '/vote';
-  private readonly FEEDBACK = '/feedback';
-  private readonly ALL_FEEDBACK = '/getFeedback';
-  private readonly HAS_ACCESS = '/hasAccessToVoting';
-  private readonly REQUEST_ACCESS = '/requestAccessToVoting';
-  private readonly NEW_VOTING = '/initializeVoting';
-  private readonly PROCESS_REQUEST = '/processRequest';
-  private readonly REQUESTS = '/getRequests';
-  private readonly EDIT = '/editVoting';
-
-  private readonly TOPICS = '/topics';
-  private readonly ALL_TOPICS = '/getTopics';
-  private readonly CREATE_TOPIC = '/createTopic';
-
-  private readonly DELEGATIONS = '/delegations';
-  private readonly MY_DELEGATIONS = '/getDelegations';
-  private readonly RECEIVED_DELEGATIONS = '/getReceivedDelegations';
-  private readonly NEW_DELEGATION = '/delegate';
 
   constructor(private readonly http: HttpClient, private readonly router: Router) {
   }
@@ -74,47 +44,6 @@ export class AuthService { //TODO: Split to business specific services
     return this.http.post(this.API_REL_PATH + this.CHANGE_PASSWORD, {oldPassword, newPassword}, httpOptions);
   }
 
-  createDelegation(delegateName: string, delegateSurname: string, votingId: number): Observable<any> {
-    const delegator = localStorage.getItem('username');
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.DELEGATIONS + this.NEW_DELEGATION, {
-      delegator,
-      delegateName,
-      delegateSurname,
-      votingId
-    }, httpOptions);
-  }
-
-  createTopic(name: string): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.TOPICS + this.CREATE_TOPIC, {name}, httpOptions);
-  }
-
-  createNewVoting(name: string, topic: string, committee: string[]): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.NEW_VOTING, {name, topic, committee}, httpOptions);
-  }
-
-  addRole(role: string, userId: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.ADD_ROLE, {role, userId}, httpOptions);
-  }
-
-  processRequest(requestId: number, approve: boolean): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.PROCESS_REQUEST, {requestId, approve}, httpOptions);
-  }
-
   reset(username: string, email: string, newPassword: string, securityAnswer: string): Observable<any> {
     return this.http.post(this.API_REL_PATH + this.RESET, {username, email, newPassword, securityAnswer});
   }
@@ -134,132 +63,6 @@ export class AuthService { //TODO: Split to business specific services
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     return this.http.get(this.API_REL_PATH + this.ALL_USER_DETAILS, {headers});
-  }
-
-  getParticipationRequests(id: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const params = new HttpParams().set('voting', id);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.REQUESTS, {params, headers});
-  }
-
-  hasAccessToVoting(id: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const params = new HttpParams().set('voting', id);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.HAS_ACCESS, {params, headers});
-  }
-
-  requestAccessToVoting(votingId: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.REQUEST_ACCESS, {votingId}, httpOptions);
-  }
-
-  getSuggestedVotings(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.SUGGESTED_VOTINGS, {headers});
-  }
-
-  getVotings(selectedRole: string): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const params = new HttpParams().set('selectedRole', selectedRole);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_VOTINGS, {params, headers});
-  }
-
-  getVotingDetails(id: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const params = new HttpParams().set('voting', id);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.VOTING_DETAILS, {params, headers});
-  }
-
-  getDiscussion(id: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const params = new HttpParams().set('voting', id);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.DISCUSSION, {params, headers});
-  }
-
-  getFeedback(id: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const params = new HttpParams().set('voting', id);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_FEEDBACK, {params, headers});
-  }
-
-  addComment(votingId: number, message: string): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.COMMENT, {votingId, message}, httpOptions);
-  }
-
-  submitFeedback(votingId: number, message: string): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.FEEDBACK, {votingId, message}, httpOptions);
-  }
-
-  react(messageId: number, action: boolean): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.REACT, {messageId, action}, httpOptions);
-  }
-
-  castVote(votes: string[], votingId: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.VOTE, {votes, votingId}, httpOptions);
-  }
-
-  editVoting(id: number, startDateValue: Date | null, endDateValue: Date | null, description: string | null, mechanism: string | null,
-             options: VotingOption[], voteLimit: number | null): Observable<any> {
-    const startDate = startDateValue ? formatDate(startDateValue, 'yyyy-MM-dd', 'en-US') : null;
-    const endDate = endDateValue ? formatDate(endDateValue, 'yyyy-MM-dd', 'en-US') : null;
-
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    const httpOptions = {headers}
-    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.EDIT, {
-      id,
-      startDate,
-      endDate,
-      description,
-      mechanism,
-      options,
-      voteLimit
-    }, httpOptions);
-  }
-
-  getTopics(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    return this.http.get(this.API_REL_PATH + this.TOPICS + this.ALL_TOPICS, {headers});
-  }
-
-  getAllVotings(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_VOTING_TITLES, {headers});
-  }
-
-  getDelegations(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    return this.http.get(this.API_REL_PATH + this.DELEGATIONS + this.MY_DELEGATIONS, {headers});
-  }
-
-  getReceivedDelegations(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    return this.http.get(this.API_REL_PATH + this.DELEGATIONS + this.RECEIVED_DELEGATIONS, {headers});
   }
 
   isAuthenticated(): boolean {

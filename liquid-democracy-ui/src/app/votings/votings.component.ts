@@ -14,6 +14,8 @@ import {DatePipe} from "@angular/common";
 import {Router} from "@angular/router";
 import {BreadcrumbModule} from "primeng/breadcrumb";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {VotingsService} from "./votings.service";
+import {AdministrationService} from "../administration/administration.service";
 
 @Component({
   selector: 'app-votings',
@@ -30,7 +32,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
     BreadcrumbModule,
     ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService, ConfirmationService],
+  providers: [AuthService, VotingsService, AdministrationService, MessageService, ConfirmationService],
   templateUrl: './votings.component.html',
   styleUrl: './votings.component.css'
 })
@@ -57,6 +59,8 @@ export class VotingsComponent implements OnInit {
   showConfirmDialog: boolean = true;
 
   constructor(private readonly authService: AuthService,
+              private readonly votingsService: VotingsService,
+              private readonly administrationService: AdministrationService,
               private readonly router: Router,
               private readonly messageService: MessageService,
               private readonly confirmationService: ConfirmationService) {
@@ -67,7 +71,7 @@ export class VotingsComponent implements OnInit {
       this.router.navigate(['/login']).then();
     }
 
-    this.authService.getTopics().subscribe({
+    this.administrationService.getTopics().subscribe({
       next: (response: Topic[]) => {
         this.topics = response.map((topic) => topic.name);
       },
@@ -83,7 +87,7 @@ export class VotingsComponent implements OnInit {
 
     let role = localStorage.getItem('selectedRole');
     if (role) {
-      this.authService.getVotings(role).subscribe({
+      this.votingsService.getVotings(role).subscribe({
         next: (response) => {
           this.votings = response.map((voting: Voting) => ({
             ...voting,
@@ -112,7 +116,7 @@ export class VotingsComponent implements OnInit {
       this.router.navigate(['/voting', voting.id]).then();
     }
 
-    this.authService.hasAccessToVoting(voting.id).subscribe({
+    this.votingsService.hasAccessToVoting(voting.id).subscribe({
       next: (response) => {
         if (response.isPresent) {
           if (response.hasAccess === null) {
@@ -173,7 +177,7 @@ export class VotingsComponent implements OnInit {
   }
 
   createAccessRequest(id: number) {
-    this.authService.requestAccessToVoting(id).subscribe({
+    this.votingsService.requestAccessToVoting(id).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'info',

@@ -21,6 +21,7 @@ import {InputNumberModule} from "primeng/inputnumber";
 import {InputTextModule} from "primeng/inputtext";
 import {Ripple} from "primeng/ripple";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {VotingsService} from "../votings.service";
 
 @Component({
   selector: 'app-voting',
@@ -48,7 +49,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
     Ripple,
     ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService, ConfirmationService],
+  providers: [AuthService, VotingsService, MessageService, ConfirmationService],
   templateUrl: './voting.component.html',
   styleUrl: './voting.component.css'
 })
@@ -119,6 +120,7 @@ export class VotingComponent implements OnInit {
   constructor(private readonly route: ActivatedRoute,
               private readonly router: Router,
               private readonly authService: AuthService,
+              private readonly votingsService: VotingsService,
               private readonly confirmationService: ConfirmationService,
               private readonly messageService: MessageService,
               private readonly fb: FormBuilder) {
@@ -152,7 +154,7 @@ export class VotingComponent implements OnInit {
 
   hasPermission() {
     if (this.votingId) {
-      this.authService.hasAccessToVoting(this.votingId).subscribe({
+      this.votingsService.hasAccessToVoting(this.votingId).subscribe({
         next: (response) => {
           if (!response.isPresent || !response.hasAccess) {
             this.router.navigate(['/dashboard']).then();
@@ -167,7 +169,7 @@ export class VotingComponent implements OnInit {
 
   loadVotingDetails(): void {
     if (this.votingId) {
-      this.authService.getVotingDetails(this.votingId).subscribe({
+      this.votingsService.getVotingDetails(this.votingId).subscribe({
         next: (response) => {
           this.votingDetails = response;
 
@@ -338,7 +340,7 @@ export class VotingComponent implements OnInit {
 
   loadComments(): void {
     if (this.votingId && !this.isExpired()) {
-      this.authService.getDiscussion(this.votingId).subscribe({
+      this.votingsService.getDiscussion(this.votingId).subscribe({
         next: (response) => {
           this.comments = response;
         },
@@ -356,7 +358,7 @@ export class VotingComponent implements OnInit {
 
   loadFeedback() {
     if (this.votingId && this.isExpired()) {
-      this.authService.getFeedback(this.votingId).subscribe({
+      this.votingsService.getFeedback(this.votingId).subscribe({
         next: (response: Feedback[]) => {
           this.allFeedback = response.map(item => item.feedback);
         },
@@ -378,7 +380,7 @@ export class VotingComponent implements OnInit {
       return;
     }
 
-    this.authService.react(comment.id, true).subscribe({
+    this.votingsService.react(comment.id, true).subscribe({
       next: () => {
         if (comment?.userAction === null) {
           comment.userAction = true;
@@ -409,7 +411,7 @@ export class VotingComponent implements OnInit {
       return;
     }
 
-    this.authService.react(comment.id, false).subscribe({
+    this.votingsService.react(comment.id, false).subscribe({
       next: () => {
         if (comment?.userAction === null) {
           comment.userAction = false;
@@ -436,7 +438,7 @@ export class VotingComponent implements OnInit {
 
   submitComment() {
     if (this.newComment.trim() && this.votingId && !this.isExpired()) {
-      this.authService.addComment(this.votingId, this.newComment).subscribe({
+      this.votingsService.addComment(this.votingId, this.newComment).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -460,7 +462,7 @@ export class VotingComponent implements OnInit {
 
   submitFeedback() {
     if (this.feedback.trim() && this.votingId && this.isExpired()) {
-      this.authService.submitFeedback(this.votingId, this.feedback).subscribe({
+      this.votingsService.submitFeedback(this.votingId, this.feedback).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -523,7 +525,7 @@ export class VotingComponent implements OnInit {
     if (this.formGroup.valid && this.votingId) {
       const option = this.formGroup.value;
 
-      this.authService.castVote([option.vote], this.votingId).subscribe({
+      this.votingsService.castVote([option.vote], this.votingId).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -575,7 +577,7 @@ export class VotingComponent implements OnInit {
         return;
       }
 
-      this.authService.castVote(option.vote, this.votingId).subscribe({
+      this.votingsService.castVote(option.vote, this.votingId).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -601,7 +603,7 @@ export class VotingComponent implements OnInit {
     }
     this.loading = true;
     this.selectedRequest = null;
-    this.authService.getParticipationRequests(this.votingId).subscribe({
+    this.votingsService.getParticipationRequests(this.votingId).subscribe({
       next: (response) => {
         this.requestDetails = response;
       },
@@ -619,7 +621,7 @@ export class VotingComponent implements OnInit {
 
   processRequest(action: boolean) {
     if (this.selectedRequest) {
-      this.authService.processRequest(this.selectedRequest.id, action).subscribe({
+      this.votingsService.processRequest(this.selectedRequest.id, action).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -665,7 +667,7 @@ export class VotingComponent implements OnInit {
     if (!this.votingId) {
       return;
     }
-    this.authService.editVoting(this.votingId, this.startDate, this.endDate, this.information, this.selectedMechanism, this.votingOptions, this.maxSelections).subscribe({
+    this.votingsService.editVoting(this.votingId, this.startDate, this.endDate, this.information, this.selectedMechanism, this.votingOptions, this.maxSelections).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',

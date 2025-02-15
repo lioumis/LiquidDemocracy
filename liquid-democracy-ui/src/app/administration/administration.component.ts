@@ -23,6 +23,8 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {Table, TableModule} from "primeng/table";
 import {DialogModule} from "primeng/dialog";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {VotingsService} from "../votings/votings.service";
+import {AdministrationService} from "./administration.service";
 
 @Component({
   selector: 'app-administration',
@@ -42,7 +44,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
     DialogModule,
     ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService],
+  providers: [AuthService, VotingsService, AdministrationService, MessageService],
   templateUrl: './administration.component.html',
   styleUrl: './administration.component.css'
 })
@@ -89,6 +91,8 @@ export class AdministrationComponent implements OnInit {
   selectedTopic: string = '';
 
   constructor(private readonly authService: AuthService,
+              private readonly votingsService: VotingsService,
+              private readonly administrationService: AdministrationService,
               private readonly messageService: MessageService,
               private readonly fb: FormBuilder,
               private readonly filterService: FilterService) {
@@ -107,7 +111,7 @@ export class AdministrationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.getTopics().subscribe({
+    this.administrationService.getTopics().subscribe({
       next: (response: Topic[]) => {
         this.topics = response.map((topic) => topic.name)
           .sort((a, b) => a.localeCompare(b));
@@ -139,7 +143,7 @@ export class AdministrationComponent implements OnInit {
     this.messageService.clear();
     if (this.newTopicForm.valid) {
       const {name} = this.newTopicForm.value;
-      this.authService.createTopic(name).subscribe({
+      this.administrationService.createTopic(name).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -207,7 +211,7 @@ export class AdministrationComponent implements OnInit {
     this.messageService.clear();
     if (this.newVotingForm.valid) {
       const {votingName, topic, member1, member2, member3} = this.newVotingForm.value;
-      this.authService.createNewVoting(votingName, topic, [member1, member2, member3]).subscribe({
+      this.votingsService.createNewVoting(votingName, topic, [member1, member2, member3]).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -241,7 +245,7 @@ export class AdministrationComponent implements OnInit {
 
   addRole() {
     if (this.selectedRole && this.selectedUser) {
-      this.authService.addRole(this.selectedRole, this.selectedUser.id).subscribe({
+      this.administrationService.addRole(this.selectedRole, this.selectedUser.id).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',

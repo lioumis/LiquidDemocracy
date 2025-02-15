@@ -12,6 +12,8 @@ import {ToastModule} from "primeng/toast";
 import {BreadcrumbModule} from "primeng/breadcrumb";
 import {Router} from "@angular/router";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {VotingsService} from "../votings/votings.service";
+import {DelegationsService} from "./delegations.service";
 
 @Component({
   selector: 'app-delegations',
@@ -29,7 +31,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
     BreadcrumbModule,
     ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService, ConfirmationService],
+  providers: [AuthService, VotingsService, DelegationsService, MessageService, ConfirmationService],
   templateUrl: './delegations.component.html',
   styleUrl: './delegations.component.css'
 })
@@ -59,6 +61,8 @@ export class DelegationsComponent implements OnInit {
   home: MenuItem = {routerLink: ['/dashboard']};
 
   constructor(private readonly authService: AuthService,
+              private readonly votingsService: VotingsService,
+              private readonly delegationsService: DelegationsService,
               private readonly messageService: MessageService,
               private readonly confirmationService: ConfirmationService,
               private readonly router: Router,
@@ -75,7 +79,7 @@ export class DelegationsComponent implements OnInit {
       this.router.navigate(['/login']).then();
     }
 
-    this.authService.getAllVotings().subscribe({
+    this.votingsService.getAllVotings().subscribe({
       next: (response: Voting[]) => {
         this.votings = response.map((voting) => voting.name);
         this.completeVotings = response;
@@ -116,7 +120,7 @@ export class DelegationsComponent implements OnInit {
   createDelegation() {
     if (this.delegationForm.valid) {
       const {name, surname, voting} = this.delegationForm.value;
-      this.authService.createDelegation(name, surname, this.getVotingId(voting)).subscribe({
+      this.delegationsService.createDelegation(name, surname, this.getVotingId(voting)).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -149,7 +153,7 @@ export class DelegationsComponent implements OnInit {
 
   loadTable() {
     this.loading = true;
-    this.authService.getDelegations().subscribe({
+    this.delegationsService.getDelegations().subscribe({
       next: (response) => {
         this.delegations = response;
       },

@@ -12,6 +12,8 @@ import {ToastModule} from "primeng/toast";
 import {Router} from "@angular/router";
 import {TooltipModule} from "primeng/tooltip";
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
+import {VotingsService} from "../votings/votings.service";
+import {DelegationsService} from "../delegations/delegations.service";
 
 @Component({
   selector: 'app-dashboard',
@@ -28,7 +30,7 @@ import {ConfirmDialogModule} from 'primeng/confirmdialog';
     TooltipModule,
     ConfirmDialogModule
   ],
-  providers: [AuthService, MessageService, ConfirmationService],
+  providers: [AuthService, VotingsService, DelegationsService, MessageService, ConfirmationService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -51,6 +53,8 @@ export class DashboardComponent implements OnInit {
   protected readonly localStorage = localStorage;
 
   constructor(private readonly authService: AuthService,
+              private readonly votingsService: VotingsService,
+              private readonly delegationsService: DelegationsService,
               private readonly router: Router,
               private readonly messageService: MessageService,
               private readonly confirmationService: ConfirmationService) {
@@ -81,7 +85,7 @@ export class DashboardComponent implements OnInit {
 
     if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
       localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
-      this.authService.getSuggestedVotings().subscribe({
+      this.votingsService.getSuggestedVotings().subscribe({
         next: (response) => {
           this.votings = response;
         },
@@ -95,7 +99,7 @@ export class DashboardComponent implements OnInit {
         }
       });
 
-      this.authService.getAllVotings().subscribe({
+      this.votingsService.getAllVotings().subscribe({
         next: (response: Voting[]) => {
           this.allVotings = response.map((voting) => voting.name);
         },
@@ -109,7 +113,7 @@ export class DashboardComponent implements OnInit {
         }
       });
 
-      this.authService.getDelegations().subscribe({
+      this.delegationsService.getDelegations().subscribe({
         next: (response) => {
           this.delegations = response;
         },
@@ -125,7 +129,7 @@ export class DashboardComponent implements OnInit {
     }
 
     if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος") {
-      this.authService.getReceivedDelegations().subscribe({
+      this.delegationsService.getReceivedDelegations().subscribe({
         next: (response) => {
           this.receivedDelegations = response;
         },
@@ -163,7 +167,7 @@ export class DashboardComponent implements OnInit {
 
   selectVoting(id: number) {
     this.messageService.clear();
-    this.authService.hasAccessToVoting(id).subscribe({
+    this.votingsService.hasAccessToVoting(id).subscribe({
       next: (response) => {
         if (response.isPresent) {
           if (response.hasAccess === null) {
@@ -224,7 +228,7 @@ export class DashboardComponent implements OnInit {
   }
 
   createAccessRequest(id: number) {
-    this.authService.requestAccessToVoting(id).subscribe({
+    this.votingsService.requestAccessToVoting(id).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'info',
