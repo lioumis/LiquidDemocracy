@@ -1,7 +1,6 @@
 package gr.upatras.ceid.ld.voting.service;
 
-import gr.upatras.ceid.ld.common.auditlog.entity.AuditLogEntity;
-import gr.upatras.ceid.ld.common.auditlog.repository.AuditLogRepository;
+import gr.upatras.ceid.ld.common.auditlog.service.LoggingService;
 import gr.upatras.ceid.ld.common.enums.Action;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.enums.VotingType;
@@ -42,7 +41,7 @@ public class VotingService {
 
     private final DelegationRepository delegationRepository;
 
-    private final AuditLogRepository auditLogRepository;
+    private final LoggingService loggingService;
 
     private final TopicRepository topicRepository;
 
@@ -58,14 +57,15 @@ public class VotingService {
 
     public VotingService(UserRepository userRepository, VotingRepository votingRepository,
                          VoteRepository voteRepository, DelegationRepository delegationRepository,
-                         AuditLogRepository auditLogRepository, TopicRepository topicRepository,
+                         LoggingService loggingService, TopicRepository topicRepository,
                          MessageRepository messageRepository, MessageDetailsRepository messageDetailsRepository,
-                         FeedbackRepository feedbackRepository, ParticipantRepository participantRepository, VotingValidator votingValidator) {
+                         FeedbackRepository feedbackRepository, ParticipantRepository participantRepository,
+                         VotingValidator votingValidator) {
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
         this.voteRepository = voteRepository;
         this.delegationRepository = delegationRepository;
-        this.auditLogRepository = auditLogRepository;
+        this.loggingService = loggingService;
         this.topicRepository = topicRepository;
         this.messageRepository = messageRepository;
         this.messageDetailsRepository = messageDetailsRepository;
@@ -110,8 +110,7 @@ public class VotingService {
 
         voteRepository.save(vote);
 
-        AuditLogEntity auditLog = new AuditLogEntity(voter, Action.DIRECT_VOTE, "Ο χρήστης " + voter.getUsername() + " ψήφισε για την ψηφοφορία " + votingId + ".");
-        auditLogRepository.save(auditLog);
+        loggingService.log(voter, Action.DIRECT_VOTE, "Ο χρήστης " + voter.getUsername() + " ψήφισε για την ψηφοφορία " + votingId + ".");
 
         castDelegatedVote(voter, voting, selectedOptions, voter);
     }
@@ -134,9 +133,9 @@ public class VotingService {
 
                 voteRepository.save(vote);
 
-                AuditLogEntity auditLog = new AuditLogEntity(finalDelegate, Action.DELEGATED_VOTE,
-                        "Ο χρήστης " + delegate.getUsername() + " ψήφισε για την ψηφοφορία " + voting.getId() + " εκ μέρους του " + delegation.getDelegator().getUsername() + ".");
-                auditLogRepository.save(auditLog);
+                loggingService.log(finalDelegate, Action.DELEGATED_VOTE,
+                        "Ο χρήστης " + delegate.getUsername() + " ψήφισε για την ψηφοφορία " + voting.getId() +
+                                " εκ μέρους του " + delegation.getDelegator().getUsername() + ".");
             }
 
             castDelegatedVote(delegation.getDelegator(), voting, votingOptions, finalDelegate);
@@ -166,10 +165,8 @@ public class VotingService {
 
         votingRepository.save(votingEntity);
 
-        AuditLogEntity auditLog = new AuditLogEntity(user, Action.VOTING_CREATION,
-                "Ο χρήστης " + user.getUsername() + " δημιούργησε την ψηφοφορία " + votingEntity.getId() +
-                        " με τίτλο " + votingInitializationDto.name() + " στη θεματική περιοχή " + topic.getTitle() + ".");
-        auditLogRepository.save(auditLog);
+        loggingService.log(user, Action.VOTING_CREATION, "Ο χρήστης " + user.getUsername() + " δημιούργησε την ψηφοφορία " +
+                votingEntity.getId() + " με τίτλο " + votingInitializationDto.name() + " στη θεματική περιοχή " + topic.getTitle() + ".");
     }
 
     @Transactional
@@ -223,10 +220,8 @@ public class VotingService {
 
         votingRepository.save(voting);
 
-        AuditLogEntity auditLog = new AuditLogEntity(user, Action.VOTING_CREATION,
-                "Ο χρήστης " + user.getUsername() + " επεξεργάστηκε την ψηφοφορία " + voting.getId() +
-                        " με τίτλο " + voting.getName() + " στη θεματική περιοχή " + voting.getTopic().getTitle() + ".");
-        auditLogRepository.save(auditLog);
+        loggingService.log(user, Action.VOTING_EDIT, "Ο χρήστης " + user.getUsername() + " επεξεργάστηκε την ψηφοφορία " +
+                voting.getId() + " με τίτλο " + voting.getName() + " στη θεματική περιοχή " + voting.getTopic().getTitle() + ".");
     }
 
     public void requestAccess(String username, Long votingId) throws ValidationException {

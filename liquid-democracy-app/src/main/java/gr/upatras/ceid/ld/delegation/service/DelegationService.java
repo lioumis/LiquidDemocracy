@@ -1,18 +1,17 @@
 package gr.upatras.ceid.ld.delegation.service;
 
-import gr.upatras.ceid.ld.delegation.dto.DelegationDto;
-import gr.upatras.ceid.ld.delegation.dto.ReceivedDelegationDto;
-import gr.upatras.ceid.ld.common.auditlog.entity.AuditLogEntity;
-import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
-import gr.upatras.ceid.ld.user.entity.UserEntity;
-import gr.upatras.ceid.ld.voting.entity.VotingEntity;
+import gr.upatras.ceid.ld.common.auditlog.service.LoggingService;
 import gr.upatras.ceid.ld.common.enums.Action;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
-import gr.upatras.ceid.ld.common.auditlog.repository.AuditLogRepository;
+import gr.upatras.ceid.ld.delegation.dto.DelegationDto;
+import gr.upatras.ceid.ld.delegation.dto.ReceivedDelegationDto;
+import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
 import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
-import gr.upatras.ceid.ld.user.repository.UserRepository;
-import gr.upatras.ceid.ld.voting.repository.VotingRepository;
 import gr.upatras.ceid.ld.delegation.validator.DelegationValidator;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
+import gr.upatras.ceid.ld.user.repository.UserRepository;
+import gr.upatras.ceid.ld.voting.entity.VotingEntity;
+import gr.upatras.ceid.ld.voting.repository.VotingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,18 +25,18 @@ public class DelegationService {
 
     private final DelegationRepository delegationRepository;
 
-    private final AuditLogRepository auditLogRepository;
+    private final LoggingService loggingService;
 
     private final UserRepository userRepository;
 
     private final VotingRepository votingRepository;
 
     public DelegationService(DelegationValidator delegationValidator, DelegationRepository delegationRepository,
-                             AuditLogRepository auditLogRepository, UserRepository userRepository,
+                             LoggingService loggingService, UserRepository userRepository,
                              VotingRepository votingRepository) {
         this.delegationValidator = delegationValidator;
         this.delegationRepository = delegationRepository;
-        this.auditLogRepository = auditLogRepository;
+        this.loggingService = loggingService;
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
     }
@@ -72,9 +71,9 @@ public class DelegationService {
         DelegationEntity delegation = new DelegationEntity(voting, delegator, delegate);
         delegationRepository.save(delegation);
 
-        AuditLogEntity auditLog = new AuditLogEntity(delegator, Action.VOTE_DELEGATION,
-                "Ο χρήστης " + delegator.getId() + " ανέθεσε την ψήφο του στον χρήστη " + delegate.getId() + " για την ψηφοφορία " + votingId + ".");
-        auditLogRepository.save(auditLog);
+        loggingService.log(delegator, Action.VOTE_DELEGATION,
+                "Ο χρήστης " + delegator.getUsername() + " ανέθεσε την ψήφο του στον χρήστη " +
+                        delegate.getUsername() + " για την ψηφοφορία " + votingId + ".");
     }
 
     public List<DelegationDto> getDelegations(String username) throws ValidationException {

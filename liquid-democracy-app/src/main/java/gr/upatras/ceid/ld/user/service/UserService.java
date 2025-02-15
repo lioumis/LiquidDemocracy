@@ -1,12 +1,11 @@
 package gr.upatras.ceid.ld.user.service;
 
-import gr.upatras.ceid.ld.user.dto.UserInformationDto;
-import gr.upatras.ceid.ld.common.auditlog.entity.AuditLogEntity;
-import gr.upatras.ceid.ld.user.entity.UserEntity;
+import gr.upatras.ceid.ld.common.auditlog.service.LoggingService;
 import gr.upatras.ceid.ld.common.enums.Action;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
-import gr.upatras.ceid.ld.common.auditlog.repository.AuditLogRepository;
+import gr.upatras.ceid.ld.user.dto.UserInformationDto;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
 import gr.upatras.ceid.ld.user.repository.UserRepository;
 import gr.upatras.ceid.ld.user.validator.UserValidator;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,13 +29,13 @@ public class UserService implements UserDetailsService {
 
     private final UserValidator userValidator;
 
-    private final AuditLogRepository auditLogRepository; //TODO: Maybe create a LoggingService
+    private final LoggingService loggingService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserValidator userValidator, AuditLogRepository auditLogRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserValidator userValidator, LoggingService loggingService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userValidator = userValidator;
-        this.auditLogRepository = auditLogRepository;
+        this.loggingService = loggingService;
     }
 
     @Override
@@ -71,8 +70,7 @@ public class UserService implements UserDetailsService {
         UserEntity newUser = new UserEntity(username, email, name, surname, encodedPassword, securityQuestion, encodedAnswer);
         userRepository.save(newUser);
 
-        auditLogRepository.save(new AuditLogEntity(newUser, Action.USER_REGISTRATION,
-                "Πραγματοποιήθηκε εγγραφή του χρήστη " + username + " με email " + email + "."));
+        loggingService.log(newUser, Action.USER_REGISTRATION, "Πραγματοποιήθηκε εγγραφή του χρήστη " + username + " με email " + email + ".");
     }
 
     public String getSecurityQuestion(String username, String email) throws ValidationException {
@@ -122,8 +120,7 @@ public class UserService implements UserDetailsService {
         String encodedPassword = passwordEncoder.encode(newRawPassword);
         user.setPasswordHash(encodedPassword);
         userRepository.save(user);
-        auditLogRepository.save(new AuditLogEntity(user, Action.PASSWORD_RESET,
-                "Πραγματοποιήθηκε επαναφορά κωδικού πρόσβασης από το χρήστη " + username + "."));
+        loggingService.log(user, Action.PASSWORD_RESET, "Πραγματοποιήθηκε επαναφορά κωδικού πρόσβασης από το χρήστη " + username + ".");
     }
 
     @Transactional
@@ -138,8 +135,7 @@ public class UserService implements UserDetailsService {
         String encodedPassword = passwordEncoder.encode(newRawPassword);
         user.setPasswordHash(encodedPassword);
         userRepository.save(user);
-        auditLogRepository.save(new AuditLogEntity(user, Action.PASSWORD_RESET,
-                "Πραγματοποιήθηκε αλλαγή κωδικού πρόσβασης από το χρήστη " + username + "."));
+        loggingService.log(user, Action.PASSWORD_CHANGE, "Πραγματοποιήθηκε αλλαγή κωδικού πρόσβασης από το χρήστη " + username + ".");
     }
 
     private UserEntity findUser(String username, String email) throws ValidationException {

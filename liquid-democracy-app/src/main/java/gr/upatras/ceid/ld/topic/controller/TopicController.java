@@ -1,10 +1,10 @@
 package gr.upatras.ceid.ld.topic.controller;
 
-import gr.upatras.ceid.ld.topic.dto.TopicDto;
+import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
-import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
+import gr.upatras.ceid.ld.topic.dto.TopicDto;
 import gr.upatras.ceid.ld.topic.service.TopicService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +66,7 @@ public class TopicController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            topicService.createTopic(topicDto.name());
+            topicService.createTopic(authorizedUsername, topicDto.name());
             Map<String, String> response = new HashMap<>();
             response.put("message", "Το θέμα δημιουργήθηκε με επιτυχία");
             return ResponseEntity.status(HttpStatus.OK).body(response);
