@@ -13,7 +13,14 @@ public enum Action {
     DIRECT_VOTE(5, "Άμεση Ψήφος"),
     DELEGATED_VOTE(6, "Εξουσιοδοτημένη Ψήφος"),
     VOTING_CREATION(7, "Δημιουργία Ψηφοφορίας"),
-    VOTING_EDIT(8, "Επεξεργασία Ψηφοφορίας");
+    VOTING_EDIT(8, "Επεξεργασία Ψηφοφορίας"),
+    NEW_ROLE(9, "Νέος ρόλος"),
+    REQUEST_CREATION(10, "Δημιουργία Αιτήματος"),
+    REQUEST_APPROVAL(11, "Αποδοχή Αιτήματος"),
+    REQUEST_REJECTION(12, "Απόρριψη Αιτήματος"),
+    REACTION(13, "Αντίδραση σε μήνυμα"),
+    COMMENT(14, "Σχόλιο"),
+    FEEDBACK(15, "Ανατροφοδότηση");
 
     private final int id;
     private final String name;

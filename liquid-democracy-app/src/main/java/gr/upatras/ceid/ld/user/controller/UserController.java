@@ -1,9 +1,9 @@
 package gr.upatras.ceid.ld.user.controller;
 
+import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
-import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.user.dto.*;
 import gr.upatras.ceid.ld.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -119,7 +119,7 @@ public class UserController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            userService.addRole(roleDto.userId(), roleDto.role());
+            userService.addRole(authorizedUsername, roleDto.userId(), roleDto.role());
             Map<String, String> response = new HashMap<>();
             response.put(MESSAGE_KEYWORD, "Ο ρόλος ανατέθηκε επιτυχώς");
             return ResponseEntity.status(HttpStatus.OK).body(response);

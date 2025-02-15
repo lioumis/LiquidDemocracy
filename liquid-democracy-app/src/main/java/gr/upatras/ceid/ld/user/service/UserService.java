@@ -96,14 +96,20 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void addRole(Long userId, String roleString) throws ValidationException {
+    public void addRole(String adminUsername, Long userId, String roleString) throws ValidationException {
         UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
+
+        UserEntity admin = userRepository.findByUsername(adminUsername)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
 
         Role role = userValidator.validateRole(user, roleString);
 
         user.getRoles().add(role);
         userRepository.save(user);
+
+        loggingService.log(admin, Action.NEW_ROLE, "Ο ρόλος + " + role.getName() + " δόθηκε από το χρήστη " +
+                adminUsername + " στο χρήστη " + user.getUsername() + ".");
     }
 
     @Transactional

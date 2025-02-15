@@ -157,7 +157,10 @@ public class VotingService {
         Set<UserEntity> committee = votingValidator.checkCommittee(votingInitializationDto.committee());
 
         committee.forEach(member -> {
-            member.getRoles().add(Role.ELECTORAL_COMMITTEE);
+            if (member.getRoles().add(Role.ELECTORAL_COMMITTEE)) {
+                loggingService.log(user, Action.NEW_ROLE, "Ο ρόλος + " + Role.ELECTORAL_COMMITTEE + " δόθηκε από το χρήστη " +
+                        username + " στο χρήστη " + member.getUsername() + " αυτόματα, ως μέρος της διαδικασίας δημιουργίας ψηφοφορίας.");
+            }
             userRepository.save(member);
         });
 
@@ -237,6 +240,10 @@ public class VotingService {
 
         ParticipantEntity participantEntity = new ParticipantEntity(user, voting);
         participantRepository.save(participantEntity);
+
+        loggingService.log(user, Action.REQUEST_CREATION,
+                "Ο χρήστης " + username + " δημιούργησε αίτημα συμμετοχής στην ψηφοφορία με τίτλο " +
+                        voting.getName() + ".");
     }
 
     public List<ParticipationRequestDto> getRequests(Long votingId) throws ValidationException {
@@ -269,6 +276,16 @@ public class VotingService {
 
         participant.setStatus(approve);
         participantRepository.save(participant);
+
+        if (approve) {
+            loggingService.log(user, Action.REQUEST_APPROVAL,
+                    "Το αίτημα του χρήστη " + participant.getUser().getUsername() + " για συμμετοχή στην ψηφοφορία με τίτλο " +
+                            voting.getName() + " έγινε δεκτό από το χρήστη " + username + ".");
+        } else {
+            loggingService.log(user, Action.REQUEST_REJECTION,
+                    "Το αίτημα του χρήστη " + participant.getUser().getUsername() + " για συμμετοχή στην ψηφοφορία με τίτλο " +
+                            voting.getName() + " απορρίφθηκε από το χρήστη " + username + ".");
+        }
     }
 
     public VotingAccessDto hasAccess(String username, Long votingId) throws ValidationException {
@@ -405,6 +422,10 @@ public class VotingService {
             MessageDetailsEntity newReaction = new MessageDetailsEntity(message, user, action);
             messageDetailsRepository.save(newReaction);
         }
+
+        loggingService.log(user, Action.REACTION,
+                "Ο χρήστης " + username + " αντέδρασε στο μήνυμα " + messageId + " του χρήστη " +
+                        message.getUser().getUsername() + " στην ψηφοφορία με τίτλο " + message.getVoting().getName() + ".");
     }
 
     public void addComment(String username, Long votingId, String message) throws ValidationException {
@@ -420,6 +441,9 @@ public class VotingService {
 
         voting.addMessage(message, user);
         votingRepository.save(voting);
+
+        loggingService.log(user, Action.COMMENT,
+                "Ο χρήστης " + username + " προσέθεσε σχόλιο στην ψηφοφορία με τίτλο " + voting.getName() + ".");
     }
 
     public void addFeedback(String username, Long votingId, String message) throws ValidationException {
@@ -439,6 +463,9 @@ public class VotingService {
 
         FeedbackEntity feedback = new FeedbackEntity(user, message, voting);
         feedbackRepository.save(feedback);
+
+        loggingService.log(user, Action.FEEDBACK,
+                "Ο χρήστης " + username + " προσέθεσε ανατροφοδότηση στην ψηφοφορία με τίτλο " + voting.getName() + ".");
     }
 
     public List<FeedbackDto> getFeedback(Long votingId) throws ValidationException {
