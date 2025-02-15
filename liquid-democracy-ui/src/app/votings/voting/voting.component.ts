@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {ToastModule} from "primeng/toast";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../login/auth.service";
@@ -444,6 +444,7 @@ export class VotingComponent implements OnInit {
             detail: 'Το σχόλιο προστέθηκε με επιτυχία'
           });
           this.loadComments();
+          this.newComment = '';
         },
         error: (error) => {
           console.error('Σφάλμα:', error);
@@ -454,7 +455,6 @@ export class VotingComponent implements OnInit {
           });
         }
       });
-      this.newComment = '';
     }
   }
 
@@ -815,6 +815,14 @@ export class VotingComponent implements OnInit {
     setTimeout(() => {
       this.showConfirmDialog = true;
     }, 0);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (this.mechanismDropdown && this.mechanismDropdown.overlayVisible && !this.mechanismDropdown.el.nativeElement.contains(target)) {
+      this.resetDropdown();
+    }
   }
 
 }

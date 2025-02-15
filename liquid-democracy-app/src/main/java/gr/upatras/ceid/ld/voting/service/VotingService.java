@@ -2,22 +2,22 @@ package gr.upatras.ceid.ld.voting.service;
 
 import gr.upatras.ceid.ld.common.auditlog.entity.AuditLogEntity;
 import gr.upatras.ceid.ld.common.auditlog.repository.AuditLogRepository;
-import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
-import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
 import gr.upatras.ceid.ld.common.enums.Action;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.enums.VotingType;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.exception.VotingCreationException;
+import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
+import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
 import gr.upatras.ceid.ld.topic.entity.TopicEntity;
 import gr.upatras.ceid.ld.topic.repository.TopicRepository;
 import gr.upatras.ceid.ld.user.entity.UserEntity;
 import gr.upatras.ceid.ld.user.repository.UserRepository;
 import gr.upatras.ceid.ld.voting.dto.*;
+import gr.upatras.ceid.ld.voting.entity.*;
 import gr.upatras.ceid.ld.voting.repository.*;
 import gr.upatras.ceid.ld.voting.validator.VotingValidator;
-import gr.upatras.ceid.ld.voting.entity.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -418,6 +418,8 @@ public class VotingService {
     }
 
     public void addComment(String username, Long votingId, String message) throws ValidationException {
+        votingValidator.validateComment(message);
+
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
@@ -429,6 +431,8 @@ public class VotingService {
     }
 
     public void addFeedback(String username, Long votingId, String message) throws ValidationException {
+        votingValidator.validateFeedback(message);
+
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 

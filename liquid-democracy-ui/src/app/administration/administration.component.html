@@ -154,9 +154,14 @@
               id="name"
               formControlName="name"
             />
-            @if (newTopicForm.get('name')?.invalid && newTopicForm.get('name')?.touched) {
+            @if (newTopicForm.get('name')?.invalid && newTopicForm.get('name')?.errors?.['required'] && newTopicForm.get('name')?.touched) {
               <div>
                 <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+            @if (newTopicForm.get('name')?.invalid && newTopicForm.get('name')?.errors?.['maxlength']) {
+              <div>
+                <small class="error">Υπερβολικά μεγάλο μήκος</small>
               </div>
             }
           </div>
@@ -181,9 +186,14 @@
               id="votingName"
               formControlName="votingName"
             />
-            @if (newVotingForm.get('votingName')?.invalid && newVotingForm.get('votingName')?.touched) {
+            @if (newVotingForm.get('votingName')?.invalid && newVotingForm.get('votingName')?.errors?.['required'] && newVotingForm.get('votingName')?.touched) {
               <div>
                 <small class="error">Υποχρεωτικό πεδίο</small>
+              </div>
+            }
+            @if (newVotingForm.get('votingName')?.invalid && newVotingForm.get('votingName')?.errors?.['maxlength']) {
+              <div>
+                <small class="error">Υπερβολικά μεγάλο μήκος</small>
               </div>
             }
           </div>

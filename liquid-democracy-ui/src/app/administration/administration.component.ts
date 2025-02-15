@@ -93,10 +93,10 @@ export class AdministrationComponent implements OnInit {
               private readonly fb: FormBuilder,
               private readonly filterService: FilterService) {
     this.newTopicForm = this.fb.group({
-      name: ['', Validators.required]
+      name: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
     });
     this.newVotingForm = this.fb.group({
-      votingName: ['', Validators.required],
+      votingName: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
       topic: ['', Validators.required],
       member1: ['', Validators.required],
       member2: ['', Validators.required],

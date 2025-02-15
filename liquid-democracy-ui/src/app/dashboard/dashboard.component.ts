@@ -61,6 +61,24 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(['/login']).then();
     }
 
+    this.authService.getUserDetails().subscribe({
+      next: (response) => {
+        if (!this.hasTheSameRoles(response.roles)) {
+          localStorage.setItem('roles', response.roles);
+          localStorage.setItem('selectedRole', response.roles[0]);
+          this.router.navigate(['/settings']).then(() => this.router.navigate(['/dashboard']).then());
+        }
+      },
+      error: (error) => {
+        console.error('Σφάλμα:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    });
+
     if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
       localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
       this.authService.getSuggestedVotings().subscribe({
@@ -223,6 +241,14 @@ export class DashboardComponent implements OnInit {
         });
       }
     });
+  }
+
+  private hasTheSameRoles(response: string[]): boolean {
+    let storedRoles: string[] = localStorage.getItem('roles')?.split(',') ?? [];
+
+    return storedRoles.length === response.length &&
+      storedRoles.every(role => response.includes(role)) &&
+      response.every(role => storedRoles.includes(role));
   }
 
 }

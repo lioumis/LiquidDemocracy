@@ -1,18 +1,18 @@
 package gr.upatras.ceid.ld.voting.validator;
 
-import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
-import gr.upatras.ceid.ld.voting.dto.VotingCreationDto;
-import gr.upatras.ceid.ld.voting.dto.VotingInitializationDto;
-import gr.upatras.ceid.ld.voting.dto.VotingOptionDto;
-import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
-import gr.upatras.ceid.ld.user.repository.UserRepository;
-import gr.upatras.ceid.ld.voting.entity.ParticipantEntity;
-import gr.upatras.ceid.ld.user.entity.UserEntity;
-import gr.upatras.ceid.ld.voting.entity.VotingEntity;
 import gr.upatras.ceid.ld.common.enums.VotingType;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.exception.VotingCreationException;
+import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
+import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
+import gr.upatras.ceid.ld.user.repository.UserRepository;
+import gr.upatras.ceid.ld.voting.dto.VotingCreationDto;
+import gr.upatras.ceid.ld.voting.dto.VotingInitializationDto;
+import gr.upatras.ceid.ld.voting.dto.VotingOptionDto;
+import gr.upatras.ceid.ld.voting.entity.ParticipantEntity;
+import gr.upatras.ceid.ld.voting.entity.VotingEntity;
 import gr.upatras.ceid.ld.voting.repository.ParticipantRepository;
 import gr.upatras.ceid.ld.voting.repository.VoteRepository;
 import gr.upatras.ceid.ld.voting.repository.VotingRepository;
@@ -93,6 +93,26 @@ public class VotingValidator {
         Optional<DelegationEntity> delegationOpt = delegationRepository.findByDelegatorAndVoting(voter, voting);
         if (delegationOpt.isPresent()) {
             throw new ValidationException("Έχετε ήδη αναθέσει την ψήφο σας σε άλλο χρήστη και δεν μπορείτε να ψηφίσετε άμεσα");
+        }
+    }
+
+    public void validateComment(String comment) throws ValidationException {
+        if (comment == null || comment.trim().isEmpty()) {
+            throw new ValidationException("Το σχόλιο είναι κενό");
+        }
+
+        if (comment.length() > 255) {
+            throw new ValidationException("Το σχόλιο είναι υπερβολικά μεγάλο");
+        }
+    }
+
+    public void validateFeedback(String feedback) throws ValidationException {
+        if (feedback == null || feedback.trim().isEmpty()) {
+            throw new ValidationException("Η ανατροφοδότηση είναι κενή");
+        }
+
+        if (feedback.length() > 255) {
+            throw new ValidationException("Η ανατροφοδότηση είναι υπερβολικά μεγάλη");
         }
     }
 

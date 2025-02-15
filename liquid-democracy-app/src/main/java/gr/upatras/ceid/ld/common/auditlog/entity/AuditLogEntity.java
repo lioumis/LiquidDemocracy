@@ -20,6 +20,7 @@ public class AuditLogEntity {
     @Convert(converter = ActionConverter.class)
     private Action action;
 
+    @Column(length = 1000)
     private String details;
 
     public AuditLogEntity(UserEntity user, Action action, String details) {
