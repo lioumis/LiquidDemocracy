@@ -7,6 +7,7 @@ import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.exception.VotingCreationException;
 import gr.upatras.ceid.ld.voting.dto.*;
 import gr.upatras.ceid.ld.voting.service.VotingService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/votings")
 public class VotingController {
@@ -64,6 +66,7 @@ public class VotingController {
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -91,6 +94,7 @@ public class VotingController {
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -113,6 +117,7 @@ public class VotingController {
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -133,6 +138,7 @@ public class VotingController {
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -158,6 +164,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -184,6 +191,7 @@ public class VotingController {
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -209,6 +217,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -244,6 +253,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -272,6 +282,7 @@ public class VotingController {
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -303,6 +314,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -331,6 +343,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -359,6 +372,7 @@ public class VotingController {
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -385,6 +399,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -417,6 +432,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -449,6 +465,7 @@ public class VotingController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -477,6 +494,7 @@ public class VotingController {
         } catch (ValidationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }

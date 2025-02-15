@@ -8,6 +8,7 @@ import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.delegation.service.DelegationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/delegations")
 public class DelegationController {
@@ -62,6 +64,7 @@ public class DelegationController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -88,6 +91,7 @@ public class DelegationController {
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -108,6 +112,7 @@ public class DelegationController {
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }

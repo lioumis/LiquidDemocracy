@@ -6,6 +6,7 @@ import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.topic.dto.TopicDto;
 import gr.upatras.ceid.ld.topic.service.TopicService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/topics")
 public class TopicController {
@@ -51,6 +53,7 @@ public class TopicController {
             List<TopicDto> topics = topicService.getTopics();
             return ResponseEntity.status(HttpStatus.OK).body(topics);
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -79,6 +82,7 @@ public class TopicController {
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

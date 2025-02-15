@@ -2,6 +2,7 @@ package gr.upatras.ceid.ld.authentication;
 
 import gr.upatras.ceid.ld.user.entity.UserEntity;
 import gr.upatras.ceid.ld.user.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+@Slf4j
 @RestController
 public class AuthController {
 
@@ -39,6 +41,7 @@ public class AuthController {
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Το όνομα χρήστη ή ο κωδικός πρόσβασης είναι λάθος");
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
