@@ -10,10 +10,6 @@ p-multiselect-panel {
   z-index: 1050 !important;
 }
 
-:host ::ng-deep .p-datatable > .p-datatable-wrapper {
-  overflow: visible !important;
-}
-
 .form {
   display: flex;
   height: 60px;

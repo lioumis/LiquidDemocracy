@@ -10,10 +10,6 @@ p-multiselect-panel {
   z-index: 1050 !important;
 }
 
-:host ::ng-deep .p-datatable > .p-datatable-wrapper {
-  overflow: visible !important;
-}
-
 :host ::ng-deep .p-calendar .p-datepicker {
   z-index: 1 !important;
 }

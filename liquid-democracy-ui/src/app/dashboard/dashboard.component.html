@@ -45,7 +45,7 @@
   <div class="delegations">
     @if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
     localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
-      <p-panel header="Αναθέσεις Ψήφου">
+      <p-panel class="half" header="Αναθέσεις Ψήφου">
         <p-table
           #dt
           [value]="delegations"
@@ -132,7 +132,7 @@
     }
 
     @if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος") {
-      <p-panel header="Ψήφοι που σας έχουν ανατεθεί">
+      <p-panel class="half" header="Ψήφοι που σας έχουν ανατεθεί">
         <p-table
           #dt2
           [value]="receivedDelegations"
