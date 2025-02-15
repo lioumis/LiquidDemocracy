@@ -177,7 +177,13 @@ export class VotingComponent implements OnInit {
             const backendStartDate = new Date(this.votingDetails.startDate);
             this.minStartDate = new Date(Math.max(backendStartDate.getTime(), this.minStartDate.getTime()));
             this.startDate = new Date(this.votingDetails.startDate);
+
             this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate() + 1);
+
+            if (this.votingDetails?.endDate) {
+              const backendEndDate = new Date(this.votingDetails.endDate);
+              this.minEndDate = new Date(Math.max(backendEndDate.getTime(), this.minEndDate.getTime()));
+            }
           }
 
           if (this.votingDetails?.endDate) {
@@ -693,7 +699,13 @@ export class VotingComponent implements OnInit {
     } else {
       this.startDate = selectedDate;
     }
+
     this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate() + 1);
+    if (this.votingDetails?.endDate) {
+      const backendEndDate = new Date(this.votingDetails.endDate);
+      this.minEndDate = new Date(Math.max(backendEndDate.getTime(), this.minEndDate.getTime()));
+    }
+
     if (this.endDate && this.endDate < this.minEndDate) {
       this.endDate = null;
     }

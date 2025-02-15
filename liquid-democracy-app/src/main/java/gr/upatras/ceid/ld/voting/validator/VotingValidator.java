@@ -48,7 +48,7 @@ public class VotingValidator {
             throw new ValidationException("Η ψηφοφορία δεν έχει ξεκινήσει ακόμα.");
         }
 
-        if (voting.getEndDate().isBefore(LocalDate.now())) {
+        if (!voting.getEndDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
     }
@@ -119,7 +119,7 @@ public class VotingValidator {
         if (endDate == null) {
             throw new ValidationException("Η ημερομηνία λήξης είναι κενή");
         }
-        if (!endDate.isBefore(LocalDate.now())) {
+        if (endDate.isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία είναι ακόμα ενεργή");
         }
     }
@@ -128,7 +128,7 @@ public class VotingValidator {
         if (endDate == null) {
             return;
         }
-        if (endDate.isBefore(LocalDate.now())) {
+        if (!endDate.isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }
@@ -306,7 +306,7 @@ public class VotingValidator {
             throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι πλέον δυνατή");
         }
 
-        if (end.isBefore(LocalDate.now())) {
+        if (!end.isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }
@@ -320,7 +320,7 @@ public class VotingValidator {
             throw new ValidationException("Η ψηφοφορία έχει ήδη ξεκινήσει");
         }
 
-        if (end != null && end.isBefore(LocalDate.now())) {
+        if (end != null && !end.isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }

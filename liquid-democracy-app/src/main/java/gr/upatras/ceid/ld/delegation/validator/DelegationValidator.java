@@ -43,7 +43,7 @@ public class DelegationValidator {
     }
 
     public void validateVotingIsActive(VotingEntity voting) throws ValidationException {
-        if (voting.getEndDate().isBefore(LocalDate.now())) {
+        if (!voting.getEndDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Η επιλεγμένη ψηφοφορία έχει λήξει.");
         }
     }
