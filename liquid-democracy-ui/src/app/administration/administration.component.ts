@@ -117,7 +117,6 @@ export class AdministrationComponent implements OnInit {
           .sort((a, b) => a.localeCompare(b));
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -154,7 +153,6 @@ export class AdministrationComponent implements OnInit {
           this.topics.sort((a, b) => a.localeCompare(b));
         },
         error: (error) => {
-          console.error('Delegation failed', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Αποτυχία',
@@ -222,7 +220,6 @@ export class AdministrationComponent implements OnInit {
           this.loadTable();
         },
         error: (error) => {
-          console.error('Delegation failed', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Αποτυχία',
@@ -275,7 +272,6 @@ export class AdministrationComponent implements OnInit {
         this.userDetails = response;
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',

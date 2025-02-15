@@ -74,7 +74,6 @@ export class DashboardComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -90,7 +89,6 @@ export class DashboardComponent implements OnInit {
           this.votings = response;
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -104,7 +102,6 @@ export class DashboardComponent implements OnInit {
           this.allVotings = response.map((voting) => voting.name);
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -118,7 +115,6 @@ export class DashboardComponent implements OnInit {
           this.delegations = response;
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -134,7 +130,6 @@ export class DashboardComponent implements OnInit {
           this.receivedDelegations = response;
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -190,7 +185,6 @@ export class DashboardComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -237,7 +231,6 @@ export class DashboardComponent implements OnInit {
         });
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',

@@ -76,7 +76,6 @@ export class VotingsComponent implements OnInit {
         this.topics = response.map((topic) => topic.name);
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -97,7 +96,6 @@ export class VotingsComponent implements OnInit {
           }));
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -139,7 +137,6 @@ export class VotingsComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -186,7 +183,6 @@ export class VotingsComponent implements OnInit {
         });
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',

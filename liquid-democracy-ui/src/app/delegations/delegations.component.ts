@@ -85,7 +85,6 @@ export class DelegationsComponent implements OnInit {
         this.completeVotings = response;
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -131,7 +130,6 @@ export class DelegationsComponent implements OnInit {
           this.loadTable();
         },
         error: (error) => {
-          console.error('Delegation failed', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Αποτυχία',
@@ -158,7 +156,6 @@ export class DelegationsComponent implements OnInit {
         this.delegations = response;
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',

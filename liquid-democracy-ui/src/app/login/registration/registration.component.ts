@@ -61,7 +61,6 @@ export class RegistrationComponent {
           this.router.navigate(['/login']).then();
         },
         error: (error) => {
-          console.error('Login failed', error.error.error);
           this.messageService.add({
             severity: 'error',
             summary: 'Αποτυχία Εγγραφής',

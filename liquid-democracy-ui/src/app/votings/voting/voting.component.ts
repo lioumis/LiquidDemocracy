@@ -247,7 +247,6 @@ export class VotingComponent implements OnInit {
 
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -351,7 +350,6 @@ export class VotingComponent implements OnInit {
           this.comments = response;
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -369,7 +367,6 @@ export class VotingComponent implements OnInit {
           this.allFeedback = response.map(item => item.feedback);
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -401,7 +398,6 @@ export class VotingComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -432,7 +428,6 @@ export class VotingComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -455,7 +450,6 @@ export class VotingComponent implements OnInit {
           this.newComment = '';
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -478,7 +472,6 @@ export class VotingComponent implements OnInit {
           this.loadVotingDetails()
         },
         error: (error) => {
-          console.error('Σφάλμα:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Σφάλμα',
@@ -614,7 +607,6 @@ export class VotingComponent implements OnInit {
         this.requestDetails = response;
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',

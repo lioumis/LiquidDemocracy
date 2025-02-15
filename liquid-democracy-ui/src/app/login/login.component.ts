@@ -51,11 +51,9 @@ export class LoginComponent implements OnInit {
       this.authService.login(username, password).subscribe({
         next: (response) => {
           localStorage.setItem('token', response.token);
-          console.log('Token response', response.token);
           this.getDetailsAndLogin();
         },
         error: (error) => {
-          console.error('Login failed', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Αποτυχία Σύνδεσης',
@@ -80,7 +78,6 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/dashboard']).then();
       },
       error: (error) => {
-        console.error('Σφάλμα:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',

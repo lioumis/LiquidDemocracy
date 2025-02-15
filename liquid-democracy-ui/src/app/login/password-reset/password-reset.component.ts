@@ -53,8 +53,7 @@ export class PasswordResetComponent {
         this.securityQuestion = response.message;
         this.currentStep = 2;
       },
-      error: (error) => {
-        console.error('Error fetching security question:', error);
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Σφάλμα',
@@ -78,14 +77,12 @@ export class PasswordResetComponent {
         });
         this.router.navigate(['/login']).then();
       },
-      error: (error) => {
-        console.error('Error during password reset:', error);
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Αποτυχία',
           detail: 'Η επαναφορά κωδικού απέτυχε.'
         });
-        console.log(error.error.error);
         this.stepTwoForm.setErrors({incorrectAnswerError: true});
       }
     });
