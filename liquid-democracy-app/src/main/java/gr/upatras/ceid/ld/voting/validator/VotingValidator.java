@@ -4,6 +4,7 @@ import gr.upatras.ceid.ld.common.enums.VotingType;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.exception.VotingCreationException;
+import gr.upatras.ceid.ld.common.utils.DateHelper;
 import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
 import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
 import gr.upatras.ceid.ld.user.entity.UserEntity;
@@ -19,12 +20,10 @@ import gr.upatras.ceid.ld.voting.repository.VotingRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
 public class VotingValidator {
-    public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd"; //TODO: Transfer to a DateHelper
 
     private final ParticipantRepository participantRepository;
 
@@ -192,7 +191,7 @@ public class VotingValidator {
     }
 
     public LocalDate validateStartDate(String startDateString, LocalDate existingStartDate) throws ValidationException {
-        LocalDate startDate = toLocalDate(startDateString);
+        LocalDate startDate = DateHelper.toLocalDate(startDateString);
         if (startDate.isBefore(LocalDate.now().plusDays(1))) {
             throw new ValidationException("Η ημερομηνία έναρξης δεν μπορεί να οριστεί στο παρελθόν");
         }
@@ -203,7 +202,7 @@ public class VotingValidator {
     }
 
     public LocalDate validateEndDate(String endDateString, LocalDate existingEndDate, LocalDate startDate) throws ValidationException {
-        LocalDate endDate = toLocalDate(endDateString);
+        LocalDate endDate = DateHelper.toLocalDate(endDateString);
 
         if (endDate.isBefore(LocalDate.now().plusDays(1))) {
             throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να οριστεί στο παρελθόν ή στην επόμενη μία ημέρα");
@@ -324,11 +323,6 @@ public class VotingValidator {
         if (end != null && end.isBefore(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
-    }
-
-    private LocalDate toLocalDate(String string) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
-        return LocalDate.parse(string, formatter);
     }
 
 }

@@ -196,7 +196,7 @@ export class VotingsComponent implements OnInit {
     if (voting?.endDate) {
       const currentDate = new Date();
       const votingEndDate = new Date(voting.endDate);
-      votingEndDate.setHours(23, 59, 59, 999); //TODO: Check if expires at EOD
+      votingEndDate.setHours(0, 0, 0, 0);
       return currentDate > votingEndDate;
     }
     return false;

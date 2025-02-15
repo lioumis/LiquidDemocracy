@@ -8,6 +8,7 @@ import gr.upatras.ceid.ld.common.enums.VotingType;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.exception.VotingCreationException;
+import gr.upatras.ceid.ld.common.utils.DateHelper;
 import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
 import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
 import gr.upatras.ceid.ld.topic.entity.TopicEntity;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,8 +33,6 @@ public class VotingService {
     private static final String USER_NOT_FOUND = "Ο χρήστης δεν βρέθηκε";
     private static final String VOTER_NOT_FOUND = "Ο ψηφοφόρος δεν βρέθηκε";
     private static final String VOTING_NOT_FOUND = "Η ψηφοφορία δεν βρέθηκε";
-
-    public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd"; //TODO: Transfer to a DateHelper
 
     private final UserRepository userRepository;
 
@@ -314,7 +312,7 @@ public class VotingService {
             return votingEntities.stream().filter(v -> v.getElectoralCommittee().contains(voter)).map(v -> {
                 boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
                 return new VotingDto(v.getName(), v.getTopic().getTitle(),
-                        toString(v.getStartDate()), toString(v.getEndDate()), hasVoted, v.getVotes().size(),
+                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),
                         v.getId().intValue());
             }).toList();
         }
@@ -322,7 +320,7 @@ public class VotingService {
         return votingEntities.stream().filter(v -> v.getStartDate() != null).map(v -> {
             boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
             return new VotingDto(v.getName(), v.getTopic().getTitle(),
-                    toString(v.getStartDate()), toString(v.getEndDate()), hasVoted, v.getVotes().size(),
+                    DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),
                     v.getId().intValue());
         }).toList();
     }
@@ -511,7 +509,7 @@ public class VotingService {
         }
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
-                toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
+                DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
                 delegated, voting.getVotingType().getId(), voting.getVoteLimit(), results, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
     }
 
@@ -527,7 +525,7 @@ public class VotingService {
         Integer votingTypeId = voting.getVotingType() == null ? null : voting.getVotingType().getId();
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
-                toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
+                DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
                 null, votingTypeId, voting.getVoteLimit(), votingResults, null, null,
                 null, null);
     }
@@ -545,22 +543,14 @@ public class VotingService {
                     new VotingOptionDto(voteDetailsEntity.getVotingOption().getName(), voteDetailsEntity.getVotingOption().getDescription())).toList();
 
             return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
-                    toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
+                    DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
                     vote.getVoter() != null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, votingOptionDtos, null,
                     null, null);
         }
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
-                toString(voting.getStartDate()), toString(voting.getEndDate()), voting.getInformation(),
+                DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
                 null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, null, null,
                 null, null);
-    }
-
-    private String toString(LocalDate localDate) {
-        if (localDate == null) {
-            return "";
-        }
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
-        return localDate.format(formatter);
     }
 }
