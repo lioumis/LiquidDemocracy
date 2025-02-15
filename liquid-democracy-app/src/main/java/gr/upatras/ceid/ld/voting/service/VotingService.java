@@ -396,10 +396,7 @@ public class VotingService {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
-
-        if (message.getVoting().getEndDate() != null && message.getVoting().getEndDate().isBefore(LocalDate.now())) {
-            throw new ValidationException("Η ψηφοφορία έχει λήξει");
-        }
+        votingValidator.validateHasNotExpired(message.getVoting().getEndDate());
 
         Optional<MessageDetailsEntity> messageDetails = messageDetailsRepository.findByMessageAndUser(message, user);
 
@@ -423,6 +420,8 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
+        votingValidator.validateHasNotExpired(voting.getEndDate());
+
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
@@ -435,6 +434,8 @@ public class VotingService {
 
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
+
+        votingValidator.validateHasExpired(voting.getEndDate());
 
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
@@ -451,9 +452,7 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        if (!voting.getEndDate().isBefore(LocalDate.now())) {
-            throw new ValidationException("Η ψηφοφορία είναι ακόμα ενεργή");
-        }
+        votingValidator.validateHasExpired(voting.getEndDate());
 
         return feedbackRepository.findByVoting(voting).stream().map(feedback ->
                 new FeedbackDto(feedback.getContent())).toList();

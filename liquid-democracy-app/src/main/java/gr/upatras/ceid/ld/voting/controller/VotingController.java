@@ -1,10 +1,10 @@
 package gr.upatras.ceid.ld.voting.controller;
 
+import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.exception.VotingCreationException;
-import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.voting.dto.*;
 import gr.upatras.ceid.ld.voting.service.VotingService;
 import org.springframework.http.HttpStatus;
@@ -407,7 +407,6 @@ public class VotingController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            //TODO: Length & special chars? validation
             votingService.addComment(authorizedUsername, commentDto.votingId(), commentDto.message());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -440,7 +439,6 @@ public class VotingController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            //TODO: Length & special chars? validation
             votingService.addFeedback(authorizedUsername, commentDto.votingId(), commentDto.message());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();

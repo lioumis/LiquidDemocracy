@@ -116,6 +116,24 @@ public class VotingValidator {
         }
     }
 
+    public void validateHasExpired(LocalDate endDate) throws ValidationException {
+        if (endDate == null) {
+            throw new ValidationException("Η ημερομηνία λήξης είναι κενή");
+        }
+        if (!endDate.isBefore(LocalDate.now())) {
+            throw new ValidationException("Η ψηφοφορία είναι ακόμα ενεργή");
+        }
+    }
+
+    public void validateHasNotExpired(LocalDate endDate) throws ValidationException {
+        if (endDate == null) {
+            return;
+        }
+        if (endDate.isBefore(LocalDate.now())) {
+            throw new ValidationException("Η ψηφοφορία έχει λήξει");
+        }
+    }
+
     public void validateVotingInitialization(VotingInitializationDto votingInitializationDto) throws ValidationException {
         if (votingInitializationDto == null) {
             throw new ValidationException("Εσφαλμένα δεδομένα");
@@ -178,7 +196,7 @@ public class VotingValidator {
         if (startDate.isBefore(LocalDate.now().plusDays(1))) {
             throw new ValidationException("Η ημερομηνία έναρξης δεν μπορεί να οριστεί στο παρελθόν");
         }
-        if (existingStartDate != null && existingStartDate.isBefore(startDate)) {
+        if (existingStartDate != null && existingStartDate.isAfter(startDate)) {
             throw new ValidationException("Η ημερομηνία έναρξης μπορεί να μετακινηθεί μόνο προς το μέλλον");
         }
         return startDate;

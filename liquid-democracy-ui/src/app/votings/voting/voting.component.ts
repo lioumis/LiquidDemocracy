@@ -133,8 +133,8 @@ export class VotingComponent implements OnInit {
     })
     const today = new Date();
     const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    this.minStartDate = normalizedToday;
-    this.minEndDate = new Date(normalizedToday.getTime() + 24 * 60 * 60 * 1000);
+    this.minStartDate = new Date(normalizedToday.getTime() + 24 * 60 * 60 * 1000);
+    this.minEndDate = new Date(normalizedToday.getTime() + 24 * 60 * 60 * 1000 * 2);
   }
 
   ngOnInit(): void {
@@ -498,7 +498,7 @@ export class VotingComponent implements OnInit {
     let endDateString = this.votingDetails?.endDate;
     if (endDateString) {
       const currentDate = new Date();
-      const votingEndDate = new Date(`${endDateString}T23:59:59`); //TODO: Check if expires at EOD
+      const votingEndDate = new Date(`${endDateString}T00:00:00`);
       return currentDate > votingEndDate
     }
     return false;
@@ -512,7 +512,7 @@ export class VotingComponent implements OnInit {
     let startDateString = this.votingDetails?.startDate;
     if (startDateString) {
       const currentDate = new Date();
-      const votingStartDate = new Date(`${startDateString}T23:59:59`);
+      const votingStartDate = new Date(`${startDateString}T00:00:00`);
       return currentDate > votingStartDate
     }
     return false;
