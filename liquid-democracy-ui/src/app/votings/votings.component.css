@@ -32,6 +32,6 @@ p-multiselect-panel {
 
 :host ::ng-deep .p-datatable > .p-datatable-wrapper {
   min-width: 100%;
-  min-height: 350px;
+  min-height: 500px;
   max-height: 66vh;
 }

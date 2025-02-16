@@ -15,6 +15,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {VotingsService} from "./votings.service";
 import {AdministrationService} from "../administration/administration.service";
+import {Calendar, CalendarModule} from "primeng/calendar";
 
 @Component({
   selector: 'app-votings',
@@ -29,7 +30,8 @@ import {AdministrationService} from "../administration/administration.service";
     Ripple,
     DatePipe,
     BreadcrumbModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    CalendarModule
   ],
   providers: [AuthService, VotingsService, AdministrationService, MessageService, ConfirmationService],
   templateUrl: './votings.component.html',
@@ -39,9 +41,13 @@ export class VotingsComponent implements OnInit {
 
   @ViewChild('topicMultiSelect') topicMultiSelect!: MultiSelect;
   @ViewChild('hasVotedMultiSelect') hasVotedMultiSelect!: MultiSelect;
+  @ViewChild('startCalendar') startCalendar: Calendar | undefined;
+  @ViewChild('endCalendar') endCalendar: Calendar | undefined;
 
   allowTopicMultiSelect: boolean = true;
   allowHasVotedMultiSelect: boolean = true;
+  allowStartCalendar: boolean = true;
+  allowEndCalendar: boolean = true;
 
   delegations: Delegation[] = [];
 
@@ -214,6 +220,28 @@ export class VotingsComponent implements OnInit {
     if (this.hasVotedMultiSelect && this.hasVotedMultiSelect.overlayVisible && !this.hasVotedMultiSelect.el.nativeElement.contains(target)) {
       this.resetHasVotedMultiSelect();
     }
+    if (this.startCalendar && this.startCalendar.overlayVisible && !this.startCalendar.el.nativeElement.contains(target)) {
+      const calendarOverlay = document.querySelector('.p-datepicker-group');
+
+      try {
+        if (calendarOverlay && !calendarOverlay.contains(target) &&
+          !target.className.includes('p-datepicker') && !target.className.includes('p-monthpicker') && !target.className.includes('p-yearpicker')) {
+          this.resetStartCalendar();
+        }
+      } catch (e) {
+      }
+    }
+    if (this.endCalendar && this.endCalendar.overlayVisible && !this.endCalendar.el.nativeElement.contains(target)) {
+      const calendarOverlay = document.querySelector('.p-datepicker-group');
+
+      try {
+        if (calendarOverlay && !calendarOverlay.contains(target) &&
+          !target.className.includes('p-datepicker') && !target.className.includes('p-monthpicker') && !target.className.includes('p-yearpicker')) {
+          this.resetEndCalendar();
+        }
+      } catch (e) {
+      }
+    }
   }
 
   resetTopicMultiSelect() {
@@ -236,6 +264,25 @@ export class VotingsComponent implements OnInit {
     }
   }
 
+  resetStartCalendar() {
+    if (this.startCalendar) {
+      this.allowStartCalendar = false;
+      this.startCalendar.overlayVisible = false;
+      setTimeout(() => {
+        this.allowStartCalendar = true;
+      }, 0);
+    }
+  }
+
+  resetEndCalendar() {
+    if (this.endCalendar) {
+      this.allowEndCalendar = false;
+      this.endCalendar.overlayVisible = false;
+      setTimeout(() => {
+        this.allowEndCalendar = true;
+      }, 0);
+    }
+  }
 }
 
 export interface Voting {

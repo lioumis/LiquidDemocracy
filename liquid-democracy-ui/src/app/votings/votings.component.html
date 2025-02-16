@@ -84,20 +84,22 @@
             </p-columnFilter>
           </th>
           <th>
-            <p-columnFilter
-              [showMenu]="false"
-              type="date"
-              field="startDate"
-              placeholder="Ημερομηνία Έναρξης"
-              ariaLabel="Filter startDate"/>
+            <p-columnFilter type="date" [showMenu]="false" field="startDate">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                @if (allowStartCalendar) {
+                  <p-calendar #startCalendar placeholder="Ημερομηνία Έναρξης" dateFormat="dd/mm/yy" [ngModel]="value" (onSelect)="filter(startCalendar.value)"/>
+                }
+              </ng-template>
+            </p-columnFilter>
           </th>
           <th>
-            <p-columnFilter
-              [showMenu]="false"
-              type="date"
-              field="endDate"
-              placeholder="Ημερομηνία Λήξης"
-              ariaLabel="Filter endDate"/>
+            <p-columnFilter type="date" [showMenu]="false" field="endDate">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                @if (allowEndCalendar) {
+                  <p-calendar #endCalendar placeholder="Ημερομηνία Λήξης" dateFormat="dd/mm/yy" [ngModel]="value" (onSelect)="filter(endCalendar.value)"/>
+                }
+              </ng-template>
+            </p-columnFilter>
           </th>
           <th>
             <p-columnFilter field="hasVoted" matchMode="in" [showMenu]="false">
