@@ -204,7 +204,7 @@ public class VotingValidator {
     public LocalDate validateEndDate(String endDateString, LocalDate existingEndDate, LocalDate startDate) throws ValidationException {
         LocalDate endDate = DateHelper.toLocalDate(endDateString);
 
-        if (endDate.isBefore(LocalDate.now().plusDays(1))) {
+        if (endDate.isBefore(LocalDate.now().plusDays(2))) {
             throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να οριστεί στο παρελθόν ή στην επόμενη μία ημέρα");
         }
 
@@ -302,7 +302,7 @@ public class VotingValidator {
             throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι δυνατή ακόμα");
         }
 
-        if (start.isBefore(LocalDate.now())) {
+        if (!start.isAfter(LocalDate.now())) {
             throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι πλέον δυνατή");
         }
 
@@ -316,7 +316,7 @@ public class VotingValidator {
             throw new ValidationException("Η ψηφοφορία δεν έχει ημερομηνία έναρξης");
         }
 
-        if (start.isBefore(LocalDate.now())) {
+        if (!start.isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει ήδη ξεκινήσει");
         }
 

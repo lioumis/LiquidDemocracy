@@ -149,7 +149,6 @@ export class VotingComponent implements OnInit {
     this.hasPermission();
 
     this.loadVotingDetails();
-    this.loadComments();
   }
 
   hasPermission() {
@@ -226,6 +225,8 @@ export class VotingComponent implements OnInit {
             this.formGroup.get('vote')?.disable();
             this.resultData = this.transformToBarChartData(this.votingDetails);
             this.distributionData = this.transformToPieChartData(this.votingDetails);
+          } else {
+            this.loadComments();
           }
 
           if (this.votingDetails?.feedback) {

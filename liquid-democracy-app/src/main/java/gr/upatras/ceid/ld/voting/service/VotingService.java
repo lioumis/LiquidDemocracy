@@ -299,7 +299,7 @@ public class VotingService {
             return new VotingAccessDto(true, true);
         }
 
-        if (voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDate.now())) {
+        if (voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
             return new VotingAccessDto(true, true);
         }
 
@@ -352,7 +352,7 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
 
-        if (voting.getStartDate() != null && voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDate.now())) {
+        if (voting.getStartDate() != null && voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
             return getInactiveVotingStatistics(voting, voter);
         }
 
@@ -374,6 +374,8 @@ public class VotingService {
     public List<DiscussionDto> getDiscussions(String username, Long votingId) throws ValidationException {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
+
+        votingValidator.validateHasNotExpired(voting.getEndDate());
 
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
