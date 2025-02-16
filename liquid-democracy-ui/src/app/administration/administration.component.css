@@ -128,3 +128,13 @@ p-multiselect-panel {
 :host ::ng-deep .p-toast {
   z-index: 2000 !important;
 }
+
+:host ::ng-deep .p-datatable > .p-datatable-wrapper {
+  min-width: 100%;
+  min-height: 350px;
+  max-height: 60vh;
+}
+
+:host ::ng-deep .p-overlay {
+  z-index: 1050 !important;
+}

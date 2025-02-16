@@ -11,111 +11,33 @@
 
 <div class="dashboard">
 
-  <p-panel header="Αναθέσεις Ψήφου">
-    <p-table
-      #dt
-      [value]="delegations"
-      dataKey="id"
-      [rows]="5"
-      [loading]="loading"
-      [paginator]="true"
-      [globalFilterFields]="['name', 'surname', 'username', 'voting']"
-      [tableStyle]="{ 'min-width': '100rem' }">
-      <ng-template pTemplate="header">
-        <tr>
-          <th pSortableColumn="name" class="center" style="width:25%">
-            Όνομα
-            <p-sortIcon field="name"/>
-          </th>
-          <th pSortableColumn="surname" class="center" style="width:25%">
-            Επώνυμο
-            <p-sortIcon field="surname"/>
-          </th>
-          <th pSortableColumn="username" class="center" style="width:25%">
-            Όνομα χρήστη
-            <p-sortIcon field="username"/>
-          </th>
-          <th pSortableColumn="voting" class="center" style="width:25%">
-            Ψηφοφορία
-            <p-sortIcon field="voting"/>
-          </th>
-        </tr>
-        <tr>
-          <th>
-            <p-columnFilter
-              [showMenu]="false"
-              type="text"
-              field="name"
-              placeholder="Όνομα"
-              ariaLabel="Filter Name"/>
-          </th>
-          <th>
-            <p-columnFilter
-              [showMenu]="false"
-              type="text"
-              field="surname"
-              placeholder="Επώνυμο"
-              ariaLabel="Filter Surname"/>
-          </th>
-          <th>
-            <p-columnFilter
-              [showMenu]="false"
-              type="text"
-              field="username"
-              placeholder="Όνομα χρήστη"
-              ariaLabel="Filter username"/>
-          </th>
-          <th>
-            <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
-              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                <p-multiSelect
-                  [ngModel]="value"
-                  [options]="votings"
-                  placeholder="Ψηφοφορία"
-                  (onChange)="filter($event.value)"
-                  [maxSelectedLabels]=1
-                  selectedItemsLabel="{0} ψηφοφορίες επιλέχθηκαν"
-                  optionLabel="">
-                  <ng-template let-option pTemplate="item">
-                    <div class="inline-block vertical-align-middle">
-                      {{ option }}
-                    </div>
-                  </ng-template>
-                </p-multiSelect>
-              </ng-template>
-            </p-columnFilter>
-          </th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-delegation>
-        <tr>
-          <td>
-            {{ delegation.name }}
-          </td>
-          <td>
-            {{ delegation.surname }}
-          </td>
-          <td>
-            {{ delegation.username }}
-          </td>
-          <td>
-            {{ delegation.voting }}
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="4">Δεν βρέθηκαν αναθέσεις ψήφου</td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-panel>
-
   <div class="new-delegation">
     <p-panel header="Νέα Ανάθεση">
       <p>Για τη διαδικασία ανάθεσης, θα χρειαστεί να εισάγετε το όνομα και το επώνυμο του αντιπροσώπου, καθώς και να
         επιλέξετε την ψηφοφορία για την οποία θέλετε να αναθέσετε την ψήφο σας.</p>
       <form [formGroup]="delegationForm" (ngSubmit)="onSubmit()" class="form">
+        <div class="form-group">
+          <label for="voting">Ψηφοφορία</label>
+          @if (allowDropdown) {
+            <p-dropdown
+              #dropdown
+              id="voting"
+              [options]="votings"
+              [panelStyleClass]="'upwards-panel'"
+              [style]="{'width':'100%'}"
+              [(ngModel)]="selectedVoting"
+              placeholder="Ψηφοφορία"
+              formControlName="voting"
+              (onChange)="onVotingChange($event)"/>
+          }
+
+          @if (delegationForm.get('voting')?.invalid && delegationForm.get('voting')?.touched) {
+            <div>
+              <small class="error">Υποχρεωτικό πεδίο</small>
+            </div>
+          }
+        </div>
+
         <div class="form-group">
           <label for="name">Όνομα Αντιπροσώπου</label>
           <input
@@ -144,29 +66,6 @@
           }
         </div>
 
-        <div class="form-group">
-          <label for="voting">Ψηφοφορία</label>
-          @if (allowDropdown) {
-            <p-dropdown
-              #dropdown
-              id="voting"
-              [options]="votings"
-              [panelStyleClass]="'upwards-panel'"
-              [style]="{'width':'100%'}"
-              [(ngModel)]="selectedVoting"
-              placeholder="Ψηφοφορία"
-              formControlName="voting"
-              (onChange)="onVotingChange($event)"/>
-          }
-          <!--          TODO: Find a way to make the dropdown open upwards with 'upwards-panel' or remove and move the Νέα ανάθεση panel to the top-->
-
-          @if (delegationForm.get('voting')?.invalid && delegationForm.get('voting')?.touched) {
-            <div>
-              <small class="error">Υποχρεωτικό πεδίο</small>
-            </div>
-          }
-        </div>
-
         <p></p>
 
         <div class="button-container">
@@ -177,5 +76,106 @@
       </form>
     </p-panel>
   </div>
+
+  <p-panel header="Αναθέσεις Ψήφου">
+    <p-table
+      #dt
+      [value]="delegations"
+      dataKey="id"
+      [rows]="5"
+      [loading]="loading"
+      [paginator]="true"
+      [scrollable]="true"
+      scrollHeight="flex"
+      [globalFilterFields]="['voting', 'name', 'surname', 'username']">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="voting" class="center" style="width:25%">
+            Ψηφοφορία
+            <p-sortIcon field="voting"/>
+          </th>
+          <th pSortableColumn="name" class="center" style="width:25%">
+            Όνομα
+            <p-sortIcon field="name"/>
+          </th>
+          <th pSortableColumn="surname" class="center" style="width:25%">
+            Επώνυμο
+            <p-sortIcon field="surname"/>
+          </th>
+          <th pSortableColumn="username" class="center" style="width:25%">
+            Όνομα χρήστη
+            <p-sortIcon field="username"/>
+          </th>
+        </tr>
+        <tr>
+          <th>
+            <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <p-multiSelect
+                  [ngModel]="value"
+                  [options]="votings"
+                  placeholder="Ψηφοφορία"
+                  (onChange)="filter($event.value)"
+                  [maxSelectedLabels]=1
+                  selectedItemsLabel="{0} ψηφοφορίες επιλέχθηκαν"
+                  optionLabel="">
+                  <ng-template let-option pTemplate="item">
+                    <div class="inline-block vertical-align-middle">
+                      {{ option }}
+                    </div>
+                  </ng-template>
+                </p-multiSelect>
+              </ng-template>
+            </p-columnFilter>
+          </th>
+          <th>
+            <p-columnFilter
+              [showMenu]="false"
+              type="text"
+              field="name"
+              placeholder="Όνομα"
+              ariaLabel="Filter Name"/>
+          </th>
+          <th>
+            <p-columnFilter
+              [showMenu]="false"
+              type="text"
+              field="surname"
+              placeholder="Επώνυμο"
+              ariaLabel="Filter Surname"/>
+          </th>
+          <th>
+            <p-columnFilter
+              [showMenu]="false"
+              type="text"
+              field="username"
+              placeholder="Όνομα χρήστη"
+              ariaLabel="Filter username"/>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-delegation>
+        <tr>
+          <td>
+            {{ delegation.voting }}
+          </td>
+          <td>
+            {{ delegation.name }}
+          </td>
+          <td>
+            {{ delegation.surname }}
+          </td>
+          <td>
+            {{ delegation.username }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4">Δεν βρέθηκαν αναθέσεις ψήφου</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
 
 </div>

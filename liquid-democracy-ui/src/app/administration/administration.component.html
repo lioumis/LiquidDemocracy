@@ -12,14 +12,15 @@
         <p-table
           #dt
           [value]="userDetails"
-          [rows]="5"
+          [rows]="10"
           [loading]="loading"
           [paginator]="true"
           selectionMode="single"
           [(selection)]="selectedUser"
           dataKey="username"
-          [globalFilterFields]="['name', 'surname', 'username', 'email', 'roles']"
-          [tableStyle]="{ 'min-width': '100rem' }">
+          [scrollable]="true"
+          scrollHeight="flex"
+          [globalFilterFields]="['name', 'surname', 'username', 'email', 'roles']">
           <ng-template pTemplate="header">
             <tr>
               <th pSortableColumn="name" class="center" style="width:20%">

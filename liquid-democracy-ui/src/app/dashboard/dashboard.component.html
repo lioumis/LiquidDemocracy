@@ -53,10 +53,15 @@
           [rows]="5"
           [loading]="loading"
           [paginator]="true"
-          [globalFilterFields]="['name', 'surname', 'topic']"
-          [tableStyle]="{ 'min-width': '60rem' }">
+          [scrollable]="true"
+          scrollHeight="flex"
+          [globalFilterFields]="['voting', 'name', 'surname']">
           <ng-template pTemplate="header">
             <tr>
+              <th pSortableColumn="voting" class="center" style="width:33%">
+                Ψηφοφορία
+                <p-sortIcon field="voting"/>
+              </th>
               <th pSortableColumn="name" class="center" style="width:33%">
                 Όνομα
                 <p-sortIcon field="name"/>
@@ -65,28 +70,8 @@
                 Επώνυμο
                 <p-sortIcon field="surname"/>
               </th>
-              <th pSortableColumn="voting" class="center" style="width:33%">
-                Ψηφοφορία
-                <p-sortIcon field="voting"/>
-              </th>
             </tr>
             <tr>
-              <th>
-                <p-columnFilter
-                  [showMenu]="false"
-                  type="text"
-                  field="name"
-                  placeholder="Όνομα"
-                  ariaLabel="Filter Name"/>
-              </th>
-              <th>
-                <p-columnFilter
-                  [showMenu]="false"
-                  type="text"
-                  field="surname"
-                  placeholder="Επώνυμο"
-                  ariaLabel="Filter Surname"/>
-              </th>
               <th>
                 <p-columnFilter field="voting" matchMode="in" [showMenu]="false">
                   <ng-template pTemplate="filter" let-value let-filter="filterCallback">
@@ -107,18 +92,34 @@
                   </ng-template>
                 </p-columnFilter>
               </th>
+              <th>
+                <p-columnFilter
+                  [showMenu]="false"
+                  type="text"
+                  field="name"
+                  placeholder="Όνομα"
+                  ariaLabel="Filter Name"/>
+              </th>
+              <th>
+                <p-columnFilter
+                  [showMenu]="false"
+                  type="text"
+                  field="surname"
+                  placeholder="Επώνυμο"
+                  ariaLabel="Filter Surname"/>
+              </th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-delegation>
             <tr>
               <td>
+                {{ delegation.voting }}
+              </td>
+              <td>
                 {{ delegation.name }}
               </td>
               <td>
                 {{ delegation.surname }}
-              </td>
-              <td>
-                {{ delegation.voting }}
               </td>
             </tr>
           </ng-template>
@@ -142,8 +143,9 @@
           sortField="votes" [sortOrder]="-1"
           [loading]="loading"
           [paginator]="true"
-          [globalFilterFields]="['voting', 'votes']"
-          [tableStyle]="{ 'min-width': '50rem' }">
+          [scrollable]="true"
+          scrollHeight="flex"
+          [globalFilterFields]="['voting', 'votes']">
           <ng-template pTemplate="header">
             <tr>
               <th pSortableColumn="voting" class="center" style="width:33%">

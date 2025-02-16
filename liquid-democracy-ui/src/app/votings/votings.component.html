@@ -18,8 +18,9 @@
       [rows]="10"
       [loading]="loading"
       [paginator]="true"
-      [globalFilterFields]="['name', 'topic', 'startDate', 'endDate', 'hasVoted', 'votes']"
-      [tableStyle]="{ 'min-width': '100rem' }">
+      [scrollable]="true"
+      scrollHeight="flex"
+      [globalFilterFields]="['name', 'topic', 'startDate', 'endDate', 'hasVoted', 'votes']">
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="name" class="center" style="width:20%">

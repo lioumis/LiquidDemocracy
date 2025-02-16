@@ -52,53 +52,55 @@
       <div class="left-column">
         @if (this.editMode) {
           <p-panel header="Επιλογές" class="vote-panel">
-            <div class="mechanism">
-              <strong>Μηχανισμός:</strong>
-              @if (allowMechanismDropdown) {
-                <p-dropdown
-                  #mechanismDropdown
-                  id="mechanism"
-                  [options]="mechanisms"
-                  [style]="{'width':'100%'}"
-                  [(ngModel)]="selectedMechanism"
-                  placeholder="Μηχανισμός"
-                  (onChange)="onMechanismChange($event)"/>
-              }
+            <div class="option-content">
+              <div class="mechanism">
+                <strong>Μηχανισμός:</strong>
+                @if (allowMechanismDropdown) {
+                  <p-dropdown
+                    #mechanismDropdown
+                    id="mechanism"
+                    [options]="mechanisms"
+                    [style]="{'width':'100%'}"
+                    [(ngModel)]="selectedMechanism"
+                    placeholder="Μηχανισμός"
+                    (onChange)="onMechanismChange($event)"/>
+                }
 
-              @if (selectedMechanism === 'Πολλαπλή Επιλογή') {
-                <strong>Μέγιστος Αριθμός Επιλογών:</strong>
-                <p-inputNumber
-                  [(ngModel)]="maxSelections"
-                  inputId="maxSelections"
-                  [min]="1"
-                  [max]="100"/>
-              }
-            </div>
-            <div class="options">
-              <div>
-                <strong>Επιλογές:</strong>
+                @if (selectedMechanism === 'Πολλαπλή Επιλογή') {
+                  <strong>Μέγιστος Αριθμός Επιλογών:</strong>
+                  <p-inputNumber
+                    [(ngModel)]="maxSelections"
+                    inputId="maxSelections"
+                    [min]="1"
+                    [max]="100"/>
+                }
               </div>
-              <div class="option-values">
-                <div class="option-row" *ngFor="let option of votingOptions; let i = index">
-                  <input class="text-box" type="text" pInputText [(ngModel)]="option.title" />
-                  <input class="text-box" type="text" pInputText [(ngModel)]="option.details" />
+              <div class="options">
+                <div>
+                  <strong>Επιλογές:</strong>
+                </div>
+                <div class="option-values">
+                  <div class="option-row" *ngFor="let option of votingOptions; let i = index">
+                    <input class="text-box" type="text" pInputText [(ngModel)]="option.title"/>
+                    <input class="text-box" type="text" pInputText [(ngModel)]="option.details"/>
+                    <button
+                      type="button"
+                      pButton
+                      pRipple
+                      icon="pi pi-minus"
+                      severity="danger"
+                      [disabled]="votingOptions.length < 3"
+                      (click)="votingOptions.splice(i, 1)">
+                    </button>
+                  </div>
                   <button
                     type="button"
                     pButton
                     pRipple
-                    icon="pi pi-minus"
-                    severity="danger"
-                    [disabled]="votingOptions.length < 3"
-                    (click)="votingOptions.splice(i, 1)">
+                    icon="pi pi-plus"
+                    (click)="votingOptions.push({title: '', details: ''})">
                   </button>
                 </div>
-                <button
-                  type="button"
-                  pButton
-                  pRipple
-                  icon="pi pi-plus"
-                  (click)="votingOptions.push({title: '', details: ''})">
-                </button>
               </div>
             </div>
           </p-panel>

@@ -141,6 +141,7 @@ textarea {
   display: flex;
   gap: 25px;
   margin-top: 25px;
+  flex-wrap: wrap;
 }
 
 .discussion-section {
@@ -339,4 +340,11 @@ textarea {
 
 :host ::ng-deep .p-toast {
   z-index: 2000 !important;
+}
+
+.option-content {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-content: center;
 }

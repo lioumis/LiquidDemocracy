@@ -16,6 +16,7 @@ p-multiselect-panel {
   margin: 30px 0 30px;
   padding: 0;
   position: relative;
+  justify-content: space-around;
 }
 
 input {
@@ -48,13 +49,12 @@ button:disabled {
 }
 
 .new-delegation {
-  padding-top: 25px;
+  padding-bottom: 25px;
 }
 
 .button-container {
-  position: absolute;
-  right: 10px;
-  top: 40%;
+  display: flex;
+  align-items: flex-end;
 }
 
 .left-button {
@@ -80,4 +80,14 @@ button:disabled {
 
 :host ::ng-deep .p-toast {
   z-index: 2000 !important;
+}
+
+:host ::ng-deep .p-datatable > .p-datatable-wrapper {
+  min-width: 100%;
+  min-height: 350px;
+  max-height: 66vh;
+}
+
+:host ::ng-deep .p-overlay {
+  z-index: 1050 !important;
 }

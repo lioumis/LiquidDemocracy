@@ -14,6 +14,10 @@ p-multiselect-panel {
   z-index: 1 !important;
 }
 
+:host ::ng-deep .p-overlay {
+  z-index: 1050 !important;
+}
+
 :host ::ng-deep .p-dialog-mask {
   z-index: 2000 !important;
 }
@@ -24,4 +28,10 @@ p-multiselect-panel {
 
 .center {
   text-align: center;
+}
+
+:host ::ng-deep .p-datatable > .p-datatable-wrapper {
+  min-width: 100%;
+  min-height: 350px;
+  max-height: 66vh;
 }
