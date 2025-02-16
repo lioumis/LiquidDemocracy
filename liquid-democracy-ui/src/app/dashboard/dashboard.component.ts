@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {AuthService} from "../login/auth.service";
 import {ConfirmationService, MessageService} from "primeng/api";
 import {PanelModule} from 'primeng/panel';
@@ -6,7 +6,7 @@ import {CarouselModule} from "primeng/carousel";
 import {Button} from "primeng/button";
 import {CardModule} from "primeng/card";
 import {TableModule} from "primeng/table";
-import {MultiSelectModule} from "primeng/multiselect";
+import {MultiSelect, MultiSelectModule} from "primeng/multiselect";
 import {FormsModule} from "@angular/forms";
 import {ToastModule} from "primeng/toast";
 import {Router} from "@angular/router";
@@ -35,6 +35,11 @@ import {DelegationsService} from "../delegations/delegations.service";
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild('receivedMultiSelect') receivedMultiSelect!: MultiSelect;
+  @ViewChild('sentMultiSelect') sentMultiSelect!: MultiSelect;
+
+  allowReceivedMultiSelect: boolean = true;
+  allowSentMultiSelect: boolean = true;
 
   delegations: Delegation[] = [];
 
@@ -254,6 +259,37 @@ export class DashboardComponent implements OnInit {
     return storedRoles.length === response.length &&
       storedRoles.every(role => response.includes(role)) &&
       response.every(role => storedRoles.includes(role));
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (this.receivedMultiSelect && this.receivedMultiSelect.overlayVisible && !this.receivedMultiSelect.el.nativeElement.contains(target)) {
+      this.resetReceivedMultiSelect();
+    }
+    if (this.sentMultiSelect && this.sentMultiSelect.overlayVisible && !this.sentMultiSelect.el.nativeElement.contains(target)) {
+      this.resetSentMultiSelect();
+    }
+  }
+
+  resetReceivedMultiSelect() {
+    if (this.receivedMultiSelect) {
+      this.allowReceivedMultiSelect = false;
+      this.receivedMultiSelect.overlayVisible = false;
+      setTimeout(() => {
+        this.allowReceivedMultiSelect = true;
+      }, 0);
+    }
+  }
+
+  resetSentMultiSelect() {
+    if (this.sentMultiSelect) {
+      this.allowSentMultiSelect = false;
+      this.sentMultiSelect.overlayVisible = false;
+      setTimeout(() => {
+        this.allowSentMultiSelect = true;
+      }, 0);
+    }
   }
 
 }

@@ -18,11 +18,15 @@
         @if (this.editMode) {
           <p class="dates">
             <strong>Ημερομηνία Έναρξης: </strong>
-            <p-calendar [minDate]="minStartDate" [maxDate]="maxStartDate" dateFormat="dd/mm/yy" [ngModel]="startDate" (onSelect)="onStartDateSelect($event)" />
+            @if (allowStartCalendar) {
+              <p-calendar #startCalendar [minDate]="minStartDate" [maxDate]="maxStartDate" dateFormat="dd/mm/yy" [ngModel]="startDate" (onSelect)="onStartDateSelect($event)"/>
+            }
           </p>
           <p class="dates">
             <strong>Ημερομηνία Λήξης: </strong>
-            <p-calendar [minDate]="minEndDate" dateFormat="dd/mm/yy" [ngModel]="endDate" (onSelect)="onEndDateSelect($event)" />
+            @if (allowEndCalendar) {
+              <p-calendar #endCalendar [minDate]="minEndDate" dateFormat="dd/mm/yy" [ngModel]="endDate" (onSelect)="onEndDateSelect($event)"/>
+            }
           </p>
         } @else {
           <p><strong>Ημερομηνία Έναρξης: </strong>{{ votingDetails?.startDate }}</p>

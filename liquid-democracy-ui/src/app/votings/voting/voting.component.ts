@@ -15,7 +15,7 @@ import {BreadcrumbModule} from "primeng/breadcrumb";
 import {CheckboxModule} from "primeng/checkbox";
 import {TableModule} from "primeng/table";
 import {MultiSelectModule} from "primeng/multiselect";
-import {CalendarModule} from "primeng/calendar";
+import {Calendar, CalendarModule} from "primeng/calendar";
 import {Dropdown, DropdownModule} from "primeng/dropdown";
 import {InputNumberModule} from "primeng/inputnumber";
 import {InputTextModule} from "primeng/inputtext";
@@ -55,8 +55,13 @@ import {VotingsService} from "../votings.service";
 })
 export class VotingComponent implements OnInit {
   @ViewChild('mechanismDropdown') mechanismDropdown: Dropdown | undefined;
+  @ViewChild('startCalendar') startCalendar: Calendar | undefined;
+  @ViewChild('endCalendar') endCalendar: Calendar | undefined;
 
   allowMechanismDropdown: boolean = true;
+
+  allowStartCalendar: boolean = true;
+  allowEndCalendar: boolean = true;
 
   showConfirmDialog: boolean = true;
 
@@ -728,6 +733,26 @@ export class VotingComponent implements OnInit {
     }
   }
 
+  resetStartCalendar() {
+    if (this.startCalendar) {
+      this.allowStartCalendar = false;
+      this.startCalendar.overlayVisible = false;
+      setTimeout(() => {
+        this.allowStartCalendar = true;
+      }, 0);
+    }
+  }
+
+  resetEndCalendar() {
+    if (this.endCalendar) {
+      this.allowEndCalendar = false;
+      this.endCalendar.overlayVisible = false;
+      setTimeout(() => {
+        this.allowEndCalendar = true;
+      }, 0);
+    }
+  }
+
   canSaveVoting(): boolean {
     if (!this.changesExist()) {
       return false;
@@ -829,6 +854,28 @@ export class VotingComponent implements OnInit {
     const target = event.target as HTMLElement;
     if (this.mechanismDropdown && this.mechanismDropdown.overlayVisible && !this.mechanismDropdown.el.nativeElement.contains(target)) {
       this.resetDropdown();
+    }
+    if (this.startCalendar && this.startCalendar.overlayVisible && !this.startCalendar.el.nativeElement.contains(target)) {
+      const calendarOverlay = document.querySelector('.p-datepicker-group');
+
+      try {
+        if (calendarOverlay && !calendarOverlay.contains(target) &&
+          !target.className.includes('p-datepicker') && !target.className.includes('p-monthpicker') && !target.className.includes('p-yearpicker')) {
+          this.resetStartCalendar();
+        }
+      } catch (e) {
+      }
+    }
+    if (this.endCalendar && this.endCalendar.overlayVisible && !this.endCalendar.el.nativeElement.contains(target)) {
+      const calendarOverlay = document.querySelector('.p-datepicker-group');
+
+      try {
+        if (calendarOverlay && !calendarOverlay.contains(target) &&
+          !target.className.includes('p-datepicker') && !target.className.includes('p-monthpicker') && !target.className.includes('p-yearpicker')) {
+          this.resetEndCalendar();
+        }
+      } catch (e) {
+      }
     }
   }
 

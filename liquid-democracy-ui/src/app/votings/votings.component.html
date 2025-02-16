@@ -63,20 +63,23 @@
           <th>
             <p-columnFilter field="topic" matchMode="in" [showMenu]="false">
               <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                <p-multiSelect
-                  [ngModel]="value"
-                  [options]="topics"
-                  placeholder="Θέμα"
-                  (onChange)="filter($event.value)"
-                  [maxSelectedLabels]=1
-                  selectedItemsLabel="{0} θέματα επιλέχθηκαν"
-                  optionLabel="">
-                  <ng-template let-option pTemplate="item">
-                    <div class="inline-block vertical-align-middle">
-                      {{ option }}
-                    </div>
-                  </ng-template>
-                </p-multiSelect>
+                @if (this.allowTopicMultiSelect) {
+                  <p-multiSelect
+                    #topicMultiSelect
+                    [ngModel]="value"
+                    [options]="topics"
+                    placeholder="Θέμα"
+                    (onChange)="filter($event.value)"
+                    [maxSelectedLabels]=1
+                    selectedItemsLabel="{0} θέματα επιλέχθηκαν"
+                    optionLabel="">
+                    <ng-template let-option pTemplate="item">
+                      <div class="inline-block vertical-align-middle">
+                        {{ option }}
+                      </div>
+                    </ng-template>
+                  </p-multiSelect>
+                }
               </ng-template>
             </p-columnFilter>
           </th>
@@ -99,20 +102,24 @@
           <th>
             <p-columnFilter field="hasVoted" matchMode="in" [showMenu]="false">
               <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                <p-multiSelect
-                  [ngModel]="value"
-                  [options]="hasVotedOptions"
-                  placeholder="Έχω ψηφίσει"
-                  (onChange)="filter($event.value)"
-                  [maxSelectedLabels]=1
-                  selectedItemsLabel="Όλα"
-                  optionLabel="">
-                  <ng-template let-option pTemplate="item">
-                    <div class="inline-block vertical-align-middle">
-                      {{ option }}
-                    </div>
-                  </ng-template>
-                </p-multiSelect>
+                @if (this.allowHasVotedMultiSelect) {
+                  <p-multiSelect
+                    #hasVotedMultiSelect
+                    showHeader="false"
+                    [ngModel]="value"
+                    [options]="hasVotedOptions"
+                    placeholder="Έχω ψηφίσει"
+                    (onChange)="filter($event.value)"
+                    [maxSelectedLabels]=1
+                    selectedItemsLabel="Όλα"
+                    optionLabel="">
+                    <ng-template let-option pTemplate="item">
+                      <div class="inline-block vertical-align-middle">
+                        {{ option }}
+                      </div>
+                    </ng-template>
+                  </p-multiSelect>
+                }
               </ng-template>
             </p-columnFilter>
           </th>

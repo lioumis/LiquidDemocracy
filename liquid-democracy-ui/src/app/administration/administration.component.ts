@@ -19,7 +19,7 @@ import {
 } from "@angular/forms";
 import {Button} from "primeng/button";
 import {Dropdown, DropdownModule} from "primeng/dropdown";
-import {MultiSelectModule} from "primeng/multiselect";
+import {MultiSelect, MultiSelectModule} from "primeng/multiselect";
 import {Table, TableModule} from "primeng/table";
 import {DialogModule} from "primeng/dialog";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
@@ -52,6 +52,7 @@ export class AdministrationComponent implements OnInit {
   @ViewChild('dt') dt: Table | undefined;
   @ViewChild('dropdown') dropdown: Dropdown | undefined;
   @ViewChild('topicDropdown') topicDropdown: Dropdown | undefined;
+  @ViewChild('roleMultiSelect') roleMultiSelect!: MultiSelect;
 
   items: MenuItem[] = [
     {label: 'Διαχείριση'}
@@ -87,6 +88,8 @@ export class AdministrationComponent implements OnInit {
   allowDropdown: boolean = true;
 
   allowTopicDropdown: boolean = true;
+
+  allowRoleMultiSelect: boolean = true;
 
   selectedTopic: string = '';
 
@@ -201,6 +204,16 @@ export class AdministrationComponent implements OnInit {
     }
   }
 
+  resetMultiSelect() {
+    if (this.roleMultiSelect) {
+      this.allowRoleMultiSelect = false;
+      this.roleMultiSelect.overlayVisible = false;
+      setTimeout(() => {
+        this.allowRoleMultiSelect = true;
+      }, 0);
+    }
+  }
+
   resetVotingForm() {
     this.newVotingForm.reset();
   }
@@ -290,6 +303,9 @@ export class AdministrationComponent implements OnInit {
     }
     if (this.topicDropdown && this.topicDropdown.overlayVisible && !this.topicDropdown.el.nativeElement.contains(target)) {
       this.resetDropdown();
+    }
+    if (this.roleMultiSelect && this.roleMultiSelect.overlayVisible && !this.roleMultiSelect.el.nativeElement.contains(target)) {
+      this.resetMultiSelect();
     }
   }
 

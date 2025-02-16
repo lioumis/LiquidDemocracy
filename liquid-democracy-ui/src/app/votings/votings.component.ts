@@ -1,13 +1,12 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {ToastModule} from "primeng/toast";
-import {MultiSelectModule} from "primeng/multiselect";
+import {MultiSelect, MultiSelectModule} from "primeng/multiselect";
 import {PanelModule} from "primeng/panel";
 import {TableModule} from "primeng/table";
 import {FormsModule} from "@angular/forms";
 import {AuthService} from "../login/auth.service";
 import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import {Delegation, Topic} from "../dashboard/dashboard.component";
-import {Dropdown} from "primeng/dropdown";
 import {ButtonDirective} from "primeng/button";
 import {Ripple} from "primeng/ripple";
 import {DatePipe} from "@angular/common";
@@ -38,7 +37,11 @@ import {AdministrationService} from "../administration/administration.service";
 })
 export class VotingsComponent implements OnInit {
 
-  @ViewChild('dropdown') dropdown: Dropdown | undefined;
+  @ViewChild('topicMultiSelect') topicMultiSelect!: MultiSelect;
+  @ViewChild('hasVotedMultiSelect') hasVotedMultiSelect!: MultiSelect;
+
+  allowTopicMultiSelect: boolean = true;
+  allowHasVotedMultiSelect: boolean = true;
 
   delegations: Delegation[] = [];
 
@@ -200,6 +203,37 @@ export class VotingsComponent implements OnInit {
       return currentDate > votingEndDate;
     }
     return false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (this.topicMultiSelect && this.topicMultiSelect.overlayVisible && !this.topicMultiSelect.el.nativeElement.contains(target)) {
+      this.resetTopicMultiSelect();
+    }
+    if (this.hasVotedMultiSelect && this.hasVotedMultiSelect.overlayVisible && !this.hasVotedMultiSelect.el.nativeElement.contains(target)) {
+      this.resetHasVotedMultiSelect();
+    }
+  }
+
+  resetTopicMultiSelect() {
+    if (this.topicMultiSelect) {
+      this.allowTopicMultiSelect = false;
+      this.topicMultiSelect.overlayVisible = false;
+      setTimeout(() => {
+        this.allowTopicMultiSelect = true;
+      }, 0);
+    }
+  }
+
+  resetHasVotedMultiSelect() {
+    if (this.hasVotedMultiSelect) {
+      this.allowHasVotedMultiSelect = false;
+      this.hasVotedMultiSelect.overlayVisible = false;
+      setTimeout(() => {
+        this.allowHasVotedMultiSelect = true;
+      }, 0);
+    }
   }
 
 }

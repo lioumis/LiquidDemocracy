@@ -1,5 +1,5 @@
 import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
-import {MultiSelectModule} from "primeng/multiselect";
+import {MultiSelect, MultiSelectModule} from "primeng/multiselect";
 import {PanelModule} from "primeng/panel";
 import {ConfirmationService, MenuItem, MessageService, PrimeTemplate} from "primeng/api";
 import {TableModule} from "primeng/table";
@@ -37,6 +37,9 @@ import {DelegationsService} from "./delegations.service";
 })
 export class DelegationsComponent implements OnInit {
   @ViewChild('dropdown') dropdown: Dropdown | undefined;
+  @ViewChild('multiSelect') multiSelect!: MultiSelect;
+
+  allowMultiSelect: boolean = true;
 
   delegationForm: FormGroup;
 
@@ -193,11 +196,24 @@ export class DelegationsComponent implements OnInit {
     }, 0);
   }
 
+  resetMultiSelect() {
+    if (this.multiSelect) {
+      this.allowMultiSelect = false;
+      this.multiSelect.overlayVisible = false;
+      setTimeout(() => {
+        this.allowMultiSelect = true;
+      }, 0);
+    }
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
     if (this.dropdown && this.dropdown.overlayVisible && !this.dropdown.el.nativeElement.contains(target)) {
       this.resetDropdown();
+    }
+    if (this.multiSelect && this.multiSelect.overlayVisible && !this.multiSelect.el.nativeElement.contains(target)) {
+      this.resetMultiSelect();
     }
   }
 }
