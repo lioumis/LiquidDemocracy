@@ -45,9 +45,8 @@
   <div class="delegations">
     @if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
     localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
-      <p-panel class="half" header="Αναθέσεις Ψήφου">
+      <p-panel [ngClass]="localStorage.getItem('selectedRole') === 'Ψηφοφόρος' ? 'full-width' : 'half-width'" header="Αναθέσεις Ψήφου">
         <p-table
-          #dt
           [value]="delegations"
           dataKey="id"
           [rows]="5"
@@ -136,7 +135,7 @@
     }
 
     @if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος") {
-      <p-panel class="half" header="Ψήφοι που σας έχουν ανατεθεί">
+      <p-panel class="half-width" header="Ψήφοι που σας έχουν ανατεθεί">
         <p-table
           #dt2
           [value]="receivedDelegations"

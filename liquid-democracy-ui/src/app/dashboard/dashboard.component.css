@@ -84,8 +84,12 @@ p-multiselect-panel {
   text-align: center;
 }
 
-.half {
+.half-width {
   width: 49%;
+}
+
+.full-width {
+  width: 100%;
 }
 
 :host ::ng-deep .p-overlay {
