@@ -314,6 +314,7 @@ textarea {
   display: flex;
   gap: 56px;
   padding-top: 30px;
+  align-items: baseline;
 }
 
 .option-values {
@@ -328,6 +329,19 @@ textarea {
   display: flex;
   gap: 20px;
   justify-content: center;
+}
+
+.option-label-row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+  padding-right: 60px;
+}
+
+.label {
+  width: 50%;
+  text-align: center;
 }
 
 .text-box {

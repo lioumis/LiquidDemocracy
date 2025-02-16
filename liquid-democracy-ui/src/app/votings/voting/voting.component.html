@@ -80,6 +80,10 @@
                   <strong>Επιλογές:</strong>
                 </div>
                 <div class="option-values">
+                  <div class="option-label-row">
+                    <p class="label">Τίτλος</p>
+                    <p class="label">Περιγραφή</p>
+                  </div>
                   <div class="option-row" *ngFor="let option of votingOptions; let i = index">
                     <input class="text-box" type="text" pInputText [(ngModel)]="option.title"/>
                     <input class="text-box" type="text" pInputText [(ngModel)]="option.details"/>
@@ -198,6 +202,17 @@
           </p-panel>
         }
 
+        @if (this.editMode) {
+          <div class="save-button-container">
+            <p-button
+              label="Αποθήκευση"
+              icon="pi pi-save"
+              (onClick)="saveVoting()"
+              [disabled]="!canSaveVoting()">
+            </p-button>
+          </div>
+        }
+
         @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή' && this.hasStartDate() && !this.hasStarted()) {
           <p-panel header="Αιτήματα Συμμετοχής" class="table-panel">
             <p-table
@@ -277,17 +292,6 @@
               <p-button (onClick)="processRequest(true)" [disabled]="!selectedRequest" label="Αποδοχή"></p-button>
             </div>
           </p-panel>
-        }
-
-        @if (this.editMode) {
-          <div class="save-button-container">
-            <p-button
-              label="Αποθήκευση"
-              icon="pi pi-save"
-              (onClick)="saveVoting()"
-              [disabled]="!canSaveVoting()">
-            </p-button>
-          </div>
         }
       </div>
 
