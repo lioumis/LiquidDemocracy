@@ -82,6 +82,14 @@ export class DashboardComponent implements OnInit {
       }
     });
 
+    if (localStorage.getItem('selectedRole') === "Εφορευτική Επιτροπή") {
+      this.router.navigate(['/settings']).then(() => this.router.navigate(['/votings']).then());
+    }
+
+    if (localStorage.getItem('selectedRole') === "Διαχειριστής Συστήματος") {
+      this.router.navigate(['/settings']).then(() => this.router.navigate(['/administration']).then());
+    }
+
     if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
       localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
       this.votingsService.getSuggestedVotings().subscribe({
