@@ -9,6 +9,7 @@ import gr.upatras.ceid.ld.topic.repository.TopicRepository;
 import gr.upatras.ceid.ld.user.entity.UserEntity;
 import gr.upatras.ceid.ld.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public class TopicService {
                 new TopicDto(topic.getId().intValue(), topic.getTitle())).toList();
     }
 
+    @Transactional
     public void createTopic(String username, String title) throws ValidationException {
         if (title == null || title.trim().isEmpty()) {
             throw new ValidationException("Το θέμα είναι κενό");

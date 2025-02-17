@@ -1,12 +1,12 @@
 package gr.upatras.ceid.ld.delegation.validator;
 
-import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
-import gr.upatras.ceid.ld.voting.entity.ParticipantEntity;
-import gr.upatras.ceid.ld.user.entity.UserEntity;
-import gr.upatras.ceid.ld.voting.entity.VotingEntity;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
+import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
 import gr.upatras.ceid.ld.delegation.repository.DelegationRepository;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
+import gr.upatras.ceid.ld.voting.entity.ParticipantEntity;
+import gr.upatras.ceid.ld.voting.entity.VotingEntity;
 import gr.upatras.ceid.ld.voting.repository.ParticipantRepository;
 import gr.upatras.ceid.ld.voting.repository.VoteRepository;
 import org.springframework.stereotype.Component;
@@ -43,6 +43,10 @@ public class DelegationValidator {
     }
 
     public void validateVotingIsActive(VotingEntity voting) throws ValidationException {
+        if (voting.getStartDate() == null) {
+            throw new ValidationException("Η επιλεγμένη ψηφοφορία δεν είναι ακόμα έτοιμη.");
+        }
+
         if (!voting.getEndDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Η επιλεγμένη ψηφοφορία έχει λήξει.");
         }

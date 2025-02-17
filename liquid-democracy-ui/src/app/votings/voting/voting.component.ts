@@ -486,7 +486,7 @@ export class VotingComponent implements OnInit {
           });
         }
       });
-      this.newComment = '';
+      this.feedback = '';
     }
   }
 

@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoggingService {
     private final AuditLogRepository auditLogRepository;
 
-
     public LoggingService(AuditLogRepository auditLogRepository) {
         this.auditLogRepository = auditLogRepository;
     }

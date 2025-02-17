@@ -227,6 +227,7 @@ public class VotingService {
                 voting.getId() + " με τίτλο " + voting.getName() + " στη θεματική περιοχή " + voting.getTopic().getTitle() + ".");
     }
 
+    @Transactional
     public void requestAccess(String username, Long votingId) throws ValidationException {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
@@ -257,6 +258,7 @@ public class VotingService {
                         p.getUser().getUsername())).toList();
     }
 
+    @Transactional
     public void processRequest(String username, Long requestId, boolean approve) throws ValidationException, AuthorizationException {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
@@ -367,8 +369,8 @@ public class VotingService {
     }
 
     public List<VotingTitleDto> getVotingTitles() {
-        return votingRepository.findAll().stream().map(votingEntity ->
-                new VotingTitleDto(votingEntity.getId().intValue(), votingEntity.getName())).toList();
+        return votingRepository.findAll().stream().filter(v -> v.getStartDate() != null)
+                .map(votingEntity -> new VotingTitleDto(votingEntity.getId().intValue(), votingEntity.getName())).toList();
     }
 
     public List<DiscussionDto> getDiscussions(String username, Long votingId) throws ValidationException {
@@ -401,6 +403,7 @@ public class VotingService {
         }).toList();
     }
 
+    @Transactional
     public void reactToMessage(Long messageId, String username, boolean action) throws ValidationException {
         MessageEntity message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new ValidationException("Το μήνυμα δεν βρέθηκε"));
@@ -430,6 +433,7 @@ public class VotingService {
                         message.getUser().getUsername() + " στην ψηφοφορία με τίτλο " + message.getVoting().getName() + ".");
     }
 
+    @Transactional
     public void addComment(String username, Long votingId, String message) throws ValidationException {
         votingValidator.validateComment(message);
 
@@ -448,6 +452,7 @@ public class VotingService {
                 "Ο χρήστης " + username + " προσέθεσε σχόλιο στην ψηφοφορία με τίτλο " + voting.getName() + ".");
     }
 
+    @Transactional
     public void addFeedback(String username, Long votingId, String message) throws ValidationException {
         votingValidator.validateFeedback(message);
 
