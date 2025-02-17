@@ -228,6 +228,7 @@ export class VotingComponent implements OnInit {
 
           if (this.isExpired()) {
             this.formGroup.get('vote')?.disable();
+            this.multipleFormGroup.get('vote')?.disable();
             this.resultData = this.transformToBarChartData(this.votingDetails);
             this.distributionData = this.transformToPieChartData(this.votingDetails);
           } else {
