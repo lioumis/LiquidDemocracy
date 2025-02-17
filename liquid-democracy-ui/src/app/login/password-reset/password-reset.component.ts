@@ -40,10 +40,19 @@ export class PasswordResetComponent {
     });
 
     this.stepTwoForm = this.fb.group({
-      securityAnswer: ['', Validators.required],
-      password: ['', Validators.required],
-      passwordRepeat: ['', Validators.required]
-    });
+        securityAnswer: ['', Validators.required],
+        password: ['', Validators.required],
+        passwordRepeat: ['', Validators.required]
+      },
+      {
+        validators: this.passwordMatchValidator
+      });
+  }
+
+  passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
+    const password = group.get('password')?.value;
+    const passwordRepeat = group.get('passwordRepeat')?.value;
+    return password === passwordRepeat ? null : {mismatch: true};
   }
 
   onStepOneSubmit(): void {

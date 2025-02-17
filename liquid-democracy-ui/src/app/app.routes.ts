@@ -12,7 +12,6 @@ import {AdministrationComponent} from "./administration/administration.component
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  // { path: '', redirectTo: '/login', pathMatch: 'full' }, // Redirect to login by default
   { path: 'forgot-password', component: PasswordResetComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'settings', component: SettingsComponent },
@@ -21,8 +20,8 @@ export const routes: Routes = [
   { path: 'votings', component: VotingsComponent },
   { path: 'voting/:id', component: VotingComponent },
   { path: 'administration', component: AdministrationComponent },
-  { path: '', redirectTo: '/', pathMatch: 'full' }, // Redirect to root
-  { path: '**', redirectTo: '/login' } // Fallback route
+  { path: '', redirectTo: '/', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' }
 ];
 
 @NgModule({
