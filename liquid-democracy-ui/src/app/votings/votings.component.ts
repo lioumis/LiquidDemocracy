@@ -119,10 +119,6 @@ export class VotingsComponent implements OnInit {
   selectVoting(voting: Voting) {
     this.messageService.clear();
 
-    if (this.isExpired(voting)) {
-      this.router.navigate(['/voting', voting.id]).then();
-    }
-
     this.votingsService.hasAccessToVoting(voting.id).subscribe({
       next: (response) => {
         if (response.isPresent) {

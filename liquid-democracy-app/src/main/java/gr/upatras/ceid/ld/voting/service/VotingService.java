@@ -247,11 +247,16 @@ public class VotingService {
                         voting.getName() + ".");
     }
 
-    public List<ParticipationRequestDto> getRequests(Long votingId) throws ValidationException {
+    public List<ParticipationRequestDto> getRequests(String username, Long votingId) throws ValidationException, AuthorizationException {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         votingValidator.validateVotingDatesForGettingRequests(voting.getStartDate(), voting.getEndDate());
+
+        votingValidator.checkAuthorizationToEdit(voting, user);
 
         return participantRepository.findByVotingAndStatusIs(voting, null).stream().map(p ->
                 new ParticipationRequestDto(p.getId().intValue(), p.getUser().getName(), p.getUser().getSurname(),
@@ -272,9 +277,7 @@ public class VotingService {
 
         VotingEntity voting = participant.getVoting();
 
-        if (!voting.getElectoralCommittee().contains(user)) {
-            throw new AuthorizationException("Δεν ανήκετε στην εφορευτική επιτροπή αυτής της ψηφοφορίας");
-        }
+        votingValidator.checkAuthorizationToEdit(voting, user);
 
         participant.setStatus(approve);
         participantRepository.save(participant);
@@ -298,10 +301,6 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (voting.getElectoralCommittee().contains(user)) {
-            return new VotingAccessDto(true, true);
-        }
-
-        if (voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
             return new VotingAccessDto(true, true);
         }
 
@@ -353,12 +352,13 @@ public class VotingService {
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
+        checkVotingAccess(username, votingId); //TODO: Clarify if everyone has access after is expires
 
         if (voting.getStartDate() != null && voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
             return getInactiveVotingStatistics(voting, voter);
         }
 
-        if (voting.getStartDate() == null || voting.getEndDate() == null) {
+        if (voting.getStartDate() == null) {
             if (voting.getElectoralCommittee().contains(voter)) {
                 return getVotingPreviewDetails(voting);
             }
@@ -373,7 +373,7 @@ public class VotingService {
                 .map(votingEntity -> new VotingTitleDto(votingEntity.getId().intValue(), votingEntity.getName())).toList();
     }
 
-    public List<DiscussionDto> getDiscussions(String username, Long votingId) throws ValidationException {
+    public List<DiscussionDto> getDiscussions(String username, Long votingId) throws ValidationException, AuthorizationException {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
@@ -381,6 +381,8 @@ public class VotingService {
 
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
+        checkVotingAccess(username, votingId);
 
         List<MessageEntity> messages = messageRepository.findByVoting(voting);
         return messages.stream().map(message -> {
@@ -404,7 +406,7 @@ public class VotingService {
     }
 
     @Transactional
-    public void reactToMessage(Long messageId, String username, boolean action) throws ValidationException {
+    public void reactToMessage(Long messageId, String username, boolean action) throws ValidationException, AuthorizationException {
         MessageEntity message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new ValidationException("Το μήνυμα δεν βρέθηκε"));
 
@@ -412,6 +414,8 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
         votingValidator.validateHasNotExpired(message.getVoting().getEndDate());
+
+        checkVotingAccess(username, message.getVoting().getId());
 
         Optional<MessageDetailsEntity> messageDetails = messageDetailsRepository.findByMessageAndUser(message, user);
 
@@ -434,13 +438,15 @@ public class VotingService {
     }
 
     @Transactional
-    public void addComment(String username, Long votingId, String message) throws ValidationException {
+    public void addComment(String username, Long votingId, String message) throws ValidationException, AuthorizationException {
         votingValidator.validateComment(message);
 
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         votingValidator.validateHasNotExpired(voting.getEndDate());
+
+        checkVotingAccess(username, votingId);
 
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
@@ -453,7 +459,7 @@ public class VotingService {
     }
 
     @Transactional
-    public void addFeedback(String username, Long votingId, String message) throws ValidationException {
+    public void addFeedback(String username, Long votingId, String message) throws ValidationException, AuthorizationException {
         votingValidator.validateFeedback(message);
 
         VotingEntity voting = votingRepository.findById(votingId)
@@ -463,6 +469,8 @@ public class VotingService {
 
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
+        checkVotingAccess(username, votingId);
 
         if (feedbackRepository.existsByVotingAndUser(voting, user)) {
             throw new ValidationException("Υπάρχει ήδη ανατροφοδότηση");
@@ -475,11 +483,16 @@ public class VotingService {
                 "Ο χρήστης " + username + " προσέθεσε ανατροφοδότηση στην ψηφοφορία με τίτλο " + voting.getName() + ".");
     }
 
-    public List<FeedbackDto> getFeedback(Long votingId) throws ValidationException {
+    public List<FeedbackDto> getFeedback(String username, Long votingId) throws ValidationException, AuthorizationException {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         votingValidator.validateHasExpired(voting.getEndDate());
+
+        votingValidator.checkAuthorizationToEdit(voting, user);
 
         return feedbackRepository.findByVoting(voting).stream().map(feedback ->
                 new FeedbackDto(feedback.getContent())).toList();
@@ -581,5 +594,12 @@ public class VotingService {
                 DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
                 null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, null, null,
                 null, null);
+    }
+
+    private void checkVotingAccess(String username, Long votingId) throws ValidationException, AuthorizationException {
+        VotingAccessDto votingAccessDto = hasAccess(username, votingId);
+        if (!votingAccessDto.isPresent() || !Boolean.TRUE.equals(votingAccessDto.hasAccess())) {
+            throw new AuthorizationException("Δεν έχετε πρόσβαση σε αυτή την ψηφοφορία");
+        }
     }
 }

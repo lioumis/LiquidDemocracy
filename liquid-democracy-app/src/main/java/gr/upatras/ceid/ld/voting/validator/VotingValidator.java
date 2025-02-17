@@ -292,6 +292,10 @@ public class VotingValidator {
     }
 
     public void checkIfRequestExists(UserEntity user, VotingEntity voting) throws ValidationException {
+        if (voting.getElectoralCommittee().contains(user)) {
+            throw new ValidationException("Έχετε ήδη πρόσβαση στην ψηφοφορία ως μέλος της εφορευτικής επιτροπής");
+        }
+
         if (participantRepository.existsByUserAndVoting(user, voting)) {
             throw new ValidationException("Υπάρχει ήδη αίτημα συμμετοχής για τη συγκεκριμένη ψηφοφορία");
         }

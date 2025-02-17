@@ -186,7 +186,7 @@ public class VotingController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            List<ParticipationRequestDto> participationRequests = votingService.getRequests(votingId);
+            List<ParticipationRequestDto> participationRequests = votingService.getRequests(authorizedUsername, votingId);
             return ResponseEntity.status(HttpStatus.OK).body(participationRequests);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -487,7 +487,7 @@ public class VotingController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            List<FeedbackDto> feedbackDtoList = votingService.getFeedback(votingId);
+            List<FeedbackDto> feedbackDtoList = votingService.getFeedback(authorizedUsername, votingId);
             return ResponseEntity.status(HttpStatus.OK).body(feedbackDtoList);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
