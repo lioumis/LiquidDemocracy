@@ -6,11 +6,11 @@
 	<parent>
 		<groupId>gr.upatras.ceid</groupId>
 		<artifactId>liquid-democracy-application</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
 	<artifactId>liquid-democracy-app</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>Liquid Democracy Application</name>
 
 	<properties>
@@ -69,7 +69,8 @@
 		<dependency>
 			<groupId>gr.upatras.ceid</groupId>
 			<artifactId>liquid-democracy-ui</artifactId>
-			<version>${project.version}</version>
+			<version>1.0.0</version>
+			<type>pom</type>
 		</dependency>
 	</dependencies>
 
