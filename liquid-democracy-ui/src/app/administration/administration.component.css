@@ -138,3 +138,7 @@ p-multiselect-panel {
 :host ::ng-deep .p-overlay {
   z-index: 1050 !important;
 }
+
+:host ::ng-deep .p-dialog-mask {
+  z-index: 2000 !important;
+}
