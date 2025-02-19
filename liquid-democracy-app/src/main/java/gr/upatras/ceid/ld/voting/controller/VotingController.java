@@ -275,7 +275,7 @@ public class VotingController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            VotingAccessDto votingAccess = votingService.hasAccess(authorizedUsername, votingId);
+            VotingAccessDto votingAccess = votingService.hasAccess(authorizedUsername, votingId, true);
             return ResponseEntity.status(HttpStatus.OK).body(votingAccess);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());

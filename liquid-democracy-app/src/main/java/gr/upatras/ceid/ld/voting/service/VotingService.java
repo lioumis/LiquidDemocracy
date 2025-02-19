@@ -293,7 +293,7 @@ public class VotingService {
         }
     }
 
-    public VotingAccessDto hasAccess(String username, Long votingId) throws ValidationException {
+    public VotingAccessDto hasAccess(String username, Long votingId, boolean viewOnly) throws ValidationException {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
@@ -301,6 +301,10 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         if (voting.getElectoralCommittee().contains(user)) {
+            return new VotingAccessDto(true, true);
+        }
+
+        if (viewOnly && voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
             return new VotingAccessDto(true, true);
         }
 
@@ -352,11 +356,11 @@ public class VotingService {
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
-        checkVotingAccess(username, votingId); //TODO: Clarify if everyone has access after is expires
-
         if (voting.getStartDate() != null && voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
             return getInactiveVotingStatistics(voting, voter);
         }
+
+        checkVotingAccess(username, votingId);
 
         if (voting.getStartDate() == null) {
             if (voting.getElectoralCommittee().contains(voter)) {
@@ -622,7 +626,7 @@ public class VotingService {
     }
 
     private void checkVotingAccess(String username, Long votingId) throws ValidationException, AuthorizationException {
-        VotingAccessDto votingAccessDto = hasAccess(username, votingId);
+        VotingAccessDto votingAccessDto = hasAccess(username, votingId, false);
         if (!votingAccessDto.isPresent() || !Boolean.TRUE.equals(votingAccessDto.hasAccess())) {
             throw new AuthorizationException("Δεν έχετε πρόσβαση σε αυτή την ψηφοφορία");
         }
