@@ -304,16 +304,30 @@ export class VotingComponent implements OnInit {
       }
     };
 
+    const labels = votingData.results.map((result: any) => result.option.title);
+    const directVotes = votingData.results.map((result: any) => result.directVotes);
+    const delegatedVotes = votingData.results.map((result: any) => result.delegatedVotes);
+    const totalVotes = votingData.results.map((result: any) => result.directVotes + result.delegatedVotes);
+
     return {
-      labels: votingData.results.map((result: any) => result.option.title),
+      labels: labels,
       datasets: [
         {
-          label: 'Ψήφοι',
-          backgroundColor: documentStyle.getPropertyValue('--blue-500'),
-          borderColor: documentStyle.getPropertyValue('--blue-500'),
-          data: votingData.results.map((result: any) => result.count),
+          label: 'Άμεσες Ψήφοι',
+          data: directVotes,
+          backgroundColor: documentStyle.getPropertyValue('--blue-500')
         },
-      ],
+        {
+          label: 'Εξουσιοδοτημένες Ψήφοι',
+          data: delegatedVotes,
+          backgroundColor: documentStyle.getPropertyValue('--yellow-500')
+        },
+        {
+          label: 'Σύνολο',
+          data: totalVotes,
+          backgroundColor: 'rgba(153, 102, 255, 0.6)'
+        }
+      ]
     };
   }
 
@@ -332,8 +346,13 @@ export class VotingComponent implements OnInit {
       }
     };
 
+    const totalVotes = votingData.directVotes + votingData.delegatedVotes;
+
+    const directPercentage = totalVotes > 0 ? ((votingData.directVotes / totalVotes) * 100).toFixed(1) : '0';
+    const delegatedPercentage = totalVotes > 0 ? ((votingData.delegatedVotes / totalVotes) * 100).toFixed(1) : '0';
+
     return {
-      labels: ['Άμεσες ψήφοι', 'Εξουσιοδοτημένες ψήφοι'],
+      labels: [`Άμεσες ψήφοι (${directPercentage}%)`, `Εξουσιοδοτημένες ψήφοι (${delegatedPercentage}%)`],
       datasets: [
         {
           data: [votingData.directVotes, votingData.delegatedVotes],
@@ -900,7 +919,8 @@ export interface VotingDetails {
 
 export interface VotingResult {
   option: VotingOption;
-  count: number;
+  directVotes: number;
+  delegatedVotes: number;
 }
 
 export interface VotingOption {

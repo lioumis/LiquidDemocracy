@@ -499,7 +499,8 @@ public class VotingService {
     }
 
     private VotingDetailsDto getInactiveVotingStatistics(VotingEntity voting, UserEntity voter) {
-        Map<VotingOptionDto, Integer> resultMap = new HashMap<>();
+        Map<VotingOptionDto, Integer> directResultMap = new HashMap<>();
+        Map<VotingOptionDto, Integer> delegatedResultMap = new HashMap<>();
         AtomicInteger directVotes = new AtomicInteger();
         AtomicInteger delegatedVotes = new AtomicInteger();
         Set<VotingOptionDto> userOptions = new HashSet<>();
@@ -521,7 +522,8 @@ public class VotingService {
 
         voting.getVotingOptions().forEach(option -> {
             VotingOptionDto votingOptionDto = new VotingOptionDto(option.getName(), option.getDescription());
-            resultMap.put(votingOptionDto, 0);
+            directResultMap.put(votingOptionDto, 0);
+            delegatedResultMap.put(votingOptionDto, 0);
         });
 
         List<VoteEntity> votes = voting.getVotes();
@@ -529,7 +531,11 @@ public class VotingService {
             List<VoteDetailsEntity> voteDetailsEntities = v.getVoteDetails();
             voteDetailsEntities.forEach(details -> {
                 VotingOptionDto votingOptionDto = new VotingOptionDto(details.getVotingOption().getName(), details.getVotingOption().getDescription());
-                resultMap.merge(votingOptionDto, 1, Integer::sum);
+                if (v.getVoter() == null) {
+                    directResultMap.merge(votingOptionDto, 1, Integer::sum);
+                } else {
+                    delegatedResultMap.merge(votingOptionDto, 1, Integer::sum);
+                }
             });
 
             if (v.getVoter() != null) {
@@ -539,8 +545,7 @@ public class VotingService {
             }
         });
 
-        List<VotingResultDto> results = resultMap.entrySet().stream().map(entry ->
-                new VotingResultDto(entry.getKey(), entry.getValue())).toList();
+        List<VotingResultDto> resultList = getVotingResultDtos(directResultMap, delegatedResultMap);
 
         Optional<FeedbackEntity> byVotingAndUser = feedbackRepository.findByVotingAndUser(voting, voter);
         String feedback = byVotingAndUser.map(FeedbackEntity::getContent).orElse(null);
@@ -552,7 +557,27 @@ public class VotingService {
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
-                delegated, voting.getVotingType().getId(), voting.getVoteLimit(), results, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
+                delegated, voting.getVotingType().getId(), voting.getVoteLimit(), resultList, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
+    }
+
+    private List<VotingResultDto> getVotingResultDtos(Map<VotingOptionDto, Integer> directResultMap, Map<VotingOptionDto, Integer> delegatedResultMap) {
+        Map<VotingOptionDto, VotingResultDto> results = new HashMap<>();
+
+        for (Map.Entry<VotingOptionDto, Integer> entry : directResultMap.entrySet()) {
+            results.put(entry.getKey(), new VotingResultDto(entry.getKey(), entry.getValue(), 0));
+        }
+
+        for (Map.Entry<VotingOptionDto, Integer> entry : delegatedResultMap.entrySet()) {
+            results.merge(entry.getKey(),
+                    new VotingResultDto(entry.getKey(), 0, entry.getValue()),
+                    (existing, newValue) -> new VotingResultDto(
+                            existing.option(),
+                            existing.directVotes() + newValue.directVotes(),
+                            existing.delegatedVotes() + newValue.delegatedVotes()
+                    ));
+        }
+
+        return new ArrayList<>(results.values());
     }
 
     private VotingDetailsDto getVotingPreviewDetails(VotingEntity voting) {
@@ -561,7 +586,7 @@ public class VotingService {
 
         if (votingOptions != null) {
             votingResults = votingOptions.stream().map(option ->
-                    new VotingResultDto(new VotingOptionDto(option.getName(), option.getDescription()), null)).toList();
+                    new VotingResultDto(new VotingOptionDto(option.getName(), option.getDescription()), null, null)).toList();
         }
 
         Integer votingTypeId = voting.getVotingType() == null ? null : voting.getVotingType().getId();
@@ -576,7 +601,7 @@ public class VotingService {
         Optional<VoteEntity> voteEntityOptional = voteRepository.findByOriginalVoterAndVoting(voter, voting);
         List<VotingOptionsEntity> votingOptions = voting.getVotingOptions();
         List<VotingResultDto> votingResults = votingOptions.stream().map(option ->
-                new VotingResultDto(new VotingOptionDto(option.getName(), option.getDescription()), null)).toList();
+                new VotingResultDto(new VotingOptionDto(option.getName(), option.getDescription()), null, null)).toList();
 
         if (voteEntityOptional.isPresent()) {
             VoteEntity vote = voteEntityOptional.get();
