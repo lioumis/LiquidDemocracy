@@ -71,6 +71,14 @@ public class VotingEntity {
     )
     private Set<UserEntity> electoralCommittee = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "delegate",
+            joinColumns = @JoinColumn(name = "voting_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserEntity> delegates = new HashSet<>();
+
     public VotingEntity(String name, TopicEntity topic, Set<UserEntity> electoralCommittee) {
         this.name = name;
         this.topic = topic;

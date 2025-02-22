@@ -130,6 +130,8 @@ public class UserService implements UserDetailsService {
 
         Role role = userValidator.validateRoleExistsNot(user, roleString);
 
+        //TODO: Handle the representative.
+
         user.getRoles().remove(role);
 
         if (Role.ELECTORAL_COMMITTEE.equals(role)) {
@@ -143,7 +145,7 @@ public class UserService implements UserDetailsService {
 
         userRepository.save(user);
 
-        loggingService.log(admin, Action.NEW_ROLE, "Ο ρόλος " + role.getName() + " του χρήστη " +
+        loggingService.log(admin, Action.ROLE_REVOCATION, "Ο ρόλος " + role.getName() + " του χρήστη " +
                 user.getUsername() + " ανακλήθηκε από το χρήστη " + adminUsername + ".");
     }
 

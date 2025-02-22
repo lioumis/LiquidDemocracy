@@ -1,12 +1,13 @@
 package gr.upatras.ceid.ld.delegation.controller;
 
-import gr.upatras.ceid.ld.delegation.dto.DelegationDto;
-import gr.upatras.ceid.ld.delegation.dto.DelegationRequestDto;
-import gr.upatras.ceid.ld.delegation.dto.ReceivedDelegationDto;
+import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
-import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
+import gr.upatras.ceid.ld.delegation.dto.DelegateAdditionDto;
+import gr.upatras.ceid.ld.delegation.dto.DelegationDto;
+import gr.upatras.ceid.ld.delegation.dto.DelegationRequestDto;
+import gr.upatras.ceid.ld.delegation.dto.ReceivedDelegationDto;
 import gr.upatras.ceid.ld.delegation.service.DelegationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,12 +26,15 @@ public class DelegationController {
     private static final String ERROR_KEYWORD = "error";
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_FOR_DELEGATION = new HashSet<>();
+    private static final Set<Role> ALLOWED_FOR_EDIT = new HashSet<>();
 
     static {
         ALLOWED_ROLES.add(Role.VOTER);
         ALLOWED_ROLES.add(Role.REPRESENTATIVE);
 
         ALLOWED_FOR_DELEGATION.add(Role.REPRESENTATIVE);
+
+        ALLOWED_FOR_EDIT.add(Role.ELECTORAL_COMMITTEE);
     }
 
     private final DelegationService delegationService;
@@ -40,6 +44,59 @@ public class DelegationController {
     public DelegationController(DelegationService delegationService, AuthorizationService authorizationService) {
         this.delegationService = delegationService;
         this.authorizationService = authorizationService;
+    }
+
+    @PostMapping("/addDelegate")
+    public ResponseEntity<Map<String, String>> addDelegate(@RequestBody DelegateAdditionDto delegateAdditionDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_FOR_EDIT);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
+            }
+
+            delegationService.addDelegate(delegateAdditionDto.delegate(), authorizedUsername, delegateAdditionDto.votingId());
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Η ψήφος ανατέθηκε με επιτυχία");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/getDelegates")
+    public ResponseEntity<Object> getDelegates(@RequestParam("voting") Long votingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_FOR_EDIT);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
+            }
+
+            List<DelegationDto> delegations = delegationService.getDelegates(votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(delegations);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/delegate")

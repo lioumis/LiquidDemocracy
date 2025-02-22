@@ -55,7 +55,7 @@ public class VotingController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, Set.of(Role.VOTER));
 
             if (authorizedUsername == null) {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);

@@ -7,8 +7,7 @@
 <div class="dashboard">
   <h2>Καλώς ορίσατε!</h2>
 
-  @if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
-  localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
+  @if (localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
     <p-panel header="Ψηφοφορίες που μπορεί να σας ενδιαφέρουν">
       <p-carousel
         [value]="votings"

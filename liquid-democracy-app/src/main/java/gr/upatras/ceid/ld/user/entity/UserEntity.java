@@ -66,6 +66,9 @@ public class UserEntity implements UserDetails {
     @ManyToMany(mappedBy = "electoralCommittee")
     private Set<VotingEntity> overseenVotings = new HashSet<>();
 
+    @ManyToMany(mappedBy = "delegates")
+    private Set<VotingEntity> delegatableVotings = new HashSet<>();
+
     public UserEntity(Long id) {
         this.id = id;
     }

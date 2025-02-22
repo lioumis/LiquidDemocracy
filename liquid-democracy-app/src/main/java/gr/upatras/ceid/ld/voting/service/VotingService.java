@@ -304,6 +304,10 @@ public class VotingService {
             return new VotingAccessDto(true, true);
         }
 
+        if (voting.getDelegates().contains(user)) {
+            return new VotingAccessDto(true, true);
+        }
+
         if (viewOnly && voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
             return new VotingAccessDto(true, true);
         }
@@ -334,6 +338,15 @@ public class VotingService {
 
         if (Role.ELECTORAL_COMMITTEE.equals(selectedRole)) {
             return votingEntities.stream().filter(v -> v.getElectoralCommittee().contains(voter)).map(v -> {
+                boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
+                return new VotingDto(v.getName(), v.getTopic().getTitle(),
+                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),
+                        v.getId().intValue());
+            }).toList();
+        }
+
+        if (Role.REPRESENTATIVE.equals(selectedRole)) {
+            return votingEntities.stream().filter(v -> v.getDelegates().contains(voter)).map(v -> {
                 boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
                 return new VotingDto(v.getName(), v.getTopic().getTitle(),
                         DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),

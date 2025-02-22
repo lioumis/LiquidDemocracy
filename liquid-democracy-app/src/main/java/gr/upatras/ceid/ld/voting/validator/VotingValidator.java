@@ -54,7 +54,7 @@ public class VotingValidator {
     }
 
     public void validateParticipation(VotingEntity voting, UserEntity voter) throws ValidationException {
-        if (!voting.getElectoralCommittee().contains(voter)) {
+        if (!voting.getElectoralCommittee().contains(voter) && !voting.getDelegates().contains(voter)) {
             ParticipantEntity participantEntity = participantRepository.findByUserAndVoting(voter, voting)
                     .orElseThrow(() -> new ValidationException("Δεν υπάρχει αίτηση συμμετοχής στην ψηφοφορία"));
 
@@ -294,6 +294,10 @@ public class VotingValidator {
     public void checkIfRequestExists(UserEntity user, VotingEntity voting) throws ValidationException {
         if (voting.getElectoralCommittee().contains(user)) {
             throw new ValidationException("Έχετε ήδη πρόσβαση στην ψηφοφορία ως μέλος της εφορευτικής επιτροπής");
+        }
+
+        if (voting.getDelegates().contains(user)) {
+            throw new ValidationException("Έχετε ήδη πρόσβαση στην ψηφοφορία ως αντιπρόσωπος");
         }
 
         if (participantRepository.existsByUserAndVoting(user, voting)) {

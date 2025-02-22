@@ -84,13 +84,8 @@ public class DelegationValidator {
     }
 
     public void validateDelegateAccessToVoting(VotingEntity voting, UserEntity delegate) throws ValidationException {
-        if (!voting.getElectoralCommittee().contains(delegate)) {
-            ParticipantEntity delegateParticipantEntity = participantRepository.findByUserAndVoting(delegate, voting)
-                    .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία"));
-
-            if (!Boolean.TRUE.equals(delegateParticipantEntity.getStatus())) {
-                throw new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν συμμετέχει σε αυτή την ψηφοφορία");
-            }
+        if (!voting.getDelegates().contains(delegate)) {
+            throw new ValidationException("Ο αντιπρόσωπος που επιλέξατε δεν είναι έγκυρος για αυτή την ψηφοφορία");
         }
     }
 

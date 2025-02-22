@@ -2,6 +2,7 @@ package gr.upatras.ceid.ld.delegation.service;
 
 import gr.upatras.ceid.ld.common.auditlog.service.LoggingService;
 import gr.upatras.ceid.ld.common.enums.Action;
+import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.delegation.dto.DelegationDto;
 import gr.upatras.ceid.ld.delegation.dto.ReceivedDelegationDto;
@@ -15,6 +16,7 @@ import gr.upatras.ceid.ld.voting.repository.VotingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -39,6 +41,47 @@ public class DelegationService {
         this.loggingService = loggingService;
         this.userRepository = userRepository;
         this.votingRepository = votingRepository;
+    }
+
+    @Transactional
+    public void addDelegate(String delegateId, String userId, Long votingId) throws ValidationException {
+        UserEntity user = userRepository.findByUsername(userId)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
+        UserEntity delegate = userRepository.findByUsername(delegateId)
+                .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος δεν βρέθηκε"));
+
+        if (!delegate.getRoles().contains(Role.REPRESENTATIVE)) {
+            throw new ValidationException("Ο επιλεγμένος χρήστης δεν είναι αντιπρόσωπος");
+        }
+
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+
+        if (!voting.getEndDate().isAfter(LocalDate.now())) {
+            throw new ValidationException("Η ψηφοφορία έχει λήξει.");
+        }
+
+        if (voting.getDelegates().contains(delegate)) {
+            throw new ValidationException("Ο επιλεγμένος χρήστης έχει ήδη οριστεί ως αντιπρόσωπος στην ψηφοφορία");
+        }
+
+        //TODO: Check if has already voted (if allowed to perform during the active voting phase.
+
+        voting.getDelegates().add(delegate);
+        votingRepository.save(voting);
+
+        loggingService.log(user, Action.DELEGATE_ADDITION,
+                "Ο χρήστης " + delegate.getUsername() + " προστέθηκε ως αντιπρόσωπος από τον χρήστη " +
+                        user.getUsername() + " στην την ψηφοφορία " + votingId + ".");
+    }
+
+    public List<DelegationDto> getDelegates(Long votingId) throws ValidationException {
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+
+        return voting.getDelegates().stream()
+                .map(d -> new DelegationDto(d.getName(), d.getSurname(), d.getUsername(), null)).toList();
     }
 
     @Transactional

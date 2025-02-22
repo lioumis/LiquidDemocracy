@@ -95,8 +95,7 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(['/settings']).then(() => this.router.navigate(['/administration']).then());
     }
 
-    if (localStorage.getItem('selectedRole') === "Αντιπρόσωπος" ||
-      localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
+    if (localStorage.getItem('selectedRole') === "Ψηφοφόρος") {
       this.votingsService.getSuggestedVotings().subscribe({
         next: (response) => {
           this.votings = response;
