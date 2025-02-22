@@ -103,13 +103,31 @@ public class UserService implements UserDetailsService {
         UserEntity admin = userRepository.findByUsername(adminUsername)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
 
-        Role role = userValidator.validateRole(user, roleString);
+        Role role = userValidator.validateRoleExists(user, roleString);
 
         user.getRoles().add(role);
         userRepository.save(user);
 
-        loggingService.log(admin, Action.NEW_ROLE, "Ο ρόλος + " + role.getName() + " δόθηκε από το χρήστη " +
+        loggingService.log(admin, Action.NEW_ROLE, "Ο ρόλος " + role.getName() + " δόθηκε από το χρήστη " +
                 adminUsername + " στο χρήστη " + user.getUsername() + ".");
+    }
+
+    @Transactional
+    public void revokeRole(String adminUsername, Long userId, String roleString) throws ValidationException {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
+
+        UserEntity admin = userRepository.findByUsername(adminUsername)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
+
+        Role role = userValidator.validateRoleExistsNot(user, roleString);
+        //TODO: Remove entries per role
+
+        user.getRoles().remove(role);
+        userRepository.save(user);
+
+        loggingService.log(admin, Action.NEW_ROLE, "Ο ρόλος " + role.getName() + " του χρήστη " +
+                user.getUsername() + " ανακλήθηκε από το χρήστη " + adminUsername + ".");
     }
 
     @Transactional

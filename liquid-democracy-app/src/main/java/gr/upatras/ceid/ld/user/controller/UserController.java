@@ -145,6 +145,37 @@ public class UserController {
         }
     }
 
+    @PostMapping("/revokeRole")
+    public ResponseEntity<Map<String, String>> revokeRole(@RequestBody RoleDto roleDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
+            }
+
+            userService.revokeRole(authorizedUsername, roleDto.userId(), roleDto.role());
+            Map<String, String> response = new HashMap<>();
+            response.put(MESSAGE_KEYWORD, "Ο ρόλος ανακλήθηκε επιτυχώς");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     @PostMapping("/resetPassword")
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetDto resetDto) {
         try {

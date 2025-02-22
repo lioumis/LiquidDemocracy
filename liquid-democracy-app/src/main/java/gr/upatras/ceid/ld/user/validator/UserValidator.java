@@ -1,8 +1,8 @@
 package gr.upatras.ceid.ld.user.validator;
 
-import gr.upatras.ceid.ld.user.entity.UserEntity;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -89,7 +89,7 @@ public class UserValidator {
         }
     }
 
-    public Role validateRole(UserEntity userEntity, String roleString) throws ValidationException {
+    public Role validateRoleExists(UserEntity userEntity, String roleString) throws ValidationException {
         Role role;
         try {
             role = Role.fromName(roleString);
@@ -99,6 +99,21 @@ public class UserValidator {
 
         if (userEntity.getRoles().contains(role)) {
             throw new ValidationException("Ο χρήστης έχει ήδη το συγκεκριμένο ρόλο");
+        }
+
+        return role;
+    }
+
+    public Role validateRoleExistsNot(UserEntity userEntity, String roleString) throws ValidationException {
+        Role role;
+        try {
+            role = Role.fromName(roleString);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Ο ρόλος δεν βρέθηκε");
+        }
+
+        if (!userEntity.getRoles().contains(role)) {
+            throw new ValidationException("Ο χρήστης δεν έχει το συγκεκριμένο ρόλο");
         }
 
         return role;

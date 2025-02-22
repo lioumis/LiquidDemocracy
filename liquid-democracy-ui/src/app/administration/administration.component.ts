@@ -81,9 +81,13 @@ export class AdministrationComponent implements OnInit {
     "Διαχειριστής Συστήματος"
   ];
 
-  roleDialogVisible: boolean = false;
+  assignRoleDialogVisible: boolean = false;
 
-  allowDialog: boolean = true;
+  revokeRoleDialogVisible: boolean = false;
+
+  allowAssignDialog: boolean = true;
+
+  allowRevokeDialog: boolean = true;
 
   allowDropdown: boolean = true;
 
@@ -167,15 +171,28 @@ export class AdministrationComponent implements OnInit {
   }
 
   assignRole() {
-    this.roleDialogVisible = true;
+    this.assignRoleDialogVisible = true;
   }
 
-  resetRoleDialog() {
+  revokeRole() {
+    this.revokeRoleDialogVisible = true;
+  }
+
+  resetAssignRoleDialog() {
     this.selectedRole = '';
-    this.allowDialog = false;
-    this.roleDialogVisible = false;
+    this.allowAssignDialog = false;
+    this.assignRoleDialogVisible = false;
     setTimeout(() => {
-      this.allowDialog = true;
+      this.allowAssignDialog = true;
+    }, 0);
+  }
+
+  resetRevokeRoleDialog() {
+    this.selectedRole = '';
+    this.allowRevokeDialog = false;
+    this.revokeRoleDialogVisible = false;
+    setTimeout(() => {
+      this.allowRevokeDialog = true;
     }, 0);
   }
 
@@ -274,7 +291,31 @@ export class AdministrationComponent implements OnInit {
       });
     }
     this.selectedRole = '';
-    this.resetRoleDialog();
+    this.resetAssignRoleDialog();
+  }
+
+  removeRole() {
+    if (this.selectedRole && this.selectedUser) {
+      this.administrationService.revokeRole(this.selectedRole, this.selectedUser.id).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: 'Ο ρόλος ανακλήθηκε με επιτυχία'
+          });
+          this.loadTable();
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Αποτυχία',
+            detail: error.error.error
+          });
+        }
+      });
+    }
+    this.selectedRole = '';
+    this.resetRevokeRoleDialog();
   }
 
   loadTable() {

@@ -128,6 +128,8 @@
           </ng-template>
         </p-table>
         <div class="table-button-container">
+          <p-button severity="danger" (onClick)="revokeRole()" [disabled]="!selectedUser"
+                    label="Ανάκληση ρόλου"></p-button>
           <p-button (onClick)="assignRole()" [disabled]="!selectedUser" label="Ανάθεση ρόλου"></p-button>
         </div>
       </ng-template>
@@ -308,14 +310,15 @@
   </p-tabView>
 </div>
 
-@if (allowDialog) {
-  <p-dialog header="Ανάθεση ρόλου" draggable="false" closable="false" [modal]="true" [(visible)]="roleDialogVisible"
+@if (allowAssignDialog) {
+  <p-dialog header="Ανάθεση ρόλου" draggable="false" closable="false" [modal]="true"
+            [(visible)]="assignRoleDialogVisible"
             [style]="{ width: '25rem', height: '17rem' }">
     <div class="dialog-content">
       @if (allowDropdown) {
         <p-dropdown
           #dropdown
-          id="voting"
+          id="assignRoleDropdown"
           [options]="allRoles"
           [style]="{'width':'100%', 'z-index':'1050', 'margin-bottom':'15px'}"
           [(ngModel)]="selectedRole"
@@ -328,8 +331,35 @@
       <div class="p-text-secondary block mb-5">{{ selectedUser?.email }}</div>
     </div>
     <div class="dialog-button-container">
-      <p-button label="Άκυρο" severity="secondary" (onClick)="this.resetRoleDialog()"/>
+      <p-button label="Άκυρο" severity="secondary" (onClick)="this.resetAssignRoleDialog()"/>
       <p-button label="Αποθήκευση" [disabled]="!selectedRole" (onClick)="this.addRole()"/>
+    </div>
+  </p-dialog>
+}
+
+@if (allowRevokeDialog) {
+  <p-dialog header="Ανάκληση ρόλου" draggable="false" closable="false" [modal]="true"
+            [(visible)]="revokeRoleDialogVisible"
+            [style]="{ width: '25rem', height: '17rem' }">
+    <div class="dialog-content">
+      @if (allowDropdown) {
+        <p-dropdown
+          #dropdown
+          id="revokeRoleDropdown"
+          [options]="allRoles"
+          [style]="{'width':'100%', 'z-index':'1050', 'margin-bottom':'15px'}"
+          [(ngModel)]="selectedRole"
+          placeholder="Ρόλος"
+          (onChange)="onRoleChange()"
+        />
+      }
+      <div class="p-text-secondary block mb-5">{{ selectedUser?.name }} {{ selectedUser?.surname }}</div>
+      <div class="p-text-secondary block mb-5">{{ selectedUser?.username }}</div>
+      <div class="p-text-secondary block mb-5">{{ selectedUser?.email }}</div>
+    </div>
+    <div class="dialog-button-container">
+      <p-button label="Άκυρο" severity="secondary" (onClick)="this.resetRevokeRoleDialog()"/>
+      <p-button label="Αποθήκευση" [disabled]="!selectedRole" (onClick)="this.removeRole()"/>
     </div>
   </p-dialog>
 }
