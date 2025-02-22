@@ -8,6 +8,9 @@ import gr.upatras.ceid.ld.user.dto.UserInformationDto;
 import gr.upatras.ceid.ld.user.entity.UserEntity;
 import gr.upatras.ceid.ld.user.repository.UserRepository;
 import gr.upatras.ceid.ld.user.validator.UserValidator;
+import gr.upatras.ceid.ld.voting.entity.ParticipantEntity;
+import gr.upatras.ceid.ld.voting.entity.VotingEntity;
+import gr.upatras.ceid.ld.voting.repository.ParticipantRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,11 +35,15 @@ public class UserService implements UserDetailsService {
 
     private final LoggingService loggingService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserValidator userValidator, LoggingService loggingService) {
+    private final ParticipantRepository participantRepository;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserValidator userValidator,
+                       LoggingService loggingService, ParticipantRepository participantRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userValidator = userValidator;
         this.loggingService = loggingService;
+        this.participantRepository = participantRepository;
     }
 
     @Override
@@ -121,9 +129,18 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
 
         Role role = userValidator.validateRoleExistsNot(user, roleString);
-        //TODO: Remove entries per role
 
         user.getRoles().remove(role);
+
+        if (Role.ELECTORAL_COMMITTEE.equals(role)) {
+            Set<VotingEntity> overseenVotings = user.getOverseenVotings();
+            overseenVotings.forEach(overseenVoting -> {
+                ParticipantEntity participantEntity = new ParticipantEntity(user, overseenVoting, true);
+                participantRepository.save(participantEntity);
+            });
+            user.removeAllVotings();
+        }
+
         userRepository.save(user);
 
         loggingService.log(admin, Action.NEW_ROLE, "Ο ρόλος " + role.getName() + " του χρήστη " +

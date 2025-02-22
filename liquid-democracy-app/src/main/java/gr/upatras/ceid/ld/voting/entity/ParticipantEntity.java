@@ -29,4 +29,10 @@ public class ParticipantEntity {
         this.user = user;
         this.voting = voting;
     }
+
+    public ParticipantEntity(UserEntity user, VotingEntity voting, Boolean status) {
+        this.user = user;
+        this.voting = voting;
+        this.status = status;
+    }
 }

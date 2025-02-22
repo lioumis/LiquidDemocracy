@@ -1,8 +1,8 @@
 package gr.upatras.ceid.ld.user.entity;
 
 import gr.upatras.ceid.ld.common.converter.RoleConverter;
-import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
 import gr.upatras.ceid.ld.common.enums.Role;
+import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
 import gr.upatras.ceid.ld.voting.entity.VoteEntity;
 import gr.upatras.ceid.ld.voting.entity.VotingEntity;
 import jakarta.persistence.*;
@@ -79,6 +79,13 @@ public class UserEntity implements UserDetails {
         this.securityQuestion = securityQuestion;
         this.securityAnswerHash = securityAnswerHash;
         this.roles.add(Role.VOTER);
+    }
+
+    public void removeAllVotings() {
+        for (VotingEntity voting : new HashSet<>(overseenVotings)) {
+            voting.getElectoralCommittee().remove(this);
+        }
+        overseenVotings.clear();
     }
 
     @Override
