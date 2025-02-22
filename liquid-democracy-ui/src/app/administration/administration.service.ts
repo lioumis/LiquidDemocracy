@@ -25,9 +25,7 @@ export class AdministrationService {
   }
 
   getTopics(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    return this.http.get(this.API_REL_PATH + this.TOPICS + this.ALL_TOPICS, {headers});
+    return this.http.get(this.API_REL_PATH + this.TOPICS + this.ALL_TOPICS);
   }
 
   addRole(role: string, userId: number): Observable<any> {

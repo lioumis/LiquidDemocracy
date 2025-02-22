@@ -319,6 +319,13 @@ public class VotingService {
         return new VotingAccessDto(true, participation.getStatus());
     }
 
+    public boolean isInactive(Long votingId) throws ValidationException {
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
+
+        return voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now());
+    }
+
     public List<VotingDto> getVotings(String username, Role selectedRole) throws ValidationException {
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
@@ -340,6 +347,15 @@ public class VotingService {
                     DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),
                     v.getId().intValue());
         }).toList();
+    }
+
+    public List<VotingDto> getInactiveVotings() {
+        List<VotingEntity> votingEntities = votingRepository.findAll();
+
+        return votingEntities.stream().filter(v -> v.getStartDate() != null && !v.getEndDate().isAfter(LocalDate.now()))
+                .map(v -> new VotingDto(v.getName(), v.getTopic().getTitle(),
+                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), false, v.getVotes().size(),
+                        v.getId().intValue())).toList();
     }
 
     public List<SuggestedVotingDto> getSuggestedVotings() {
@@ -370,6 +386,17 @@ public class VotingService {
         }
 
         return getActiveVotingDetails(voting, voter);
+    }
+
+    public VotingDetailsDto getInactiveVotingDetails(Long votingId) throws ValidationException, AuthorizationException {
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
+
+        if (voting.getStartDate() == null || voting.getEndDate() == null || voting.getEndDate().isAfter(LocalDate.now())) {
+            throw new AuthorizationException("Η ψηφοφορία δεν έχει λήξει ακόμα");
+        }
+
+        return getAllInactiveVotingStatistics(voting);
     }
 
     public List<VotingTitleDto> getVotingTitles() {
@@ -562,6 +589,44 @@ public class VotingService {
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
                 delegated, voting.getVotingType().getId(), voting.getVoteLimit(), resultList, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
+    }
+
+    private VotingDetailsDto getAllInactiveVotingStatistics(VotingEntity voting) {
+        Map<VotingOptionDto, Integer> directResultMap = new HashMap<>();
+        Map<VotingOptionDto, Integer> delegatedResultMap = new HashMap<>();
+        AtomicInteger directVotes = new AtomicInteger();
+        AtomicInteger delegatedVotes = new AtomicInteger();
+
+        voting.getVotingOptions().forEach(option -> {
+            VotingOptionDto votingOptionDto = new VotingOptionDto(option.getName(), option.getDescription());
+            directResultMap.put(votingOptionDto, 0);
+            delegatedResultMap.put(votingOptionDto, 0);
+        });
+
+        List<VoteEntity> votes = voting.getVotes();
+        votes.forEach(v -> {
+            List<VoteDetailsEntity> voteDetailsEntities = v.getVoteDetails();
+            voteDetailsEntities.forEach(details -> {
+                VotingOptionDto votingOptionDto = new VotingOptionDto(details.getVotingOption().getName(), details.getVotingOption().getDescription());
+                if (v.getVoter() == null) {
+                    directResultMap.merge(votingOptionDto, 1, Integer::sum);
+                } else {
+                    delegatedResultMap.merge(votingOptionDto, 1, Integer::sum);
+                }
+            });
+
+            if (v.getVoter() != null) {
+                delegatedVotes.incrementAndGet();
+            } else {
+                directVotes.incrementAndGet();
+            }
+        });
+
+        List<VotingResultDto> resultList = getVotingResultDtos(directResultMap, delegatedResultMap);
+
+        return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
+                DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
+                null, voting.getVotingType().getId(), voting.getVoteLimit(), resultList, null, directVotes.get(), delegatedVotes.get(), null);
     }
 
     private List<VotingResultDto> getVotingResultDtos(Map<VotingOptionDto, Integer> directResultMap, Map<VotingOptionDto, Integer> delegatedResultMap) {

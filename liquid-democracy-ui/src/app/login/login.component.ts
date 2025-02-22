@@ -86,4 +86,8 @@ export class LoginComponent implements OnInit {
       }
     });
   }
+
+  viewVotings() {
+    this.router.navigate(['/votings']).then();
+  }
 }

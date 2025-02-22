@@ -42,14 +42,6 @@ public class TopicController {
     @GetMapping("/getTopics")
     public ResponseEntity<Object> getTopics() {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
-
-            if (authorizedUsername == null) {
-                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
-            }
-
             List<TopicDto> topics = topicService.getTopics();
             return ResponseEntity.status(HttpStatus.OK).body(topics);
         } catch (Exception e) {

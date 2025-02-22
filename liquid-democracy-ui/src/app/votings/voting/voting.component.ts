@@ -7,7 +7,7 @@ import {PanelModule} from "primeng/panel";
 import {DataViewModule} from "primeng/dataview";
 import {Button, ButtonDirective} from "primeng/button";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {NgForOf} from "@angular/common";
+import {NgClass, NgForOf} from "@angular/common";
 import {RadioButtonModule} from "primeng/radiobutton";
 import {InputTextareaModule} from "primeng/inputtextarea";
 import {ChartModule} from "primeng/chart";
@@ -47,7 +47,8 @@ import {VotingsService} from "../votings.service";
     InputNumberModule,
     InputTextModule,
     Ripple,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    NgClass
   ],
   providers: [AuthService, VotingsService, MessageService, ConfirmationService],
   templateUrl: './voting.component.html',
@@ -114,6 +115,8 @@ export class VotingComponent implements OnInit {
 
   protected readonly localStorage = localStorage;
 
+  showOnlyInactive: boolean = false;
+
   editMode: boolean = false;
   startDate: Date | null = null;
   endDate: Date | null = null;
@@ -146,14 +149,33 @@ export class VotingComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']).then();
+      this.showOnlyInactive = true;
     }
 
     this.votingId = Number(this.route.snapshot.paramMap.get('id'));
 
-    this.hasPermission();
+    if (this.showOnlyInactive) {
+      this.isInactive();
+    } else {
+      this.hasPermission();
+    }
 
     this.loadVotingDetails();
+  }
+
+  isInactive() {
+    if (this.votingId) {
+      this.votingsService.isVotingInactive(this.votingId).subscribe({
+        next: (response) => {
+          if (!response) {
+            this.router.navigate(['/dashboard']).then();
+          }
+        },
+        error: () => {
+          this.router.navigate(['/dashboard']).then();
+        }
+      });
+    }
   }
 
   hasPermission() {
@@ -172,7 +194,7 @@ export class VotingComponent implements OnInit {
   }
 
   loadVotingDetails(): void {
-    if (this.votingId) {
+    if (this.votingId && !this.showOnlyInactive) {
       this.votingsService.getVotingDetails(this.votingId).subscribe({
         next: (response) => {
           this.votingDetails = response;
@@ -252,6 +274,29 @@ export class VotingComponent implements OnInit {
             {label: this.votingDetails?.name}
           ];
 
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
+    } else if (this.votingId && this.showOnlyInactive) {
+      this.votingsService.getInactiveVotingDetails(this.votingId).subscribe({
+        next: (response) => {
+          this.votingDetails = response;
+
+          this.formGroup.get('vote')?.disable();
+          this.multipleFormGroup.get('vote')?.disable();
+          this.resultData = this.transformToBarChartData(this.votingDetails);
+          this.distributionData = this.transformToPieChartData(this.votingDetails);
+
+          this.items = [
+            {label: 'Ψηφοφορίες', routerLink: ['/votings']},
+            {label: this.votingDetails?.name}
+          ];
         },
         error: (error) => {
           this.messageService.add({

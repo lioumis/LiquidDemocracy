@@ -344,7 +344,7 @@
 
     </div>
   } @else {
-    <div class="details">
+    <div [ngClass]="this.showOnlyInactive ? 'details-view-only' : 'details'">
       <p-panel header="Αποτελέσματα & Στατιστικά" class="results-panel">
         <div class="results-content">
           <div class="vote-section">
@@ -415,7 +415,7 @@
             </div>
           </div>
         </p-panel>
-      } @else {
+      } @else if (!this.showOnlyInactive) {
         <p-panel header="Προτάσεις & Ανατροφοδότηση" class="feedback-panel">
           <div class="feedback-content">
             <p>Τι θα προτείνατε για να βελτιώσουμε τη διαδικασία ψηφοφορίας;</p>

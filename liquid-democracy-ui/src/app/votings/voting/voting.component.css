@@ -144,6 +144,10 @@ textarea {
   flex-wrap: wrap;
 }
 
+.details-view-only {
+  margin-top: 25px;
+}
+
 .discussion-section {
   display: flex;
   flex-direction: column;

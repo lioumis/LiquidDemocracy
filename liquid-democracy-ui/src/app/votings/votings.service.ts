@@ -13,7 +13,9 @@ export class VotingsService {
   private readonly VOTINGS = '/votings';
   private readonly SUGGESTED_VOTINGS = '/getSuggestedVotings';
   private readonly ALL_VOTINGS = '/getVotings';
+  private readonly INACTIVE_VOTINGS = '/getInactiveVotings';
   private readonly VOTING_DETAILS = '/getVotingDetails';
+  private readonly INACTIVE_VOTING_DETAILS = '/getInactiveVotingDetails';
   private readonly ALL_VOTING_TITLES = '/getVotingTitles';
   private readonly DISCUSSION = '/getDiscussion';
   private readonly COMMENT = '/comment';
@@ -21,6 +23,7 @@ export class VotingsService {
   private readonly VOTE = '/vote';
   private readonly FEEDBACK = '/feedback';
   private readonly ALL_FEEDBACK = '/getFeedback';
+  private readonly IS_INACTIVE = '/isInactive';
   private readonly HAS_ACCESS = '/hasAccessToVoting';
   private readonly REQUEST_ACCESS = '/requestAccessToVoting';
   private readonly NEW_VOTING = '/initializeVoting';
@@ -59,6 +62,11 @@ export class VotingsService {
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.HAS_ACCESS, {params, headers});
   }
 
+  isVotingInactive(id: number): Observable<any> {
+    const params = new HttpParams().set('voting', id);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.IS_INACTIVE, {params});
+  }
+
   requestAccessToVoting(votingId: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
@@ -79,11 +87,20 @@ export class VotingsService {
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.ALL_VOTINGS, {params, headers});
   }
 
+  getInactiveVotings(): Observable<any> {
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.INACTIVE_VOTINGS);
+  }
+
   getVotingDetails(id: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const params = new HttpParams().set('voting', id);
     return this.http.get(this.API_REL_PATH + this.VOTINGS + this.VOTING_DETAILS, {params, headers});
+  }
+
+  getInactiveVotingDetails(id: number): Observable<any> {
+    const params = new HttpParams().set('voting', id);
+    return this.http.get(this.API_REL_PATH + this.VOTINGS + this.INACTIVE_VOTING_DETAILS, {params});
   }
 
   getDiscussion(id: number): Observable<any> {

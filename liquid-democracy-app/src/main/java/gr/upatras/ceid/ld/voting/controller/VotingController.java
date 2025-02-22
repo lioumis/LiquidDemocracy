@@ -99,6 +99,17 @@ public class VotingController {
         }
     }
 
+    @GetMapping("/getInactiveVotings")
+    public ResponseEntity<Object> getInactiveVotings() {
+        try {
+            List<VotingDto> votings = votingService.getInactiveVotings();
+            return ResponseEntity.status(HttpStatus.OK).body(votings);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/getVotingDetails")
     public ResponseEntity<Object> getVotingDetails(@RequestParam("voting") Long votingId) {
         try {
@@ -111,6 +122,21 @@ public class VotingController {
             }
 
             VotingDetailsDto votingDetails = votingService.getVotingDetails(authorizedUsername, votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(votingDetails);
+        } catch (AuthorizationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getInactiveVotingDetails")
+    public ResponseEntity<Object> getInactiveVotingDetails(@RequestParam("voting") Long votingId) {
+        try {
+            VotingDetailsDto votingDetails = votingService.getInactiveVotingDetails(votingId);
             return ResponseEntity.status(HttpStatus.OK).body(votingDetails);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -262,6 +288,19 @@ public class VotingController {
         Map<String, String> response = new HashMap<>();
         response.put(MESSAGE_KEYWORD, "Το αίτημα συμμετοχής καταχωρήθηκε επιτυχώς");
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/isInactive")
+    public ResponseEntity<Object> isInactive(@RequestParam("voting") Long votingId) {
+        try {
+            boolean isInactive = votingService.isInactive(votingId);
+            return ResponseEntity.status(HttpStatus.OK).body(isInactive);
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping("/hasAccessToVoting")

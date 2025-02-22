@@ -28,6 +28,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> auth
                         .requestMatchers("/",
                                 "/authenticate", "/register", "/getSecurityQuestion", "/resetPassword",
+                                "/topics/getTopics", "/votings/getInactiveVotings", "/votings/getInactiveVotingDetails",
+                                "/votings/isInactive",
                                 "/app", "/app/**")
                         .permitAll()
                         .anyRequest().authenticated())

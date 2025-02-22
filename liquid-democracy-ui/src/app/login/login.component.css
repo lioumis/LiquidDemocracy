@@ -1,6 +1,6 @@
 .login-container {
   max-width: 450px;
-  margin: 60px auto;
+  margin: 60px;
   padding: 25px;
   border-radius: 10px;
   background-color: #ffffff;
@@ -90,6 +90,23 @@ button:disabled {
   width: 100%;
 }
 
+.button-container-votings {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 :host ::ng-deep .p-toast {
   z-index: 2000 !important;
+}
+
+.panels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.voting-text {
+  text-align: center;
 }

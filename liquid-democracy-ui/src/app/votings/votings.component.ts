@@ -67,6 +67,8 @@ export class VotingsComponent implements OnInit {
 
   showConfirmDialog: boolean = true;
 
+  showOnlyInactive: boolean = false;
+
   constructor(private readonly authService: AuthService,
               private readonly votingsService: VotingsService,
               private readonly administrationService: AdministrationService,
@@ -77,7 +79,7 @@ export class VotingsComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']).then();
+      this.showOnlyInactive = true;
     }
 
     this.administrationService.getTopics().subscribe({
@@ -112,6 +114,23 @@ export class VotingsComponent implements OnInit {
           });
         }
       });
+    } else {
+      this.votingsService.getInactiveVotings().subscribe({
+        next: (response) => {
+          this.votings = response.map((voting: Voting) => ({
+            ...voting,
+            startDate: voting.startDate ? new Date(voting.startDate) : null,
+            endDate: voting.endDate ? new Date(voting.endDate) : null,
+          }));
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
     }
     this.loading = false;
   }
@@ -121,8 +140,8 @@ export class VotingsComponent implements OnInit {
 
     if (this.isExpired(voting)) {
       this.router.navigate(['/voting', voting.id]).then();
+      return;
     }
-
     this.votingsService.hasAccessToVoting(voting.id).subscribe({
       next: (response) => {
         if (response.isPresent) {
