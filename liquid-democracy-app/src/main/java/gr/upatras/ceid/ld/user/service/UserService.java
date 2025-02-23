@@ -131,8 +131,15 @@ public class UserService implements UserDetailsService {
         Role role = userValidator.validateRoleExistsNot(user, roleString);
 
         //TODO: Handle the representative.
+        if (Role.REPRESENTATIVE.equals(role)) {
+            throw new ValidationException("Ο συγκεκριμένος ρόλος δεν μπορεί να ανακληθεί");
+        }
 
         user.getRoles().remove(role);
+
+        if (Role.VOTER.equals(role)) {
+            participantRepository.deleteAllByUser(user);
+        }
 
         if (Role.ELECTORAL_COMMITTEE.equals(role)) {
             Set<VotingEntity> overseenVotings = user.getOverseenVotings();

@@ -58,6 +58,10 @@ public class DelegationService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
+        if (!voting.getStartDate().isBefore(LocalDate.now())) {
+            throw new ValidationException("Η ψηφοφορία έχει ξεκινήσει");
+        }
+
         if (!voting.getEndDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
@@ -65,8 +69,6 @@ public class DelegationService {
         if (voting.getDelegates().contains(delegate)) {
             throw new ValidationException("Ο επιλεγμένος χρήστης έχει ήδη οριστεί ως αντιπρόσωπος στην ψηφοφορία");
         }
-
-        //TODO: Check if has already voted (if allowed to perform during the active voting phase.
 
         voting.getDelegates().add(delegate);
         votingRepository.save(voting);
