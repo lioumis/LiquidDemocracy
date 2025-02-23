@@ -160,7 +160,7 @@ export class VotingComponent implements OnInit {
     const today = new Date();
     const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     this.minStartDate = new Date(normalizedToday.getTime() + 24 * 60 * 60 * 1000);
-    this.minEndDate = new Date(normalizedToday.getTime() + 24 * 60 * 60 * 1000 * 2);
+    this.minEndDate = new Date(normalizedToday.getTime() + 24 * 60 * 60 * 1000);
   }
 
   ngOnInit(): void {
@@ -220,7 +220,7 @@ export class VotingComponent implements OnInit {
             this.minStartDate = new Date(Math.max(backendStartDate.getTime(), this.minStartDate.getTime()));
             this.startDate = new Date(this.votingDetails.startDate);
 
-            this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate() + 1);
+            this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate());
 
             if (this.votingDetails?.endDate) {
               const backendEndDate = new Date(this.votingDetails.endDate);
@@ -587,7 +587,8 @@ export class VotingComponent implements OnInit {
     let endDateString = this.votingDetails?.endDate;
     if (endDateString) {
       const currentDate = new Date();
-      const votingEndDate = new Date(`${endDateString}T00:00:00`);
+      const votingEndDate = new Date(endDateString);
+      votingEndDate.setHours(23, 59, 59, 0);
       return currentDate > votingEndDate
     }
     return false;
@@ -601,7 +602,8 @@ export class VotingComponent implements OnInit {
     let startDateString = this.votingDetails?.startDate;
     if (startDateString) {
       const currentDate = new Date();
-      const votingStartDate = new Date(`${startDateString}T00:00:00`);
+      const votingStartDate = new Date(startDateString);
+      votingStartDate.setHours(0, 0, 0, 0);
       return currentDate > votingStartDate
     }
     return false;
@@ -871,7 +873,7 @@ export class VotingComponent implements OnInit {
       this.startDate = selectedDate;
     }
 
-    this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate() + 1);
+    this.minEndDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate());
     if (this.votingDetails?.endDate) {
       const backendEndDate = new Date(this.votingDetails.endDate);
       this.minEndDate = new Date(Math.max(backendEndDate.getTime(), this.minEndDate.getTime()));

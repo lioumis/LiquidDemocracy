@@ -20,6 +20,7 @@ import gr.upatras.ceid.ld.voting.repository.VotingRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -44,11 +45,11 @@ public class VotingValidator {
     }
 
     public void validateVotingDates(VotingEntity voting) throws ValidationException {
-        if (voting.getStartDate().isAfter(LocalDate.now())) {
+        if (voting.getStartDate().isAfter(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία δεν έχει ξεκινήσει ακόμα.");
         }
 
-        if (!voting.getEndDate().isAfter(LocalDate.now())) {
+        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
     }
@@ -115,20 +116,20 @@ public class VotingValidator {
         }
     }
 
-    public void validateHasExpired(LocalDate endDate) throws ValidationException {
+    public void validateHasExpired(LocalDateTime endDate) throws ValidationException {
         if (endDate == null) {
             throw new ValidationException("Η ημερομηνία λήξης είναι κενή");
         }
-        if (endDate.isAfter(LocalDate.now())) {
+        if (endDate.isAfter(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία είναι ακόμα ενεργή");
         }
     }
 
-    public void validateHasNotExpired(LocalDate endDate) throws ValidationException {
+    public void validateHasNotExpired(LocalDateTime endDate) throws ValidationException {
         if (endDate == null) {
             return;
         }
-        if (!endDate.isAfter(LocalDate.now())) {
+        if (endDate.isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }
@@ -190,9 +191,9 @@ public class VotingValidator {
         }
     }
 
-    public LocalDate validateStartDate(String startDateString, LocalDate existingStartDate) throws ValidationException {
-        LocalDate startDate = DateHelper.toLocalDate(startDateString);
-        if (startDate.isBefore(LocalDate.now().plusDays(1))) {
+    public LocalDateTime validateStartDate(String startDateString, LocalDateTime existingStartDate) throws ValidationException {
+        LocalDateTime startDate = DateHelper.startDateToLocalDateTime(startDateString);
+        if (startDate.isBefore(LocalDate.now().atStartOfDay().plusDays(1))) {
             throw new ValidationException("Η ημερομηνία έναρξης δεν μπορεί να οριστεί στο παρελθόν");
         }
         if (existingStartDate != null && existingStartDate.isAfter(startDate)) {
@@ -201,10 +202,10 @@ public class VotingValidator {
         return startDate;
     }
 
-    public LocalDate validateEndDate(String endDateString, LocalDate existingEndDate, LocalDate startDate) throws ValidationException {
-        LocalDate endDate = DateHelper.toLocalDate(endDateString);
+    public LocalDateTime validateEndDate(String endDateString, LocalDateTime existingEndDate, LocalDateTime startDate) throws ValidationException {
+        LocalDateTime endDate = DateHelper.endDateToLocalDateTime(endDateString);
 
-        if (endDate.isBefore(LocalDate.now().plusDays(2))) {
+        if (endDate.isBefore(LocalDate.now().atTime(23, 59, 59).plusDays(1))) {
             throw new ValidationException("Η ημερομηνία λήξης δεν μπορεί να οριστεί στο παρελθόν ή στην επόμενη μία ημέρα");
         }
 
@@ -305,30 +306,30 @@ public class VotingValidator {
         }
     }
 
-    public void validateVotingDatesForRequest(LocalDate start, LocalDate end) throws ValidationException {
+    public void validateVotingDatesForRequest(LocalDateTime start, LocalDateTime end) throws ValidationException {
         if (start == null) {
             throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι δυνατή ακόμα");
         }
 
-        if (!start.isAfter(LocalDate.now())) {
+        if (start.isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η καταχώρηση αιτήματος συμμετοχής δεν είναι πλέον δυνατή");
         }
 
-        if (!end.isAfter(LocalDate.now())) {
+        if (end.isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }
 
-    public void validateVotingDatesForGettingRequests(LocalDate start, LocalDate end) throws ValidationException {
+    public void validateVotingDatesForGettingRequests(LocalDateTime start, LocalDateTime end) throws ValidationException {
         if (start == null) {
             throw new ValidationException("Η ψηφοφορία δεν έχει ημερομηνία έναρξης");
         }
 
-        if (!start.isAfter(LocalDate.now())) {
+        if (start.isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει ήδη ξεκινήσει");
         }
 
-        if (end != null && !end.isAfter(LocalDate.now())) {
+        if (end != null && end.isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει");
         }
     }

@@ -16,7 +16,7 @@ import gr.upatras.ceid.ld.voting.repository.VotingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -58,11 +58,11 @@ public class DelegationService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
-        if (!voting.getStartDate().isAfter(LocalDate.now())) {
+        if (voting.getStartDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει ξεκινήσει");
         }
 
-        if (!voting.getEndDate().isAfter(LocalDate.now())) {
+        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
 
@@ -89,11 +89,11 @@ public class DelegationService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
-        if (!voting.getStartDate().isAfter(LocalDate.now())) {
+        if (voting.getStartDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει ξεκινήσει");
         }
 
-        if (!voting.getEndDate().isAfter(LocalDate.now())) {
+        if (voting.getEndDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Η ψηφοφορία έχει λήξει.");
         }
 

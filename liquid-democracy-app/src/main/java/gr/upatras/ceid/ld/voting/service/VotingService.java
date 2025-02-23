@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -186,7 +186,7 @@ public class VotingService {
 
         if (votingCreationDto.startDate() != null) {
             mandatory = true;
-            LocalDate startDate = votingValidator.validateStartDate(votingCreationDto.startDate(), voting.getStartDate());
+            LocalDateTime startDate = votingValidator.validateStartDate(votingCreationDto.startDate(), voting.getStartDate());
             voting.setStartDate(startDate);
         }
 
@@ -195,7 +195,7 @@ public class VotingService {
         }
 
         if (votingCreationDto.endDate() != null) {
-            LocalDate endDate = votingValidator.validateEndDate(votingCreationDto.endDate(), voting.getEndDate(), voting.getStartDate());
+            LocalDateTime endDate = votingValidator.validateEndDate(votingCreationDto.endDate(), voting.getEndDate(), voting.getStartDate());
             voting.setEndDate(endDate);
         }
 
@@ -308,7 +308,7 @@ public class VotingService {
             return new VotingAccessDto(true, true);
         }
 
-        if (viewOnly && voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
+        if (viewOnly && voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now())) {
             return new VotingAccessDto(true, true);
         }
 
@@ -327,7 +327,7 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        return voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now());
+        return voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now());
     }
 
     public List<VotingDto> getVotings(String username, Role selectedRole) throws ValidationException {
@@ -365,7 +365,7 @@ public class VotingService {
     public List<VotingDto> getInactiveVotings() {
         List<VotingEntity> votingEntities = votingRepository.findAll();
 
-        return votingEntities.stream().filter(v -> v.getStartDate() != null && !v.getEndDate().isAfter(LocalDate.now()))
+        return votingEntities.stream().filter(v -> v.getStartDate() != null && v.getEndDate().isBefore(LocalDateTime.now()))
                 .map(v -> new VotingDto(v.getName(), v.getTopic().getTitle(),
                         DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), false, v.getVotes().size(),
                         v.getId().intValue())).toList();
@@ -385,7 +385,7 @@ public class VotingService {
         UserEntity voter = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(VOTER_NOT_FOUND));
 
-        if (voting.getStartDate() != null && voting.getEndDate() != null && !voting.getEndDate().isAfter(LocalDate.now())) {
+        if (voting.getStartDate() != null && voting.getEndDate() != null && voting.getEndDate().isBefore(LocalDateTime.now())) {
             return getInactiveVotingStatistics(voting, voter);
         }
 
@@ -405,7 +405,7 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
-        if (voting.getStartDate() == null || voting.getEndDate() == null || voting.getEndDate().isAfter(LocalDate.now())) {
+        if (voting.getStartDate() == null || voting.getEndDate() == null || voting.getEndDate().isAfter(LocalDateTime.now())) {
             throw new AuthorizationException("Η ψηφοφορία δεν έχει λήξει ακόμα");
         }
 
