@@ -315,9 +315,9 @@
             [(visible)]="assignRoleDialogVisible"
             [style]="{ width: '25rem', height: '17rem' }">
     <div class="dialog-content">
-      @if (allowDropdown) {
+      @if (allowAssignDropdown) {
         <p-dropdown
-          #dropdown
+          #assignDropdown
           id="assignRoleDropdown"
           [options]="allRoles"
           [style]="{'width':'100%', 'z-index':'1050', 'margin-bottom':'15px'}"
@@ -342,9 +342,9 @@
             [(visible)]="revokeRoleDialogVisible"
             [style]="{ width: '25rem', height: '17rem' }">
     <div class="dialog-content">
-      @if (allowDropdown) {
+      @if (allowRevokeDropdown) {
         <p-dropdown
-          #dropdown
+          #revokeDropdown
           id="revokeRoleDropdown"
           [options]="allRoles"
           [style]="{'width':'100%', 'z-index':'1050', 'margin-bottom':'15px'}"

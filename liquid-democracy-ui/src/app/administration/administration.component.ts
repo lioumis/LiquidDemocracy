@@ -50,7 +50,8 @@ import {AdministrationService} from "./administration.service";
 })
 export class AdministrationComponent implements OnInit {
   @ViewChild('dt') dt: Table | undefined;
-  @ViewChild('dropdown') dropdown: Dropdown | undefined;
+  @ViewChild('assignDropdown') assignDropdown: Dropdown | undefined;
+  @ViewChild('revokeDropdown') revokeDropdown: Dropdown | undefined;
   @ViewChild('topicDropdown') topicDropdown: Dropdown | undefined;
   @ViewChild('roleMultiSelect') roleMultiSelect!: MultiSelect;
 
@@ -89,7 +90,9 @@ export class AdministrationComponent implements OnInit {
 
   allowRevokeDialog: boolean = true;
 
-  allowDropdown: boolean = true;
+  allowAssignDropdown: boolean = true;
+
+  allowRevokeDropdown: boolean = true;
 
   allowTopicDropdown: boolean = true;
 
@@ -197,11 +200,19 @@ export class AdministrationComponent implements OnInit {
   }
 
   onRoleChange() {
-    if (this.dropdown) {
-      this.allowDropdown = false;
-      this.dropdown.overlayVisible = false;
+    if (this.assignDropdown) {
+      this.allowAssignDropdown = false;
+      this.assignDropdown.overlayVisible = false;
       setTimeout(() => {
-        this.allowDropdown = true;
+        this.allowAssignDropdown = true;
+      }, 0);
+    }
+
+    if (this.revokeDropdown) {
+      this.allowRevokeDropdown = false;
+      this.revokeDropdown.overlayVisible = false;
+      setTimeout(() => {
+        this.allowRevokeDropdown = true;
       }, 0);
     }
   }
@@ -339,7 +350,8 @@ export class AdministrationComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
-    if (this.dropdown && this.dropdown.overlayVisible && !this.dropdown.el.nativeElement.contains(target)) {
+    if (this.assignDropdown && this.assignDropdown.overlayVisible && !this.assignDropdown.el.nativeElement.contains(target) ||
+      this.revokeDropdown && this.revokeDropdown.overlayVisible && !this.revokeDropdown.el.nativeElement.contains(target)) {
       this.onRoleChange();
     }
     if (this.topicDropdown && this.topicDropdown.overlayVisible && !this.topicDropdown.el.nativeElement.contains(target)) {
