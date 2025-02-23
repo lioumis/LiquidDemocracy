@@ -117,6 +117,11 @@ public class DelegationService {
                 .map(d -> new DelegationDto(d.getName(), d.getSurname(), d.getUsername(), null)).toList();
     }
 
+    public List<DelegationDto> getPotentialDelegates() {
+        return userRepository.findByRolesContains(Set.of(Role.REPRESENTATIVE)).stream()
+                .map(d -> new DelegationDto(d.getName(), d.getSurname(), d.getUsername(), null)).toList();
+    }
+
     @Transactional
     public void delegateVote(String delegatorUsername, String delegateName, String delegateSurname, Long votingId) throws ValidationException {
         UserEntity delegator = userRepository.findByUsername(delegatorUsername)

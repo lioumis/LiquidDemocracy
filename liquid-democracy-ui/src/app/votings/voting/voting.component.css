@@ -369,3 +369,13 @@ textarea {
   flex-direction: column;
   align-content: center;
 }
+
+.dialog-button-container {
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.dialog-content {
+  margin-bottom: 20px;
+}

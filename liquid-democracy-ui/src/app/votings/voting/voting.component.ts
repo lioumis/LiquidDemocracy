@@ -23,6 +23,7 @@ import {Ripple} from "primeng/ripple";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {VotingsService} from "../votings.service";
 import {DelegationsService} from "../../delegations/delegations.service";
+import {DialogModule} from "primeng/dialog";
 
 @Component({
   selector: 'app-voting',
@@ -49,7 +50,8 @@ import {DelegationsService} from "../../delegations/delegations.service";
     InputTextModule,
     Ripple,
     ConfirmDialogModule,
-    NgClass
+    NgClass,
+    DialogModule
   ],
   providers: [AuthService, VotingsService, MessageService, ConfirmationService, DelegationsService],
   templateUrl: './voting.component.html',
@@ -104,13 +106,21 @@ export class VotingComponent implements OnInit {
 
   distributionOptions: any;
 
-  requestDetails: ParticipationRequest[] = [];
+  requestDetails: User[] = [];
 
-  delegates: ParticipationRequest[] = [];
+  delegates: User[] = [];
 
-  selectedRequest: ParticipationRequest | null = null;
+  potentialDelegates: User[] = [];
 
-  selectedDelegate: ParticipationRequest | null = null;
+  selectedRequest: User | null = null;
+
+  selectedDelegate: User | null = null;
+
+  selectedNewDelegate: User | null = null;
+
+  allowDialog: boolean = true;
+
+  dialogVisible: boolean = false;
 
   loading: boolean = true;
 
@@ -716,6 +726,23 @@ export class VotingComponent implements OnInit {
     this.loading = false;
   }
 
+  loadPotentialDelegates() {
+    this.loading = true;
+    this.delegationsService.getPotentialDelegates().subscribe({
+      next: (response) => {
+        this.potentialDelegates = response;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    });
+    this.loading = false;
+  }
+
   processRequest(action: boolean) {
     if (this.selectedRequest) {
       this.votingsService.processRequest(this.selectedRequest.id, action).subscribe({
@@ -762,16 +789,21 @@ export class VotingComponent implements OnInit {
     }
   }
 
+  addNewDelegate() {
+    this.loadPotentialDelegates();
+    this.dialogVisible = true;
+  }
+
   addDelegate() {
-    if (this.selectedDelegate && this.votingId) {
-      this.delegationsService.addDelegate(this.selectedDelegate?.username, this.votingId).subscribe({
+    if (this.selectedNewDelegate && this.votingId) {
+      this.delegationsService.addDelegate(this.selectedNewDelegate?.username, this.votingId).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Επιτυχία',
             detail: 'Ο αντιπρόσωπος προστέθηκε με επιτυχία'
           });
-          this.selectedDelegate = null;
+          this.selectedNewDelegate = null;
           this.loadDelegates();
         },
         error: (error) => {
@@ -782,6 +814,8 @@ export class VotingComponent implements OnInit {
           });
         }
       });
+      this.selectedNewDelegate = null;
+      this.resetDialog();
     }
   }
 
@@ -988,6 +1022,15 @@ export class VotingComponent implements OnInit {
     }, 0);
   }
 
+  resetDialog() {
+    this.selectedNewDelegate = null;
+    this.allowDialog = false;
+    this.dialogVisible = false;
+    setTimeout(() => {
+      this.allowDialog = true;
+    }, 0);
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
@@ -1057,7 +1100,7 @@ export interface Comment {
   userAction: boolean | null;
 }
 
-export interface ParticipationRequest {
+export interface User {
   id: number;
   name: string;
   surname: string;

@@ -11,6 +11,7 @@ export class DelegationsService {
   private readonly DELEGATIONS = '/delegations';
   private readonly MY_DELEGATIONS = '/getDelegations';
   private readonly DELEGATES = '/getDelegates';
+  private readonly POTENTIAL_DELEGATES = '/getPotentialDelegates';
   private readonly ADD_DELEGATE = '/addDelegate';
   private readonly REMOVE_DELEGATE = '/removeDelegate';
   private readonly RECEIVED_DELEGATIONS = '/getReceivedDelegations';
@@ -43,6 +44,12 @@ export class DelegationsService {
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const params = new HttpParams().set('voting', id);
     return this.http.get(this.API_REL_PATH + this.DELEGATIONS + this.DELEGATES, {headers, params});
+  }
+
+  getPotentialDelegates(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.get(this.API_REL_PATH + this.DELEGATIONS + this.POTENTIAL_DELEGATES, {headers});
   }
 
   addDelegate(delegate: string, votingId: number): Observable<any> {
