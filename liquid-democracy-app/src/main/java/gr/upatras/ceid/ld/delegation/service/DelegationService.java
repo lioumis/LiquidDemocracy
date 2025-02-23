@@ -58,7 +58,7 @@ public class DelegationService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
 
-        if (!voting.getStartDate().isBefore(LocalDate.now())) {
+        if (!voting.getStartDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Η ψηφοφορία έχει ξεκινήσει");
         }
 
@@ -76,6 +76,37 @@ public class DelegationService {
         loggingService.log(user, Action.DELEGATE_ADDITION,
                 "Ο χρήστης " + delegate.getUsername() + " προστέθηκε ως αντιπρόσωπος από τον χρήστη " +
                         user.getUsername() + " στην την ψηφοφορία " + votingId + ".");
+    }
+
+    @Transactional
+    public void removeDelegate(String delegateId, String userId, Long votingId) throws ValidationException {
+        UserEntity user = userRepository.findByUsername(userId)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
+        UserEntity delegate = userRepository.findByUsername(delegateId)
+                .orElseThrow(() -> new ValidationException("Ο αντιπρόσωπος δεν βρέθηκε"));
+
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException("Η ψηφοφορία δεν βρέθηκε"));
+
+        if (!voting.getStartDate().isAfter(LocalDate.now())) {
+            throw new ValidationException("Η ψηφοφορία έχει ξεκινήσει");
+        }
+
+        if (!voting.getEndDate().isAfter(LocalDate.now())) {
+            throw new ValidationException("Η ψηφοφορία έχει λήξει.");
+        }
+
+        if (!voting.getDelegates().contains(delegate)) {
+            throw new ValidationException("Ο επιλεγμένος χρήστης δεν είναι αντιπρόσωπος στην ψηφοφορία");
+        }
+
+        voting.getDelegates().remove(delegate);
+        votingRepository.save(voting);
+
+        loggingService.log(user, Action.DELEGATE_REMOVAL,
+                "Ο χρήστης " + delegate.getUsername() + " αφαιρέθηκε από αντιπρόσωπος από τον χρήστη " +
+                        user.getUsername() + " από την ψηφοφορία " + votingId + ".");
     }
 
     public List<DelegationDto> getDelegates(Long votingId) throws ValidationException {

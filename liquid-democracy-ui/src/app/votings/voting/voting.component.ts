@@ -22,6 +22,7 @@ import {InputTextModule} from "primeng/inputtext";
 import {Ripple} from "primeng/ripple";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {VotingsService} from "../votings.service";
+import {DelegationsService} from "../../delegations/delegations.service";
 
 @Component({
   selector: 'app-voting',
@@ -50,7 +51,7 @@ import {VotingsService} from "../votings.service";
     ConfirmDialogModule,
     NgClass
   ],
-  providers: [AuthService, VotingsService, MessageService, ConfirmationService],
+  providers: [AuthService, VotingsService, MessageService, ConfirmationService, DelegationsService],
   templateUrl: './voting.component.html',
   styleUrl: './voting.component.css'
 })
@@ -105,7 +106,11 @@ export class VotingComponent implements OnInit {
 
   requestDetails: ParticipationRequest[] = [];
 
+  delegates: ParticipationRequest[] = [];
+
   selectedRequest: ParticipationRequest | null = null;
+
+  selectedDelegate: ParticipationRequest | null = null;
 
   loading: boolean = true;
 
@@ -129,6 +134,7 @@ export class VotingComponent implements OnInit {
               private readonly router: Router,
               private readonly authService: AuthService,
               private readonly votingsService: VotingsService,
+              private readonly delegationsService: DelegationsService,
               private readonly confirmationService: ConfirmationService,
               private readonly messageService: MessageService,
               private readonly fb: FormBuilder) {
@@ -267,6 +273,7 @@ export class VotingComponent implements OnInit {
             }
             this.loadFeedback();
             this.loadTable();
+            this.loadDelegates();
           }
 
           this.items = [
@@ -688,6 +695,27 @@ export class VotingComponent implements OnInit {
     this.loading = false;
   }
 
+  loadDelegates() {
+    if (!this.votingId || !this.hasStartDate() || this.hasStarted()) {
+      return;
+    }
+    this.loading = true;
+    this.selectedDelegate = null;
+    this.delegationsService.getDelegates(this.votingId).subscribe({
+      next: (response) => {
+        this.delegates = response;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error
+        });
+      }
+    });
+    this.loading = false;
+  }
+
   processRequest(action: boolean) {
     if (this.selectedRequest) {
       this.votingsService.processRequest(this.selectedRequest.id, action).subscribe({
@@ -699,6 +727,52 @@ export class VotingComponent implements OnInit {
           });
           this.selectedRequest = null;
           this.loadTable();
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Αποτυχία',
+            detail: error.error.error
+          });
+        }
+      });
+    }
+  }
+
+  removeDelegate() {
+    if (this.selectedDelegate && this.votingId) {
+      this.delegationsService.removeDelegate(this.selectedDelegate?.username, this.votingId).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: 'Ο αντιπρόσωπος αφαιρέθηκε με επιτυχία'
+          });
+          this.selectedDelegate = null;
+          this.loadDelegates();
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Αποτυχία',
+            detail: error.error.error
+          });
+        }
+      });
+    }
+  }
+
+  addDelegate() {
+    if (this.selectedDelegate && this.votingId) {
+      this.delegationsService.addDelegate(this.selectedDelegate?.username, this.votingId).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Επιτυχία',
+            detail: 'Ο αντιπρόσωπος προστέθηκε με επιτυχία'
+          });
+          this.selectedDelegate = null;
+          this.loadDelegates();
         },
         error: (error) => {
           this.messageService.add({

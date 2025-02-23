@@ -22,7 +22,8 @@ public enum Action {
     COMMENT(14, "Σχόλιο"),
     FEEDBACK(15, "Ανατροφοδότηση"),
     ROLE_REVOCATION(16, "Ανάκληση Ρόλου"),
-    DELEGATE_ADDITION(17, "Προσθήκη Αντιπροσώπου σε Ψηφοφορία");
+    DELEGATE_ADDITION(17, "Προσθήκη Αντιπροσώπου σε Ψηφοφορία"),
+    DELEGATE_REMOVAL(18, "Αφαίρεση Αντιπροσώπου από Ψηφοφορία");
 
     private final int id;
     private final String name;

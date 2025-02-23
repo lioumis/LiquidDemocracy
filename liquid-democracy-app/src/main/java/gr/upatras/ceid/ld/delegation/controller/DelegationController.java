@@ -4,7 +4,7 @@ import gr.upatras.ceid.ld.common.authorization.AuthorizationService;
 import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
-import gr.upatras.ceid.ld.delegation.dto.DelegateAdditionDto;
+import gr.upatras.ceid.ld.delegation.dto.DelegateDto;
 import gr.upatras.ceid.ld.delegation.dto.DelegationDto;
 import gr.upatras.ceid.ld.delegation.dto.DelegationRequestDto;
 import gr.upatras.ceid.ld.delegation.dto.ReceivedDelegationDto;
@@ -47,7 +47,7 @@ public class DelegationController {
     }
 
     @PostMapping("/addDelegate")
-    public ResponseEntity<Map<String, String>> addDelegate(@RequestBody DelegateAdditionDto delegateAdditionDto) {
+    public ResponseEntity<Map<String, String>> addDelegate(@RequestBody DelegateDto delegateDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
@@ -57,7 +57,7 @@ public class DelegationController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            delegationService.addDelegate(delegateAdditionDto.delegate(), authorizedUsername, delegateAdditionDto.votingId());
+            delegationService.addDelegate(delegateDto.delegate(), authorizedUsername, delegateDto.votingId());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
@@ -74,7 +74,39 @@ public class DelegationController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Η ψήφος ανατέθηκε με επιτυχία");
+        response.put("message", "Ο αντιπρόσωπος προστέθηκε με επιτυχία");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/removeDelegate")
+    public ResponseEntity<Map<String, String>> removeDelegate(@RequestBody DelegateDto delegateDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_FOR_EDIT);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
+            }
+
+            delegationService.removeDelegate(delegateDto.delegate(), authorizedUsername, delegateDto.votingId());
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Η ψήφος αφαιρέθηκε με επιτυχία");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
