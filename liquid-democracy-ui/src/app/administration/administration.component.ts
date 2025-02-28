@@ -6,15 +6,14 @@ import {AuthService} from "../login/auth.service";
 import {TabViewModule} from "primeng/tabview";
 import {Topic} from "../dashboard/dashboard.component";
 import {ScrollerModule} from "primeng/scroller";
-import {NgClass} from "@angular/common";
+import {NgClass, NgForOf} from "@angular/common";
 import {
-  AbstractControl,
+  FormArray,
   FormBuilder,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
   ValidationErrors,
-  ValidatorFn,
   Validators
 } from "@angular/forms";
 import {Button} from "primeng/button";
@@ -25,6 +24,8 @@ import {DialogModule} from "primeng/dialog";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {VotingsService} from "../votings/votings.service";
 import {AdministrationService} from "./administration.service";
+import {InputTextModule} from "primeng/inputtext";
+import {Ripple} from "primeng/ripple";
 
 @Component({
   selector: 'app-administration',
@@ -42,7 +43,10 @@ import {AdministrationService} from "./administration.service";
     MultiSelectModule,
     TableModule,
     DialogModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    InputTextModule,
+    NgForOf,
+    Ripple
   ],
   providers: [AuthService, VotingsService, AdministrationService, MessageService],
   templateUrl: './administration.component.html',
@@ -112,12 +116,11 @@ export class AdministrationComponent implements OnInit {
     this.newVotingForm = this.fb.group({
       votingName: ['', Validators.compose([Validators.required, Validators.maxLength(255)])],
       topic: ['', Validators.required],
-      member1: ['', Validators.required],
-      member2: ['', Validators.required],
-      member3: ['', Validators.required]
-    }, {
-      validators: this.duplicateValuesValidator(['member1', 'member2', 'member3'])
+      members: this.fb.array([this.fb.control('', Validators.required)])
     });
+    this.members.setValidators(() => this.duplicateValuesValidator(this.members));
+    this.addMember();
+    this.addMember();
   }
 
   ngOnInit(): void {
@@ -146,6 +149,22 @@ export class AdministrationComponent implements OnInit {
       }
       return false;
     });
+  }
+
+  get members(): FormArray {
+    return this.newVotingForm.get('members') as FormArray;
+  }
+
+  addMember() {
+    this.members.push(this.fb.control('', Validators.required));
+    this.members.updateValueAndValidity();
+  }
+
+  removeMember(index: number) {
+    if (this.members.length > 3) {
+      this.members.removeAt(index);
+      this.members.updateValueAndValidity();
+    }
   }
 
   onTopicSubmit(): void {
@@ -249,8 +268,8 @@ export class AdministrationComponent implements OnInit {
   onSubmit(): void {
     this.messageService.clear();
     if (this.newVotingForm.valid) {
-      const {votingName, topic, member1, member2, member3} = this.newVotingForm.value;
-      this.votingsService.createNewVoting(votingName, topic, [member1, member2, member3]).subscribe({
+      const {votingName, topic, members} = this.newVotingForm.value;
+      this.votingsService.createNewVoting(votingName, topic, members).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -270,7 +289,7 @@ export class AdministrationComponent implements OnInit {
           Object.keys(error.error).forEach(key => {
             if (key.startsWith('member')) {
               const index = parseInt(key.replace('member', ''), 10);
-              const control = this.newVotingForm.get(`member${index + 1}`);
+              const control = (this.newVotingForm.get('members') as FormArray).at(index);
               if (control) {
                 control.setErrors({backend: error.error[key]});
               }
@@ -362,30 +381,23 @@ export class AdministrationComponent implements OnInit {
     }
   }
 
-  duplicateValuesValidator(fields: string[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const values = fields.map(field => control.get(field)?.value?.toLowerCase());
-      const duplicates = values.filter((value, index, arr) => value && arr.indexOf(value) !== index);
+  duplicateValuesValidator(formArray: FormArray): ValidationErrors | null {
+    const values = formArray.controls.map(control => control.value?.toLowerCase());
+    const duplicates = values.filter((value, index, arr) => value && arr.indexOf(value) !== index);
 
-      fields.forEach(field => {
-        const fieldControl = control.get(field);
-        if (fieldControl) {
-          const isDuplicate = duplicates.includes(fieldControl.value?.toLowerCase());
-          if (isDuplicate) {
-            fieldControl.setErrors({...fieldControl.errors, duplicate: true});
-          } else {
-            if (fieldControl.errors) {
-              const {duplicate, ...remainingErrors} = fieldControl.errors;
-              fieldControl.setErrors(Object.keys(remainingErrors).length > 0 ? remainingErrors : null);
-            } else {
-              fieldControl.setErrors(null);
-            }
-          }
+    formArray.controls.forEach(control => {
+      const isDuplicate = duplicates.includes(control.value?.toLowerCase());
+      if (isDuplicate) {
+        control.setErrors({...control.errors, duplicate: true});
+      } else {
+        if (control.errors) {
+          const {duplicate, ...remainingErrors} = control.errors;
+          control.setErrors(Object.keys(remainingErrors).length > 0 ? remainingErrors : null);
         }
-      });
+      }
+    });
 
-      return duplicates.length > 0 ? {duplicateValues: true} : null;
-    };
+    return duplicates.length ? {duplicateValues: true} : null;
   }
 
 }

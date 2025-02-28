@@ -48,22 +48,6 @@ input {
   border: 1px solid #ccc;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  background-color: #007bff;
-  color: #fff;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
 .error {
   color: red;
   font-size: 12px;
@@ -142,4 +126,36 @@ p-multiselect-panel {
 
 :host ::ng-deep .p-dialog-mask {
   z-index: 2000 !important;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 30px;
+  align-items: baseline;
+}
+
+.option-values {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.option-row {
+  display: flex;
+  gap: 20px;
+  align-items: baseline;
+}
+
+.text-box {
+  width: 28rem;
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
 }

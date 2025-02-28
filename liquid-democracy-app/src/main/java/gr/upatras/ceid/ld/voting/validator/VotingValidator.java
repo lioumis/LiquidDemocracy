@@ -151,8 +151,8 @@ public class VotingValidator {
             throw new ValidationException("Η εφορευτική επιτροπή είναι κενή");
         }
 
-        if (votingInitializationDto.committee().size() != 3) {
-            throw new ValidationException("Η εφορευτική επιτροπή πρέπει να αποτελείται από 3 άτομα");
+        if (votingInitializationDto.committee().size() < 3) {
+            throw new ValidationException("Η εφορευτική επιτροπή πρέπει να αποτελείται από τουλάχιστον 3 άτομα");
         }
     }
 

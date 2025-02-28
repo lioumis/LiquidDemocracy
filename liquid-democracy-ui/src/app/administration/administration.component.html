@@ -226,74 +226,50 @@
             }
           </div>
 
-          <div class="voting-form-group">
-            <label for="member1">Εφορευτική Επιτροπή (Όνομα Χρήστη)</label>
-            <input
-              type="text"
-              id="member1"
-              formControlName="member1"
-            />
-            @if (newVotingForm.get('member1')?.errors?.['required'] && newVotingForm.get('member1')?.touched) {
-              <div>
-                <small class="error">Υποχρεωτικό πεδίο</small>
-              </div>
-            }
-            @if (newVotingForm.get('member1')?.errors?.['backend']) {
-              <div>
-                <small class="error">{{ newVotingForm.get('member1')?.errors?.['backend'] }}</small>
-              </div>
-            }
-            @if (newVotingForm.get('member1')?.errors?.['duplicate']) {
-              <div>
-                <small class="error">Ο χρήστης υπάρχει ήδη σε άλλο πεδίο</small>
-              </div>
-            }
-          </div>
+          <div class="options">
+            <div>
+              <label>Εφορευτική Επιτροπή (Όνομα Χρήστη)</label>
+            </div>
+            <div class="option-values" formArrayName="members">
+              <div class="option-row" *ngFor="let memberCtrl of members.controls; let i = index">
+                <div class="field-row">
+                  <input class="text-box" type="text" pInputText [formControlName]="i"/>
+                  @if (memberCtrl.errors?.['required'] && memberCtrl.touched) {
+                    <div>
+                      <small class="error">Υποχρεωτικό πεδίο</small>
+                    </div>
+                  }
 
-          <div class="voting-form-group">
-            <input
-              type="text"
-              id="member2"
-              formControlName="member2"
-            />
-            @if (newVotingForm.get('member2')?.errors?.['required'] && newVotingForm.get('member2')?.touched) {
-              <div>
-                <small class="error">Υποχρεωτικό πεδίο</small>
-              </div>
-            }
-            @if (newVotingForm.get('member2')?.errors?.['backend']) {
-              <div>
-                <small class="error">{{ newVotingForm.get('member2')?.errors?.['backend'] }}</small>
-              </div>
-            }
-            @if (newVotingForm.get('member2')?.errors?.['duplicate']) {
-              <div>
-                <small class="error">Ο χρήστης υπάρχει ήδη σε άλλο πεδίο</small>
-              </div>
-            }
-          </div>
+                  @if (memberCtrl.errors?.['backend']) {
+                    <div>
+                      <small class="error">{{ memberCtrl.errors?.['backend'] }}</small>
+                    </div>
+                  }
 
-          <div class="voting-form-group">
-            <input
-              type="text"
-              id="member3"
-              formControlName="member3"
-            />
-            @if (newVotingForm.get('member3')?.errors?.['required'] && newVotingForm.get('member3')?.touched) {
-              <div>
-                <small class="error">Υποχρεωτικό πεδίο</small>
+                  @if (memberCtrl.errors?.['duplicate']) {
+                    <div>
+                      <small class="error">Ο χρήστης υπάρχει ήδη σε άλλο πεδίο</small>
+                    </div>
+                  }
+                </div>
+                <button
+                  type="button"
+                  pButton
+                  pRipple
+                  icon="pi pi-minus"
+                  severity="danger"
+                  [disabled]="members.length < 4"
+                  (click)="removeMember(i)">
+                </button>
               </div>
-            }
-            @if (newVotingForm.get('member3')?.errors?.['backend']) {
-              <div>
-                <small class="error">{{ newVotingForm.get('member3')?.errors?.['backend'] }}</small>
-              </div>
-            }
-            @if (newVotingForm.get('member3')?.errors?.['duplicate']) {
-              <div>
-                <small class="error">Ο χρήστης υπάρχει ήδη σε άλλο πεδίο</small>
-              </div>
-            }
+              <button
+                type="button"
+                pButton
+                pRipple
+                icon="pi pi-plus"
+                (click)="addMember()">
+              </button>
+            </div>
           </div>
 
           <p></p>
