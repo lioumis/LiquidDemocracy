@@ -158,7 +158,7 @@ public class VotingService {
 
         committee.forEach(member -> {
             if (member.getRoles().add(Role.ELECTORAL_COMMITTEE)) {
-                loggingService.log(user, Action.NEW_ROLE, "Ο ρόλος + " + Role.ELECTORAL_COMMITTEE + " δόθηκε από το χρήστη " +
+                loggingService.log(user, Action.NEW_ROLE, "Ο ρόλος " + Role.ELECTORAL_COMMITTEE + " δόθηκε από το χρήστη " +
                         username + " στο χρήστη " + member.getUsername() + " αυτόματα, ως μέρος της διαδικασίας δημιουργίας ψηφοφορίας.");
             }
             userRepository.save(member);
