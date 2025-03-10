@@ -32,9 +32,7 @@ public class DelegationController {
     static {
         ALLOWED_ROLES.add(Role.VOTER);
         ALLOWED_ROLES.add(Role.REPRESENTATIVE);
-
         ALLOWED_FOR_DELEGATION.add(Role.REPRESENTATIVE);
-
         ALLOWED_FOR_EDIT.add(Role.ELECTORAL_COMMITTEE);
     }
 
