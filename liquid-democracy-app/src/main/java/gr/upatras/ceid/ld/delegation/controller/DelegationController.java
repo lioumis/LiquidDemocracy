@@ -24,6 +24,7 @@ import java.util.*;
 public class DelegationController {
     private static final String AUTHORIZATION_ERROR_MESSAGE = "Δεν έχετε άδεια να εκτελέσετε αυτήν την ενέργεια";
     private static final String ERROR_KEYWORD = "error";
+    private static final String MESSAGE_KEYWORD = "message";
     private static final Set<Role> ALLOWED_ROLES = new HashSet<>();
     private static final Set<Role> ALLOWED_FOR_DELEGATION = new HashSet<>();
     private static final Set<Role> ALLOWED_FOR_EDIT = new HashSet<>();
@@ -74,7 +75,7 @@ public class DelegationController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Ο αντιπρόσωπος προστέθηκε με επιτυχία");
+        response.put(MESSAGE_KEYWORD, "Ο αντιπρόσωπος προστέθηκε με επιτυχία");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -106,7 +107,7 @@ public class DelegationController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Η ψήφος αφαιρέθηκε με επιτυχία");
+        response.put(MESSAGE_KEYWORD, "Η ψήφος αφαιρέθηκε με επιτυχία");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -181,7 +182,7 @@ public class DelegationController {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Η ψήφος ανατέθηκε με επιτυχία");
+        response.put(MESSAGE_KEYWORD, "Η ψήφος ανατέθηκε με επιτυχία");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
