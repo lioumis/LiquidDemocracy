@@ -20,7 +20,7 @@ public interface VotingRepository extends JpaRepository<VotingEntity, Long> {
                 GROUP BY v.id
                 ORDER BY COUNT(votes) + COUNT(messages) DESC
             """)
-    List<VotingEntity> findTopVotingsWithMostVotesAndComments(Pageable pageable); //TODO: Are indices needed?
+    List<VotingEntity> findTopVotingsWithMostVotesAndComments(Pageable pageable);
 
     boolean existsByNameIgnoreCase(String name);
 }
