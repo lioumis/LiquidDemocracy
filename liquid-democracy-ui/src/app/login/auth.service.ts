@@ -68,6 +68,12 @@ export class AuthService {
   isAuthenticated(): boolean {
     let token = localStorage.getItem('token');
 
+    let username = localStorage.getItem('username');
+
+    if (!username) {
+      return false;
+    }
+
     if (!token) {
       return false;
     }

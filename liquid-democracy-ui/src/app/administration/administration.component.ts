@@ -86,6 +86,10 @@ export class AdministrationComponent implements OnInit {
     "Διαχειριστής Συστήματος"
   ];
 
+  assignedRoles: string[] = [];
+
+  notAssignedRoles: string[] = [];
+
   assignRoleDialogVisible: boolean = false;
 
   revokeRoleDialogVisible: boolean = false;
@@ -193,10 +197,16 @@ export class AdministrationComponent implements OnInit {
   }
 
   assignRole() {
+    if (this.selectedUser) {
+      this.notAssignedRoles = this.allRoles.filter(role => !this.selectedUser?.roles.includes(role));
+    }
     this.assignRoleDialogVisible = true;
   }
 
   revokeRole() {
+    if (this.selectedUser) {
+      this.assignedRoles = this.selectedUser.roles;
+    }
     this.revokeRoleDialogVisible = true;
   }
 

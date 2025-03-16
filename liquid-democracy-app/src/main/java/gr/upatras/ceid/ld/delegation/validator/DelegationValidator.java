@@ -69,7 +69,7 @@ public class DelegationValidator {
     }
 
     public void validateDelegatorAccessToVoting(VotingEntity voting, UserEntity delegator) throws ValidationException {
-        if (!voting.getElectoralCommittee().contains(delegator)) {
+        if (!voting.getElectoralCommittee().contains(delegator) && !voting.getDelegates().contains(delegator)) {
             ParticipantEntity delegatorParticipantEntity = participantRepository.findByUserAndVoting(delegator, voting)
                     .orElseThrow(() -> new ValidationException("Δεν συμμετέχετε σε αυτή την ψηφοφορία"));
 

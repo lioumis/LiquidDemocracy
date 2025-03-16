@@ -295,7 +295,7 @@
         <p-dropdown
           #assignDropdown
           id="assignRoleDropdown"
-          [options]="allRoles"
+          [options]="notAssignedRoles"
           [style]="{'width':'100%', 'z-index':'1050', 'margin-bottom':'15px'}"
           [(ngModel)]="selectedRole"
           placeholder="Ρόλος"
@@ -322,7 +322,7 @@
         <p-dropdown
           #revokeDropdown
           id="revokeRoleDropdown"
-          [options]="allRoles"
+          [options]="assignedRoles"
           [style]="{'width':'100%', 'z-index':'1050', 'margin-bottom':'15px'}"
           [(ngModel)]="selectedRole"
           placeholder="Ρόλος"
