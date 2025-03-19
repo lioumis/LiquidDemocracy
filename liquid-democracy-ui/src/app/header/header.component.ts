@@ -73,7 +73,7 @@ export class HeaderComponent {
     let roleString = this.localStorage.getItem('roles');
     if (roleString) {
       let roles = roleString.split(',');
-      if (!this.selectedRole) {
+      if (!this.selectedRole || !roles.includes(this.selectedRole)) {
         this.selectedRole = roles[0];
       }
       this.localStorage.setItem('selectedRole', this.selectedRole);
