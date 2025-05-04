@@ -9,6 +9,13 @@
   [model]="items"
   [home]="home"/>
 
+<div class="banner">
+  <p-messages
+    [(value)]="messages"
+    [enableService]="false"
+    [closable]="false"/>
+</div>
+
 <div class="dashboard">
   <div class="voting-details-container">
     <div class="voting-details-header">
@@ -32,7 +39,11 @@
           </p>
         } @else {
           <p><strong>Ημερομηνία Έναρξης: </strong>{{ votingDetails?.startDate }} (00:00:00)</p>
-          <p><strong>Ημερομηνία Λήξης: </strong>{{ votingDetails?.endDate }} (23:59:59)</p>
+          @if (isValid()) {
+            <p><strong>Ημερομηνία Λήξης: </strong>{{ votingDetails?.endDate }} (23:59:59)</p>
+          } @else {
+            <p><strong>Ημερομηνία Λήξης: </strong>{{ votingDetails?.endDate }}</p>
+          }
         }
       </div>
     </div>
@@ -209,14 +220,30 @@
         }
 
         @if (this.editMode) {
-          <div class="save-button-container">
+          <div class="button-container">
             <p-button
               label="Αποθήκευση"
               icon="pi pi-save"
               (onClick)="saveVoting()"
               [disabled]="!canSaveVoting()">
             </p-button>
+            <p-button
+              label="Ακύρωση ψηφοφορίας"
+              icon="pi pi-times"
+              severity="danger"
+              (onClick)="displayCancellationDialog()"
+              [disabled]="!isValid() && !isExpired()">
+            </p-button>
           </div>
+        } @else if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+          <p-button
+            class="cancel-button"
+            label="Ακύρωση ψηφοφορίας"
+            icon="pi pi-times"
+            severity="danger"
+            (onClick)="displayCancellationDialog()"
+            [disabled]="!isValid() && !isExpired()">
+          </p-button>
         }
 
         @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή' && this.hasStartDate() && !this.hasStarted()) {

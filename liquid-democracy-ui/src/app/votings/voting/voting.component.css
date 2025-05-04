@@ -2,6 +2,11 @@
   padding: 25px 30px;
 }
 
+.banner {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
 .voting-details-container {
   display: flex;
   justify-content: space-between;
@@ -289,11 +294,21 @@ textarea {
   justify-content: flex-end;
 }
 
+.cancel-button {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .table-button-container {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
 }
 
 .center {

@@ -82,6 +82,8 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
+        votingValidator.validateIsValid(voting);
+
         votingValidator.validateVotingDates(voting);
 
         votingValidator.validateParticipation(voting, voter);
@@ -113,6 +115,29 @@ public class VotingService {
         loggingService.log(voter, Action.DIRECT_VOTE, "Ο χρήστης " + voter.getUsername() + " ψήφισε για την ψηφοφορία " + votingId + ".");
 
         castDelegatedVote(voter, voting, selectedOptions, voter);
+    }
+
+    @Transactional
+    public void cancelVoting(String username, Long votingId) throws ValidationException {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
+        VotingEntity voting = votingRepository.findById(votingId)
+                .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
+
+        votingValidator.validateHasNotExpired(voting.getEndDate());
+
+        votingValidator.validateIsValid(voting);
+
+        voting.setValid(false);
+
+        voteRepository.deleteAll(voting.getVotes());
+
+        voting.setEndDate(LocalDateTime.now());
+
+        votingRepository.save(voting);
+
+        loggingService.log(user, Action.VOTING_CANCELLATION, "Ο χρήστης " + user.getUsername() + " ακύρωσε την ψηφοφορία " + votingId + ".");
     }
 
     public void castDelegatedVote(UserEntity delegate, VotingEntity voting, Set<VotingOptionsEntity> votingOptions, UserEntity finalDelegate) {
@@ -182,6 +207,8 @@ public class VotingService {
 
         votingValidator.checkAuthorizationToEdit(voting, user);
 
+        votingValidator.validateIsValid(voting);
+
         boolean mandatory = false;
 
         if (votingCreationDto.startDate() != null) {
@@ -235,6 +262,8 @@ public class VotingService {
         VotingEntity voting = votingRepository.findById(votingId)
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
+        votingValidator.validateIsValid(voting);
+
         votingValidator.checkIfRequestExists(user, voting);
 
         votingValidator.validateVotingDatesForRequest(voting.getStartDate(), voting.getEndDate());
@@ -276,6 +305,8 @@ public class VotingService {
         }
 
         VotingEntity voting = participant.getVoting();
+
+        votingValidator.validateIsValid(voting);
 
         votingValidator.checkAuthorizationToEdit(voting, user);
 
@@ -457,9 +488,13 @@ public class VotingService {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
-        votingValidator.validateHasNotExpired(message.getVoting().getEndDate());
+        VotingEntity voting = message.getVoting();
 
-        checkVotingAccess(username, message.getVoting().getId());
+        votingValidator.validateHasNotExpired(voting.getEndDate());
+
+        votingValidator.validateIsValid(voting);
+
+        checkVotingAccess(username, voting.getId());
 
         Optional<MessageDetailsEntity> messageDetails = messageDetailsRepository.findByMessageAndUser(message, user);
 
@@ -478,7 +513,7 @@ public class VotingService {
 
         loggingService.log(user, Action.REACTION,
                 "Ο χρήστης " + username + " αντέδρασε στο μήνυμα " + messageId + " του χρήστη " +
-                        message.getUser().getUsername() + " στην ψηφοφορία με τίτλο " + message.getVoting().getName() + ".");
+                        message.getUser().getUsername() + " στην ψηφοφορία με τίτλο " + voting.getName() + ".");
     }
 
     @Transactional
@@ -489,6 +524,8 @@ public class VotingService {
                 .orElseThrow(() -> new ValidationException(VOTING_NOT_FOUND));
 
         votingValidator.validateHasNotExpired(voting.getEndDate());
+
+        votingValidator.validateIsValid(voting);
 
         checkVotingAccess(username, votingId);
 
@@ -513,6 +550,8 @@ public class VotingService {
 
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
+
+        votingValidator.validateIsValid(voting);
 
         checkVotingAccess(username, votingId);
 
@@ -601,7 +640,7 @@ public class VotingService {
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
-                delegated, voting.getVotingType().getId(), voting.getVoteLimit(), resultList, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
+                delegated, voting.getVotingType().getId(), voting.getVoteLimit(), voting.isValid(), resultList, userOptionsList, directVotes.get(), delegatedVotes.get(), feedback);
     }
 
     private VotingDetailsDto getAllInactiveVotingStatistics(VotingEntity voting) {
@@ -639,7 +678,7 @@ public class VotingService {
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
-                null, voting.getVotingType().getId(), voting.getVoteLimit(), resultList, null, directVotes.get(), delegatedVotes.get(), null);
+                null, voting.getVotingType().getId(), voting.getVoteLimit(), voting.isValid(), resultList, null, directVotes.get(), delegatedVotes.get(), null);
     }
 
     private List<VotingResultDto> getVotingResultDtos(Map<VotingOptionDto, Integer> directResultMap, Map<VotingOptionDto, Integer> delegatedResultMap) {
@@ -675,7 +714,7 @@ public class VotingService {
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
-                null, votingTypeId, voting.getVoteLimit(), votingResults, null, null,
+                null, votingTypeId, voting.getVoteLimit(), voting.isValid(), votingResults, null, null,
                 null, null);
     }
 
@@ -693,13 +732,13 @@ public class VotingService {
 
             return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                     DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
-                    vote.getVoter() != null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, votingOptionDtos, null,
+                    vote.getVoter() != null, voting.getVotingType().getId(), voting.getVoteLimit(), voting.isValid(), votingResults, votingOptionDtos, null,
                     null, null);
         }
 
         return new VotingDetailsDto(voting.getName(), voting.getTopic().getTitle(),
                 DateHelper.toString(voting.getStartDate()), DateHelper.toString(voting.getEndDate()), voting.getInformation(),
-                null, voting.getVotingType().getId(), voting.getVoteLimit(), votingResults, null, null,
+                null, voting.getVotingType().getId(), voting.getVoteLimit(), voting.isValid(), votingResults, null, null,
                 null, null);
     }
 

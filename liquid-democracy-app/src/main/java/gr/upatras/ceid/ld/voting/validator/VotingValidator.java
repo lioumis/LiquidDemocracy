@@ -134,6 +134,12 @@ public class VotingValidator {
         }
     }
 
+    public void validateIsValid(VotingEntity voting) throws ValidationException {
+        if (!voting.isValid()) {
+            throw new ValidationException("Η ψηφοφορία έχει ακυρωθεί");
+        }
+    }
+
     public void validateVotingInitialization(VotingInitializationDto votingInitializationDto) throws ValidationException {
         if (votingInitializationDto == null) {
             throw new ValidationException("Εσφαλμένα δεδομένα");

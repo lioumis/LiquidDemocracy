@@ -2,7 +2,7 @@ import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {ToastModule} from "primeng/toast";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../login/auth.service";
-import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
+import {ConfirmationService, MenuItem, Message, MessageService} from "primeng/api";
 import {PanelModule} from "primeng/panel";
 import {DataViewModule} from "primeng/dataview";
 import {Button, ButtonDirective} from "primeng/button";
@@ -24,6 +24,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {VotingsService} from "../votings.service";
 import {DelegationsService} from "../../delegations/delegations.service";
 import {DialogModule} from "primeng/dialog";
+import {MessagesModule} from "primeng/messages";
 
 @Component({
   selector: 'app-voting',
@@ -51,7 +52,8 @@ import {DialogModule} from "primeng/dialog";
     Ripple,
     ConfirmDialogModule,
     NgClass,
-    DialogModule
+    DialogModule,
+    MessagesModule
   ],
   providers: [AuthService, VotingsService, MessageService, ConfirmationService, DelegationsService],
   templateUrl: './voting.component.html',
@@ -125,6 +127,8 @@ export class VotingComponent implements OnInit {
   loading: boolean = true;
 
   items: MenuItem[] | undefined;
+
+  messages: Message[] = [];
 
   home: MenuItem = {routerLink: ['/dashboard']};
 
@@ -215,6 +219,10 @@ export class VotingComponent implements OnInit {
         next: (response) => {
           this.votingDetails = response;
 
+          if (!this.isValid()) {
+            this.messages = [{severity: 'warn', detail: 'Η ψηφοφορία έχει ακυρωθεί'}];
+          }
+
           if (this.votingDetails?.startDate) {
             const backendStartDate = new Date(this.votingDetails.startDate);
             this.minStartDate = new Date(Math.max(backendStartDate.getTime(), this.minStartDate.getTime()));
@@ -278,7 +286,7 @@ export class VotingComponent implements OnInit {
           }
 
           if (this.localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
-            if (!this.hasStarted()) {
+            if (!this.hasStarted() && this.isValid()) {
               this.editMode = true;
             }
             this.loadFeedback();
@@ -584,6 +592,9 @@ export class VotingComponent implements OnInit {
   }
 
   isExpired() {
+    if (!this.isValid()) {
+      return true;
+    }
     let endDateString = this.votingDetails?.endDate;
     if (endDateString) {
       const currentDate = new Date();
@@ -592,6 +603,10 @@ export class VotingComponent implements OnInit {
       return currentDate > votingEndDate
     }
     return false;
+  }
+
+  isValid(): boolean {
+    return !!(this.votingDetails?.valid && this.votingDetails?.valid === true);
   }
 
   hasStartDate() {
@@ -687,7 +702,7 @@ export class VotingComponent implements OnInit {
   }
 
   loadTable() {
-    if (!this.votingId || !this.hasStartDate() || this.hasStarted()) {
+    if (!this.votingId || !this.hasStartDate() || this.hasStarted() || this.isExpired()) {
       return;
     }
     this.loading = true;
@@ -854,6 +869,32 @@ export class VotingComponent implements OnInit {
           detail: 'Οι αλλαγές αποθηκεύτηκαν'
         });
         this.loadVotingDetails();
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Σφάλμα',
+          detail: error.error.error
+        });
+      }
+    });
+  }
+
+  cancelVoting() {
+    if (!this.votingId) {
+      return;
+    }
+    this.votingsService.cancelVoting(this.votingId).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Επιτυχία',
+          detail: 'Η ψηφοφορία ακυρώθηκε'
+        });
+        setTimeout(() => {
+          this.editMode = false;
+          this.loadVotingDetails();
+        }, 1000);
       },
       error: (error) => {
         this.messageService.add({
@@ -1033,6 +1074,26 @@ export class VotingComponent implements OnInit {
     }, 0);
   }
 
+  displayCancellationDialog() {
+    this.confirmationService.confirm({
+      acceptLabel: "Ναι",
+      rejectLabel: "Όχι",
+      message: 'Η ακύρωση ψηφοφορίας είναι μη αναστρέψιμη. Όλες οι ψήφοι θα αφαιρεθούν. Θέλετε να συνεχίσετε;',
+      header: 'Προσοχή!',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.cancelVoting();
+        this.resetConfirmDialog();
+      },
+      reject: () => {
+        this.resetConfirmDialog();
+      }
+    });
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
@@ -1074,6 +1135,7 @@ export interface VotingDetails {
   delegated: boolean | null;
   votingType: number;
   voteLimit: number | null;
+  valid: boolean;
   results: VotingResult[];
   userVote: VotingOption[];
   directVotes: number;

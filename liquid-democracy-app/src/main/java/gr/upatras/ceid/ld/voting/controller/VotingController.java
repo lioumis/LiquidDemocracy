@@ -201,6 +201,38 @@ public class VotingController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping("/cancelVoting")
+    public ResponseEntity<Map<String, String>> cancelVoting(@RequestBody VotingIdDto votingIdDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String usernameFromToken = authentication.getName();
+            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES_FOR_UPDATE);
+
+            if (authorizedUsername == null) {
+                throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
+            }
+
+            votingService.cancelVoting(authorizedUsername, votingIdDto.votingId());
+        } catch (ValidationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (AuthorizationException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR_KEYWORD, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put(MESSAGE_KEYWORD, "Η ψηφοφορία ακυρώθηκε επιτυχώς");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @GetMapping("/getRequests")
     public ResponseEntity<Object> getRequests(@RequestParam("voting") Long votingId) {
         try {
@@ -259,7 +291,7 @@ public class VotingController {
     }
 
     @PostMapping("/requestAccessToVoting")
-    public ResponseEntity<Map<String, String>> requestAccessToVoting(@RequestBody AccessRequestDto accessRequestDto) {
+    public ResponseEntity<Map<String, String>> requestAccessToVoting(@RequestBody VotingIdDto votingIdDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
@@ -269,7 +301,7 @@ public class VotingController {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            votingService.requestAccess(authorizedUsername, accessRequestDto.votingId());
+            votingService.requestAccess(authorizedUsername, votingIdDto.votingId());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());

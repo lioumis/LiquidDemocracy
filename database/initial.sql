@@ -40,10 +40,11 @@ create table user_roles
 
 create table voting
 (
-    end_date    datetime null,
-    start_date  datetime null,
-    vote_limit  int null,
-    voting_type int null,
+    valid       bit          not null default true,
+    end_date    datetime     null,
+    start_date  datetime     null,
+    vote_limit  int          null,
+    voting_type int          null,
     id          bigint auto_increment primary key,
     topic_id    bigint       not null,
     information varchar(500) null,

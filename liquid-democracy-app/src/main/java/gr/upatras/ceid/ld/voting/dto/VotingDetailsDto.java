@@ -11,6 +11,7 @@ public record VotingDetailsDto(
         Boolean delegated,
         Integer votingType,
         Integer voteLimit,
+        Boolean valid,
         List<VotingResultDto> results,
         List<VotingOptionDto> userVote,
         Integer directVotes,

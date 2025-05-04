@@ -21,6 +21,7 @@ export class VotingsService {
   private readonly COMMENT = '/comment';
   private readonly REACT = '/react';
   private readonly VOTE = '/vote';
+  private readonly CANCEL_VOTING = '/cancelVoting';
   private readonly FEEDBACK = '/feedback';
   private readonly ALL_FEEDBACK = '/getFeedback';
   private readonly IS_INACTIVE = '/isInactive';
@@ -143,6 +144,13 @@ export class VotingsService {
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
     const httpOptions = {headers}
     return this.http.post(this.API_REL_PATH + this.VOTINGS + this.VOTE, {votes, votingId}, httpOptions);
+  }
+
+  cancelVoting(votingId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    const httpOptions = {headers}
+    return this.http.post(this.API_REL_PATH + this.VOTINGS + this.CANCEL_VOTING, {votingId}, httpOptions);
   }
 
   editVoting(id: number, startDateValue: Date | null, endDateValue: Date | null, description: string | null, mechanism: string | null,

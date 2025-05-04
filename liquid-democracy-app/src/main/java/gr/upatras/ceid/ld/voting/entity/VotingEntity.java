@@ -1,10 +1,10 @@
 package gr.upatras.ceid.ld.voting.entity;
 
 import gr.upatras.ceid.ld.common.converter.VotingTypeConverter;
+import gr.upatras.ceid.ld.common.enums.VotingType;
 import gr.upatras.ceid.ld.delegation.entity.DelegationEntity;
 import gr.upatras.ceid.ld.topic.entity.TopicEntity;
 import gr.upatras.ceid.ld.user.entity.UserEntity;
-import gr.upatras.ceid.ld.common.enums.VotingType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,6 +50,10 @@ public class VotingEntity {
     @Column
     private Integer voteLimit;
 
+    @Setter
+    @Column(nullable = false)
+    private boolean valid; //TODO: Include in ER
+
     @OneToMany(mappedBy = "voting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VotingOptionsEntity> votingOptions;
 
@@ -83,6 +87,7 @@ public class VotingEntity {
         this.name = name;
         this.topic = topic;
         this.electoralCommittee = electoralCommittee;
+        this.valid = true;
     }
 
     public void addVotingOption(String name, String description) {
