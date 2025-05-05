@@ -221,6 +221,10 @@ export class VotingsComponent implements OnInit {
   }
 
   isExpired(voting: Voting) {
+    if (!this.isValid(voting)) {
+      return true;
+    }
+
     if (voting?.endDate) {
       const currentDate = new Date();
       const votingEndDate = new Date(voting.endDate);
@@ -228,6 +232,10 @@ export class VotingsComponent implements OnInit {
       return currentDate > votingEndDate;
     }
     return false;
+  }
+
+  isValid(voting: Voting): boolean {
+    return !!(voting?.valid && voting?.valid === true);
   }
 
   @HostListener('document:click', ['$event'])
@@ -310,6 +318,7 @@ export interface Voting {
   topic: string;
   startDate: string;
   endDate: string;
+  valid: boolean;
   hasVoted: string;
   votes: number;
 }

@@ -313,6 +313,10 @@ export class VotingComponent implements OnInit {
         next: (response) => {
           this.votingDetails = response;
 
+          if (!this.isValid()) {
+            this.messages = [{severity: 'warn', detail: 'Η ψηφοφορία έχει ακυρωθεί'}];
+          }
+
           this.formGroup.get('vote')?.disable();
           this.multipleFormGroup.get('vote')?.disable();
           this.resultData = this.transformToBarChartData(this.votingDetails);

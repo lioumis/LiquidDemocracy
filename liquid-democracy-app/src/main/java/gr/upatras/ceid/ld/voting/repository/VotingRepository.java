@@ -15,12 +15,13 @@ public interface VotingRepository extends JpaRepository<VotingEntity, Long> {
                 LEFT JOIN v.votes votes
                 LEFT JOIN v.messages messages
                 WHERE v.startDate IS NOT NULL
+                AND v.valid IS true
                 AND v.endDate IS NOT NULL
                 AND v.endDate > CURRENT_TIMESTAMP
                 GROUP BY v.id
                 ORDER BY COUNT(votes) + COUNT(messages) DESC
             """)
-    List<VotingEntity> findTopVotingsWithMostVotesAndComments(Pageable pageable);
+    List<VotingEntity> findTopValidVotingsWithMostVotesAndComments(Pageable pageable);
 
     boolean existsByNameIgnoreCase(String name);
 }

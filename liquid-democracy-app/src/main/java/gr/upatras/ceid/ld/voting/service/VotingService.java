@@ -404,7 +404,7 @@ public class VotingService {
 
     public List<SuggestedVotingDto> getSuggestedVotings() {
         Pageable pageable = PageRequest.of(0, 6);
-        List<VotingEntity> topVotings = votingRepository.findTopVotingsWithMostVotesAndComments(pageable);
+        List<VotingEntity> topVotings = votingRepository.findTopValidVotingsWithMostVotesAndComments(pageable);
         return topVotings.stream().map(v -> new SuggestedVotingDto(v.getName(), v.getTopic().getTitle(),
                 v.getVotes().size(), v.getMessages().size(), v.getId().intValue())).toList();
     }
