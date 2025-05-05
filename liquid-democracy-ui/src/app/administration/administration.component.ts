@@ -1,7 +1,7 @@
 import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {BreadcrumbModule} from "primeng/breadcrumb";
 import {ToastModule} from "primeng/toast";
-import {FilterService, MenuItem, MessageService} from "primeng/api";
+import {ConfirmationService, FilterService, MenuItem, MessageService} from "primeng/api";
 import {AuthService} from "../login/auth.service";
 import {TabViewModule} from "primeng/tabview";
 import {Topic} from "../dashboard/dashboard.component";
@@ -48,7 +48,7 @@ import {Ripple} from "primeng/ripple";
     NgForOf,
     Ripple
   ],
-  providers: [AuthService, VotingsService, AdministrationService, MessageService],
+  providers: [AuthService, VotingsService, AdministrationService, MessageService, ConfirmationService],
   templateUrl: './administration.component.html',
   styleUrl: './administration.component.css'
 })
@@ -108,9 +108,12 @@ export class AdministrationComponent implements OnInit {
 
   selectedTopic: string = '';
 
+  showConfirmDialog: boolean = true;
+
   constructor(private readonly authService: AuthService,
               private readonly votingsService: VotingsService,
               private readonly administrationService: AdministrationService,
+              private readonly confirmationService: ConfirmationService,
               private readonly messageService: MessageService,
               private readonly fb: FormBuilder,
               private readonly filterService: FilterService) {
@@ -228,6 +231,33 @@ export class AdministrationComponent implements OnInit {
     }, 0);
   }
 
+  resetConfirmDialog() {
+    this.showConfirmDialog = false;
+    setTimeout(() => {
+      this.showConfirmDialog = true;
+    }, 0);
+  }
+
+  displayDialog(role: string, user: UserDetails) {
+    this.confirmationService.confirm({
+      acceptLabel: "Ναι",
+      rejectLabel: "Όχι",
+      message: 'Με την αφαίρεση του ρόλου του αντιπροσώπου, ο χρήστης δεν θα μπορεί να οριστεί σαν αντιπρόσωπος σε επόμενες ψηφοφορίες.<br> Θα παραμείνει όμως αντιπρόσωπος στις ψηφοφορίες στις οποίες έχει ήδη οριστεί.<br> Θέλετε να συνεχίσετε;',
+      header: 'Προσοχή!',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.cancelRole(role, user);
+        this.resetConfirmDialog();
+      },
+      reject: () => {
+        this.resetConfirmDialog();
+      }
+    });
+  }
+
   onRoleChange() {
     if (this.assignDropdown) {
       this.allowAssignDropdown = false;
@@ -336,7 +366,19 @@ export class AdministrationComponent implements OnInit {
 
   removeRole() {
     if (this.selectedRole && this.selectedUser) {
-      this.administrationService.revokeRole(this.selectedRole, this.selectedUser.id).subscribe({
+      if (this.selectedRole === "Αντιπρόσωπος") {
+        this.displayDialog(this.selectedRole, this.selectedUser);
+      } else {
+        this.cancelRole(this.selectedRole, this.selectedUser);
+      }
+    }
+    this.selectedRole = '';
+    this.resetRevokeRoleDialog();
+  }
+
+  cancelRole(role: string, user: UserDetails) {
+    if (role && user) {
+      this.administrationService.revokeRole(role, user.id).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -354,8 +396,6 @@ export class AdministrationComponent implements OnInit {
         }
       });
     }
-    this.selectedRole = '';
-    this.resetRevokeRoleDialog();
   }
 
   loadTable() {

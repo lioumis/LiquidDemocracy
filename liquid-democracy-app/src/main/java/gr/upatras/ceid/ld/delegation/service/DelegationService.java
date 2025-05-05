@@ -101,6 +101,10 @@ public class DelegationService {
             throw new ValidationException("Ο επιλεγμένος χρήστης δεν είναι αντιπρόσωπος στην ψηφοφορία");
         }
 
+        if (voting.getDelegations().stream().anyMatch(delegation -> delegation.getDelegate().equals(delegate))) {
+            throw new ValidationException("Έχουν ήδη ανατεθεί ψήφοι σε αυτόν τον αντιπρόσωπο");
+        }
+
         voting.getDelegates().remove(delegate);
         votingRepository.save(voting);
 

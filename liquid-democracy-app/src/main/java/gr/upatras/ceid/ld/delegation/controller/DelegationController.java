@@ -9,6 +9,7 @@ import gr.upatras.ceid.ld.delegation.dto.DelegationDto;
 import gr.upatras.ceid.ld.delegation.dto.DelegationRequestDto;
 import gr.upatras.ceid.ld.delegation.dto.ReceivedDelegationDto;
 import gr.upatras.ceid.ld.delegation.service.DelegationService;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -156,11 +157,13 @@ public class DelegationController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            UserEntity authorizedUser = authorizationService.getAuthorizedUser(usernameFromToken);
 
-            if (!delegationRequestDto.delegator().equals(authorizedUsername)) {
+            if (!delegationRequestDto.delegator().equals(authorizedUser.getUsername())) {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
+
+            authorizationService.checkRoles(authorizedUser, ALLOWED_ROLES);
 
             delegationService.delegateVote(delegationRequestDto.delegator(), delegationRequestDto.delegateName(),
                     delegationRequestDto.delegateSurname(), delegationRequestDto.votingId());
@@ -189,13 +192,15 @@ public class DelegationController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_ROLES);
+            UserEntity authorizedUser = authorizationService.getAuthorizedUser(usernameFromToken);
 
-            if (authorizedUsername == null) {
+            if (authorizedUser == null) {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            List<DelegationDto> delegations = delegationService.getDelegations(authorizedUsername);
+            authorizationService.checkRoles(authorizedUser, ALLOWED_ROLES);
+
+            List<DelegationDto> delegations = delegationService.getDelegations(authorizedUser.getUsername());
             return ResponseEntity.status(HttpStatus.OK).body(delegations);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -210,13 +215,16 @@ public class DelegationController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, ALLOWED_FOR_DELEGATION);
 
-            if (authorizedUsername == null) {
+            UserEntity authorizedUser = authorizationService.getAuthorizedUser(usernameFromToken);
+
+            if (authorizedUser == null) {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            List<ReceivedDelegationDto> delegations = delegationService.getReceivedDelegations(authorizedUsername);
+            authorizationService.checkRoles(authorizedUser, ALLOWED_FOR_DELEGATION);
+
+            List<ReceivedDelegationDto> delegations = delegationService.getReceivedDelegations(authorizedUser.getUsername());
             return ResponseEntity.status(HttpStatus.OK).body(delegations);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());

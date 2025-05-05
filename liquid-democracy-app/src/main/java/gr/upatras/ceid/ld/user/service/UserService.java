@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -92,6 +93,20 @@ public class UserService implements UserDetailsService {
 
     public UserInformationDto getUserDetails(String username) throws ValidationException {
         UserEntity user = findUser(username);
+        Set<Role> roles = user.getRoles();
+
+        if (!roles.contains(Role.REPRESENTATIVE)) {
+            Set<VotingEntity> byDelegate = user.getDelegatableVotings();
+            for (VotingEntity votingEntity : byDelegate) {
+                LocalDateTime endDate = votingEntity.getEndDate();
+
+                if (votingEntity.isValid() && endDate != null && endDate.isAfter(LocalDateTime.now())) {
+                    roles.add(Role.REPRESENTATIVE);
+                    break;
+                }
+            }
+        }
+
         return new UserInformationDto(user.getId(), user.getUsername(), user.getName(), user.getSurname(), user.getEmail(),
                 user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
     }
@@ -129,11 +144,6 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MESSAGE));
 
         Role role = userValidator.validateRoleExistsNot(user, roleString);
-
-        //TODO: Handle the representative.
-        if (Role.REPRESENTATIVE.equals(role)) {
-            throw new ValidationException("Ο συγκεκριμένος ρόλος δεν μπορεί να ανακληθεί");
-        }
 
         user.getRoles().remove(role);
 

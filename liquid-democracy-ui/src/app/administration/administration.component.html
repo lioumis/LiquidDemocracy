@@ -1,5 +1,9 @@
 <p-toast></p-toast>
 
+@if (showConfirmDialog) {
+  <p-confirmDialog></p-confirmDialog>
+}
+
 <p-breadcrumb
   class="max-w-full"
   [model]="items"

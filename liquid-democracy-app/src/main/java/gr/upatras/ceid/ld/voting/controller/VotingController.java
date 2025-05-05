@@ -5,6 +5,7 @@ import gr.upatras.ceid.ld.common.enums.Role;
 import gr.upatras.ceid.ld.common.exception.AuthorizationException;
 import gr.upatras.ceid.ld.common.exception.ValidationException;
 import gr.upatras.ceid.ld.common.exception.VotingCreationException;
+import gr.upatras.ceid.ld.user.entity.UserEntity;
 import gr.upatras.ceid.ld.voting.dto.*;
 import gr.upatras.ceid.ld.voting.service.VotingService;
 import lombok.extern.slf4j.Slf4j;
@@ -81,13 +82,15 @@ public class VotingController {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, Set.of(selectedRole));
+            UserEntity authorizedUser = authorizationService.getAuthorizedUser(usernameFromToken);
 
-            if (authorizedUsername == null) {
+            if (authorizedUser == null) {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            List<VotingDto> votings = votingService.getVotings(authorizedUsername, selectedRole);
+            authorizationService.checkRoles(authorizedUser, Set.of(selectedRole));
+
+            List<VotingDto> votings = votingService.getVotings(authorizedUser.getUsername(), selectedRole);
             return ResponseEntity.status(HttpStatus.OK).body(votings);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -174,13 +177,15 @@ public class VotingController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String usernameFromToken = authentication.getName();
-            String authorizedUsername = authorizationService.getAuthorizedUser(usernameFromToken, VOTING_ROLES);
+            UserEntity authorizedUser = authorizationService.getAuthorizedUser(usernameFromToken);
 
-            if (authorizedUsername == null) {
+            if (authorizedUser == null) {
                 throw new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE);
             }
 
-            votingService.castVote(authorizedUsername, voteDto.votingId().longValue(), voteDto.votes());
+            authorizationService.checkRoles(authorizedUser, VOTING_ROLES);
+
+            votingService.castVote(authorizedUser.getUsername(), voteDto.votingId().longValue(), voteDto.votes());
         } catch (ValidationException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put(ERROR_KEYWORD, e.getMessage());
