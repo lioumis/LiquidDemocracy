@@ -388,7 +388,6 @@ INSERT INTO voting_option (voting_id, description, name) VALUES
 (11, 'Δημιουργία εθνικού σχεδίου για τη βιώσιμη διαχείριση των υδάτων.', 'Εθνικό Σχέδιο Διαχείρισης Υδάτων');
 
 INSERT INTO vote (voter_id, voting_id, original_voter_id) VALUES
-(null, 10, 3),
 (null, 10, 8),
 (null, 10, 6),
 (6, 10, 1),
@@ -398,12 +397,11 @@ INSERT INTO vote (voter_id, voting_id, original_voter_id) VALUES
 
 INSERT INTO vote_details (vote_rank, vote_id, voting_option_id) VALUES
 (1, 1, 26),
-(1, 2, 26),
+(1, 2, 27),
 (1, 3, 27),
 (1, 4, 27),
 (1, 5, 27),
-(1, 6, 27),
-(1, 7, 27);
+(1, 6, 27);
 
 INSERT INTO feedback (user_id, voting_id, content) VALUES
 (10, 8, 'Η διαδικασία ψηφοφορίας πρέπει να είναι πιο διαφανής, με σαφέστερη παρουσίαση των αποτελεσμάτων.'),
