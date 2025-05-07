@@ -118,7 +118,7 @@ public class VotingService {
     }
 
     @Transactional
-    public void cancelVoting(String username, Long votingId) throws ValidationException {
+    public void cancelVoting(String username, Long votingId) throws ValidationException, AuthorizationException {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ValidationException(USER_NOT_FOUND));
 
@@ -128,6 +128,8 @@ public class VotingService {
         votingValidator.validateHasNotExpired(voting.getEndDate());
 
         votingValidator.validateIsValid(voting);
+
+        votingValidator.checkAuthorizationToEdit(voting, user);
 
         voting.setValid(false);
 

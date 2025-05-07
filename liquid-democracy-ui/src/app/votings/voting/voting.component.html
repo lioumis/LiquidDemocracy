@@ -507,19 +507,21 @@
             }
           </div>
 
-          <div class="results-section">
-            <p>Αποτελέσματα</p>
-            <p-chart type="bar" [data]="resultData" [options]="resultOptions"/>
-          </div>
+          @if (this.isValid()) {
+            <div class="results-section">
+              <p>Αποτελέσματα</p>
+              <p-chart type="bar" [data]="resultData" [options]="resultOptions"/>
+            </div>
 
-          <div class="distribution-section">
-            <p>Κατανομή ψήφων</p>
-            <p-chart type="pie" [data]="distributionData" [options]="distributionOptions"/>
-          </div>
+            <div class="distribution-section">
+              <p>Κατανομή ψήφων</p>
+              <p-chart type="pie" [data]="distributionData" [options]="distributionOptions"/>
+            </div>
+          }
         </div>
       </p-panel>
 
-      @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή') {
+      @if (localStorage.getItem('selectedRole') === 'Εφορευτική Επιτροπή' && this.isValid()) {
         <p-panel header="Προτάσεις & Ανατροφοδότηση" class="comments-panel">
           <div class="comments">
             <div class="comment" *ngFor="let feedback of allFeedback">
@@ -527,7 +529,7 @@
             </div>
           </div>
         </p-panel>
-      } @else if (!this.showOnlyInactive) {
+      } @else if (!this.showOnlyInactive && this.isValid()) {
         <p-panel header="Προτάσεις & Ανατροφοδότηση" class="feedback-panel">
           <div class="feedback-content">
             <p>Τι θα προτείνατε για να βελτιώσουμε τη διαδικασία ψηφοφορίας;</p>
