@@ -373,7 +373,7 @@ public class VotingService {
             return votingEntities.stream().filter(v -> v.getElectoralCommittee().contains(voter)).map(v -> {
                 boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
                 return new VotingDto(v.getName(), v.getTopic().getTitle(),
-                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),
+                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), v.isValid(), hasVoted, v.getVotes().size(),
                         v.getId().intValue());
             }).toList();
         }
@@ -382,7 +382,7 @@ public class VotingService {
             return votingEntities.stream().filter(v -> v.getDelegates().contains(voter)).map(v -> {
                 boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
                 return new VotingDto(v.getName(), v.getTopic().getTitle(),
-                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),
+                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), v.isValid(), hasVoted, v.getVotes().size(),
                         v.getId().intValue());
             }).toList();
         }
@@ -390,7 +390,7 @@ public class VotingService {
         return votingEntities.stream().filter(v -> v.getStartDate() != null).map(v -> {
             boolean hasVoted = v.getVotes().stream().anyMatch(vote -> vote.getOriginalVoter().getId().equals(voter.getId()));
             return new VotingDto(v.getName(), v.getTopic().getTitle(),
-                    DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), hasVoted, v.getVotes().size(),
+                    DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), v.isValid(), hasVoted, v.getVotes().size(),
                     v.getId().intValue());
         }).toList();
     }
@@ -400,7 +400,7 @@ public class VotingService {
 
         return votingEntities.stream().filter(v -> v.getStartDate() != null && v.getEndDate().isBefore(LocalDateTime.now()))
                 .map(v -> new VotingDto(v.getName(), v.getTopic().getTitle(),
-                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), false, v.getVotes().size(),
+                        DateHelper.toString(v.getStartDate()), DateHelper.toString(v.getEndDate()), v.isValid(), false, v.getVotes().size(),
                         v.getId().intValue())).toList();
     }
 

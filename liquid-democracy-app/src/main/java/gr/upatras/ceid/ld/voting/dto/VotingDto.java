@@ -5,6 +5,7 @@ public record VotingDto(
         String topic,
         String startDate,
         String endDate,
+        Boolean valid,
         boolean hasVoted,
         int votes,
         int id) {
