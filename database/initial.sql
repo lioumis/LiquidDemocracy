@@ -260,43 +260,43 @@ INSERT INTO user (email, name, password_hash, security_answer_hash, security_que
 ('ioanna@example.com', 'Ιωάννα', '$2a$10$PWHtwaK49GG5Q9qJYLS0sugLWUn8FfGm9mJKtOFs2CDyauYD.YVVC', 'ijn345hashedanswer', 'Ποια είναι η αγαπημένη σου σειρά;', 'Δεληγιάννη', 'ioanna345'),
 ('vaggelis@example.com', 'Βαγγέλης', '$2a$10$PWHtwaK49GG5Q9qJYLS0sugLWUn8FfGm9mJKtOFs2CDyauYD.YVVC', 'str456hashedanswer', 'Ποιο είναι το όνομα του αγαπημένου σου φίλου;', 'Μπουρνάζος', 'vaggelis456');
 
--- Ρόλος 1 για όλους τους χρήστες
-INSERT INTO user_roles (user_id, role_id) VALUES
-(1, 1),
-(2, 1),
-(3, 1),
-(4, 1),
-(5, 1),
-(6, 1),
-(7, 1),
-(8, 1),
-(9, 1),
-(10, 1);
-
--- Ρόλος 2 για τους πρώτους 8 χρήστες
-INSERT INTO user_roles (user_id, role_id) VALUES
-(1, 2),
-(2, 2),
-(3, 2),
-(4, 2),
-(5, 2),
-(6, 2),
-(7, 2),
-(8, 2);
-
--- Ρόλος 3 για τους χρήστες 1, 2, 3, 8, 9, 10
-INSERT INTO user_roles (user_id, role_id) VALUES
-(1, 3),
-(2, 3),
-(3, 3),
-(8, 3),
-(9, 3),
-(10, 3);
-
--- Ρόλος 4 για τους χρήστες 8, 10
-INSERT INTO user_roles (user_id, role_id) VALUES
-(8, 4),
-(10, 4);
+# -- Ρόλος 1 για όλους τους χρήστες
+# INSERT INTO user_roles (user_id, role_id) VALUES
+# (1, 1),
+# (2, 1),
+# (3, 1),
+# (4, 1),
+# (5, 1),
+# (6, 1),
+# (7, 1),
+# (8, 1),
+# (9, 1),
+# (10, 1);
+#
+# -- Ρόλος 2 για τους πρώτους 8 χρήστες
+# INSERT INTO user_roles (user_id, role_id) VALUES
+# (1, 2),
+# (2, 2),
+# (3, 2),
+# (4, 2),
+# (5, 2),
+# (6, 2),
+# (7, 2),
+# (8, 2);
+#
+# -- Ρόλος 3 για τους χρήστες 1, 2, 3, 8, 9, 10
+# INSERT INTO user_roles (user_id, role_id) VALUES
+# (1, 3),
+# (2, 3),
+# (3, 3),
+# (8, 3),
+# (9, 3),
+# (10, 3);
+#
+# -- Ρόλος 4 για τους χρήστες 8, 10
+# INSERT INTO user_roles (user_id, role_id) VALUES
+# (8, 4),
+# (10, 4);
 
 INSERT INTO user_roles (role_id, user_id) VALUES
 (1, 1),
