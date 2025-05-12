@@ -190,6 +190,8 @@ create table participant
         foreign key (user_id) references user (id)
 );
 
+CREATE INDEX idx_voting_valid_dates ON voting(valid, start_date, end_date);
+
 # Test data
 
 INSERT INTO topic (title)

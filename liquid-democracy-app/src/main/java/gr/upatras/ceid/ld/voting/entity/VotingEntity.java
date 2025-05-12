@@ -52,7 +52,7 @@ public class VotingEntity {
 
     @Setter
     @Column(nullable = false)
-    private boolean valid; //TODO: Include in ER
+    private boolean valid;
 
     @OneToMany(mappedBy = "voting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VotingOptionsEntity> votingOptions;
