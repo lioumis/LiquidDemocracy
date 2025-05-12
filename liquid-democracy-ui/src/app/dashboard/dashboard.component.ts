@@ -149,6 +149,19 @@ export class DashboardComponent implements OnInit {
           });
         }
       });
+
+      this.delegationsService.getDelegations().subscribe({
+        next: (response) => {
+          this.delegations = response;
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Σφάλμα',
+            detail: error.error
+          });
+        }
+      });
     }
 
     this.responsiveOptions = [
